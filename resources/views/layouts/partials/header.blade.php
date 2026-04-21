@@ -39,7 +39,7 @@
 
 
             {{-- Showing active package for SaaS Superadmin --}}
-            @if(Module::has('Superadmin'))
+            @if(Module::isEnabled('Superadmin'))
                 @includeIf('superadmin::layouts.partials.active_subscription')
             @endif
 
@@ -50,7 +50,7 @@
 
 
             <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-3">
-                @if (Module::has('Essentials'))
+                @if (Module::isEnabled('Essentials'))
                     @includeIf('essentials::layouts.partials.header_part')
                 @endif
                 <details class="tw-dw-dropdown tw-relative tw-inline-block tw-text-left">
@@ -84,7 +84,7 @@
                                 </svg>
                                 @lang('lang_v1.calendar')
                             </a>
-                            @if (Module::has('Essentials'))
+                            @if (Module::isEnabled('Essentials'))
                                 <a href="#"
                                     data-href="{{ action([\Modules\Essentials\Http\Controllers\ToDoController::class, 'create']) }}"
                                     data-container="#task_modal"
@@ -162,7 +162,7 @@
                         </a>
                     @endcan
                 @endif
-                @if (Module::has('Repair'))
+                @if (Module::isEnabled('Repair'))
                     @includeIf('repair::layouts.partials.header')
                 @endif
                 @can('profit_loss_report.view')
