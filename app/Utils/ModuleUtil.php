@@ -82,11 +82,11 @@ class ModuleUtil extends Util
             }
         }
 
-        // Check which modules are installed using the batch-loaded data
+        // Check which modules are installed and enabled using the batch-loaded data
         $installed_modules = [];
         foreach ($module_name_map as $version_key => $details) {
             $module_version = isset($module_versions[$version_key]) ? $module_versions[$version_key] : null;
-            if (!empty($module_version)) {
+            if (!empty($module_version) && Module::isEnabled($details['name'])) {
                 $installed_modules[] = $details;
             }
         }

@@ -1,4 +1,4 @@
-@if(Module::has('Essentials'))
+@if(Module::isEnabled('Essentials'))
   @include('essentials::attendance.clock_in_clock_out_modal')
 @endif
 <script type="text/javascript">
