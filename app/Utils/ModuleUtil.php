@@ -25,11 +25,15 @@ class ModuleUtil extends Util
 
         if ($is_available) {
             //Check if installed by checking the system table {module_name}_version
-            $module_version = System::getProperty(strtolower($module_name).'_version');
-            if (empty($module_version)) {
+            try {
+                $module_version = System::getProperty(strtolower($module_name).'_version');
+                if (empty($module_version)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            } catch (\Exception $e) {
                 return false;
-            } else {
-                return true;
             }
         }
 
@@ -71,7 +75,11 @@ class ModuleUtil extends Util
         // Fetch all module versions in one query
         $module_versions = [];
         if (!empty($version_keys)) {
-            $module_versions = System::getProperties($version_keys, true);
+            try {
+                $module_versions = System::getProperties($version_keys, true);
+            } catch (\Exception $e) {
+                $module_versions = [];
+            }
         }
 
         // Check which modules are installed using the batch-loaded data
