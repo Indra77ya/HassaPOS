@@ -265,6 +265,11 @@ class ModulesController extends Controller
 
         try {
             $module = Module::find($module_name);
+
+            if (empty($module)) {
+                abort(404);
+            }
+
             $path = $module->getPath();
             $zip_file = $module_name . '_' . time() . '.zip';
             $zip_path = storage_path('app/' . $zip_file);
