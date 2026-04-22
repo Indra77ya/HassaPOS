@@ -9,8 +9,6 @@ Sebelum memulai, pastikan komputer atau server Anda memenuhi persyaratan berikut
 ### Untuk Lokal dan Server:
 - **PHP**: Versi 8.1 atau lebih tinggi (disarankan 8.2)
 - **Composer**: Alat untuk mengelola dependensi PHP
-- **Node.js**: Versi 16 atau lebih tinggi
-- **npm**: Biasanya sudah terinstall dengan Node.js
 - **Database**: MySQL 5.7+ atau MariaDB 10.3+
 - **Web Server**: Apache atau Nginx (untuk server)
 - **Git**: Untuk mengunduh kode dari repository
@@ -43,15 +41,7 @@ Sebelum memulai, pastikan komputer atau server Anda memenuhi persyaratan berikut
    ```
    Proses ini mungkin memakan waktu beberapa menit. Tunggu hingga selesai.
 
-### Langkah 3: Install Dependensi JavaScript
-1. Pastikan Node.js dan npm sudah terinstall. Jika belum, unduh dari [nodejs.org](https://nodejs.org/).
-2. Jalankan perintah untuk install dependensi JavaScript:
-   ```
-   npm install
-   ```
-   Ini juga mungkin memakan waktu beberapa menit.
-
-### Langkah 4: Konfigurasi Database
+### Langkah 3: Konfigurasi Database
 1. Buat database baru di MySQL/MariaDB Anda. Misalnya, nama database: `ultimatepos`.
 2. Buka file `.env.example` dan salin isinya ke file baru bernama `.env`.
 3. Edit file `.env` dengan informasi database Anda:
@@ -65,19 +55,19 @@ Sebelum memulai, pastikan komputer atau server Anda memenuhi persyaratan berikut
    ```
    Ganti `your_username` dan `your_password` dengan kredensial database Anda.
 
-### Langkah 5: Generate Application Key
+### Langkah 4: Generate Application Key
 Jalankan perintah berikut untuk membuat kunci aplikasi:
 ```
 php artisan key:generate
 ```
 
-### Langkah 6: Migrasi Database
+### Langkah 5: Migrasi Database
 Jalankan perintah untuk membuat tabel-tabel database:
 ```
 php artisan migrate
 ```
 
-### Langkah 7: Seed Database (Opsional)
+### Langkah 6: Seed Database (Opsional)
 Jika Anda ingin mengisi database dengan data contoh dan user super admin, jalankan:
 ```
 php artisan db:seed
@@ -96,17 +86,7 @@ Jika Anda hanya ingin menjalankan seeder user super admin saja:
 php artisan db:seed --class=SuperAdminSeeder
 ```
 
-### Langkah 8: Build Assets
-Jalankan perintah untuk mengkompilasi file CSS dan JavaScript:
-```
-npm run dev
-```
-Atau untuk production:
-```
-npm run build
-```
-
-### Langkah 9: Jalankan Aplikasi
+### Langkah 7: Jalankan Aplikasi
 Jalankan server lokal:
 ```
 php artisan serve
@@ -131,14 +111,6 @@ Aplikasi akan berjalan di `http://localhost:8000`. Buka browser dan akses alamat
 3. Install dependensi PHP:
    ```
    composer install --no-dev --optimize-autoloader
-   ```
-4. Install dependensi JavaScript:
-   ```
-   npm install
-   ```
-5. Build assets untuk production:
-   ```
-   npm run build
    ```
 
 ### Langkah 3: Konfigurasi Environment
@@ -255,9 +227,8 @@ Setelah login sebagai super admin, Anda dapat membuat user tambahan dengan langk
 ### Masalah Umum:
 1. **Error 500**: Periksa permission file dan folder.
 2. **Database connection error**: Pastikan kredensial database benar di `.env`.
-3. **Assets tidak loading**: Jalankan `npm run build` lagi.
-4. **Composer error**: Pastikan PHP versi yang benar dan ekstensi yang diperlukan aktif.
-5. **Gagal login dengan superadmin**: 
+3. **Composer error**: Pastikan PHP versi yang benar dan ekstensi yang diperlukan aktif.
+4. **Gagal login dengan superadmin**:
    - Pastikan database sudah di-migrate dan di-seed
    - Jalankan perintah: `php artisan db:seed --class=SuperAdminSeeder`
    - Jika user sudah ada, Anda bisa reset password dengan artisan command:
@@ -268,7 +239,7 @@ Setelah login sebagai super admin, Anda dapat membuat user tambahan dengan langk
      >>> $user->save();
      >>> exit;
      ```
-6. **Migration error**: Coba jalankan `php artisan migrate:reset` lalu `php artisan migrate` dari awal (hati-hati: ini akan menghapus semua data)
+5. **Migration error**: Coba jalankan `php artisan migrate:reset` lalu `php artisan migrate` dari awal (hati-hati: ini akan menghapus semua data)
 
 ### Ekstensi PHP yang Diperlukan:
 - BCMath
