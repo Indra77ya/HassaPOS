@@ -1,6 +1,6 @@
-# Panduan Instalasi UltimatePOS v6.12
+# Panduan Instalasi HassaPOS v6.12
 
-Selamat datang di panduan instalasi UltimatePOS v6.12! Panduan ini akan memandu Anda melalui proses instalasi dari awal hingga akhir, baik untuk lingkungan lokal (komputer pribadi) maupun server (hosting online). Kami akan menjelaskan setiap langkah dengan detail dan sederhana, sehingga orang awam pun bisa mengikutinya.
+Selamat datang di panduan instalasi HassaPOS v6.12! Panduan ini akan memandu Anda melalui proses instalasi dari awal hingga akhir, baik untuk lingkungan lokal (komputer pribadi) maupun server (hosting online). Kami akan menjelaskan setiap langkah dengan detail dan sederhana, sehingga orang awam pun bisa mengikutinya.
 
 ## Persyaratan Sistem
 
@@ -25,12 +25,12 @@ Sebelum memulai, pastikan komputer atau server Anda memenuhi persyaratan berikut
 2. Navigasi ke folder tempat Anda ingin menyimpan proyek (misalnya: `cd Desktop`).
 3. Jalankan perintah berikut untuk mengunduh kode:
    ```
-   git clone https://github.com/your-repo/UltimatePOS-CodeBase-V6.12.git
+   git clone https://github.com/your-repo/HassaPOS-CodeBase-V6.12.git
    ```
    Ganti `your-repo` dengan nama repository yang benar jika berbeda.
 4. Masuk ke folder proyek:
    ```
-   cd UltimatePOS-CodeBase-V6.12
+   cd HassaPOS-CodeBase-V6.12
    ```
 
 ### Langkah 2: Install Dependensi PHP
@@ -42,14 +42,14 @@ Sebelum memulai, pastikan komputer atau server Anda memenuhi persyaratan berikut
    Proses ini mungkin memakan waktu beberapa menit. Tunggu hingga selesai.
 
 ### Langkah 3: Konfigurasi Database
-1. Buat database baru di MySQL/MariaDB Anda. Misalnya, nama database: `ultimatepos`.
+1. Buat database baru di MySQL/MariaDB Anda. Misalnya, nama database: `hassapos`.
 2. Buka file `.env.example` dan salin isinya ke file baru bernama `.env`.
 3. Edit file `.env` dengan informasi database Anda:
    ```
    DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
    DB_PORT=3306
-   DB_DATABASE=ultimatepos
+   DB_DATABASE=hassapos
    DB_USERNAME=your_username
    DB_PASSWORD=your_password
    ```
@@ -78,7 +78,7 @@ php artisan db:seed
 - User Super Admin (untuk login awal)
   - Username: `superadmin`
   - Password: `password123`
-  - Email: `admin@ultimatepos.com`
+  - Email: `admin@hassapos.com`
   - **PENTING**: Ubah password ini setelah login pertama kali!
 
 Jika Anda hanya ingin menjalankan seeder user super admin saja:
@@ -99,7 +99,7 @@ Aplikasi akan berjalan di `http://localhost:8000`. Buka browser dan akses alamat
 1. Upload seluruh folder proyek ke server Anda menggunakan FTP, SFTP, atau Git.
 2. Jika menggunakan Git, SSH ke server dan jalankan:
    ```
-   git clone https://github.com/your-repo/UltimatePOS-CodeBase-V6.12.git /path/to/your/website
+   git clone https://github.com/your-repo/HassaPOS-CodeBase-V6.12.git /path/to/your/website
    ```
 
 ### Langkah 2: Install Dependensi di Server
@@ -142,7 +142,7 @@ php artisan db:seed
 **Kredensial Super Admin:**
 - Username: `superadmin`
 - Password: `password123`
-- Email: `admin@ultimatepos.com`
+- Email: `admin@hassapos.com`
 - **PENTING**: Ubah password ini setelah login pertama kali!
 
 ### Langkah 6: Konfigurasi Web Server
@@ -263,8 +263,8 @@ Setelah login sebagai super admin, Anda dapat membuat user tambahan dengan langk
 ## Dukungan
 Jika Anda mengalami kesulitan, silakan:
 1. Baca dokumentasi resmi Laravel.
-2. Cari di forum komunitas UltimatePOS.
+2. Cari di forum komunitas HassaPOS.
 3. Hubungi tim dukungan jika tersedia.
 
-Selamat menggunakan UltimatePOS! 🚀
+Selamat menggunakan HassaPOS! 🚀
 # HassaPOS
