@@ -281,7 +281,7 @@ class ModulesController extends Controller
             }
 
             $path = $module->getPath();
-            $zip_file = $module_name . '_' . time() . '.zip';
+            $zip_file = $module_name . '.zip';
             $zip_path = storage_path('app/' . $zip_file);
 
             $zip = new ZipArchive();
@@ -295,7 +295,17 @@ class ModulesController extends Controller
                     if (! $file->isDir()) {
                         $filePath = $file->getRealPath();
                         $relativePath = substr($filePath, strlen($path) + 1);
-                        $zip->addFile($filePath, $relativePath);
+
+                        // Exclude unnecessary files/folders
+                        if (strpos($relativePath, '.git/') === 0 ||
+                            strpos($relativePath, 'node_modules/') === 0 ||
+                            strpos($relativePath, '.DS_Store') !== false ||
+                            strpos($relativePath, 'Thumbs.db') !== false
+                        ) {
+                            continue;
+                        }
+
+                        $zip->addFile($filePath, $module_name . '/' . $relativePath);
                     }
                 }
                 $zip->close();
