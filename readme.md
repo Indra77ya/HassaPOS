@@ -1,6 +1,6 @@
-# Panduan Instalasi UltimatePOS v6.12
+# Panduan Instalasi HassaPOS v6.12
 
-Selamat datang di panduan instalasi UltimatePOS v6.12! Panduan ini akan memandu Anda melalui proses instalasi dari awal hingga akhir, baik untuk lingkungan lokal (komputer pribadi) maupun server (hosting online). Kami akan menjelaskan setiap langkah dengan detail dan sederhana, sehingga orang awam pun bisa mengikutinya.
+Selamat datang di panduan instalasi HassaPOS v6.12! Panduan ini akan memandu Anda melalui proses instalasi dari awal hingga akhir, baik untuk lingkungan lokal (komputer pribadi) maupun server (hosting online). Kami akan menjelaskan setiap langkah dengan detail dan sederhana, sehingga orang awam pun bisa mengikutinya.
 
 ## Persyaratan Sistem
 
@@ -9,8 +9,6 @@ Sebelum memulai, pastikan komputer atau server Anda memenuhi persyaratan berikut
 ### Untuk Lokal dan Server:
 - **PHP**: Versi 8.1 atau lebih tinggi (disarankan 8.2)
 - **Composer**: Alat untuk mengelola dependensi PHP
-- **Node.js**: Versi 16 atau lebih tinggi
-- **npm**: Biasanya sudah terinstall dengan Node.js
 - **Database**: MySQL 5.7+ atau MariaDB 10.3+
 - **Web Server**: Apache atau Nginx (untuk server)
 - **Git**: Untuk mengunduh kode dari repository
@@ -27,12 +25,12 @@ Sebelum memulai, pastikan komputer atau server Anda memenuhi persyaratan berikut
 2. Navigasi ke folder tempat Anda ingin menyimpan proyek (misalnya: `cd Desktop`).
 3. Jalankan perintah berikut untuk mengunduh kode:
    ```
-   git clone https://github.com/your-repo/UltimatePOS-CodeBase-V6.12.git
+   git clone https://github.com/Indra77ya/HassaPOS.git
    ```
    Ganti `your-repo` dengan nama repository yang benar jika berbeda.
 4. Masuk ke folder proyek:
    ```
-   cd UltimatePOS-CodeBase-V6.12
+   cd HassaPOS
    ```
 
 ### Langkah 2: Install Dependensi PHP
@@ -43,70 +41,39 @@ Sebelum memulai, pastikan komputer atau server Anda memenuhi persyaratan berikut
    ```
    Proses ini mungkin memakan waktu beberapa menit. Tunggu hingga selesai.
 
-### Langkah 3: Install Dependensi JavaScript
-1. Pastikan Node.js dan npm sudah terinstall. Jika belum, unduh dari [nodejs.org](https://nodejs.org/).
-2. Jalankan perintah untuk install dependensi JavaScript:
-   ```
-   npm install
-   ```
-   Ini juga mungkin memakan waktu beberapa menit.
-
-### Langkah 4: Konfigurasi Database
-1. Buat database baru di MySQL/MariaDB Anda. Misalnya, nama database: `ultimatepos`.
+### Langkah 3: Konfigurasi Database
+1. Buat database baru di MySQL/MariaDB Anda. Misalnya, nama database: `hassapos`.
 2. Buka file `.env.example` dan salin isinya ke file baru bernama `.env`.
 3. Edit file `.env` dengan informasi database Anda:
    ```
    DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
    DB_PORT=3306
-   DB_DATABASE=ultimatepos
+   DB_DATABASE=hassapos
    DB_USERNAME=your_username
    DB_PASSWORD=your_password
    ```
-   Ganti `your_username` dan `your_password` dengan kredensial database Anda.
+   Ganti `your_username` and `your_password` dengan kredensial database Anda.
 
-### Langkah 5: Generate Application Key
+### Langkah 4: Generate Application Key
 Jalankan perintah berikut untuk membuat kunci aplikasi:
 ```
 php artisan key:generate
 ```
 
-### Langkah 6: Migrasi Database
+### Langkah 5: Migrasi Database
 Jalankan perintah untuk membuat tabel-tabel database:
 ```
 php artisan migrate
 ```
 
-### Langkah 7: Seed Database (Opsional)
-Jika Anda ingin mengisi database dengan data contoh dan user super admin, jalankan:
+### Langkah 6: Seed Database (Opsional)
+Jika Anda ingin mengisi database dengan data awal, jalankan:
 ```
 php artisan db:seed
 ```
 
-**Data yang Ditambahkan:**
-- Barcodes, Permissions, Currencies (data default)
-- User Super Admin (untuk login awal)
-  - Username: `superadmin`
-  - Password: `password123`
-  - Email: `admin@ultimatepos.com`
-  - **PENTING**: Ubah password ini setelah login pertama kali!
-
-Jika Anda hanya ingin menjalankan seeder user super admin saja:
-```
-php artisan db:seed --class=SuperAdminSeeder
-```
-
-### Langkah 8: Build Assets
-Jalankan perintah untuk mengkompilasi file CSS dan JavaScript:
-```
-npm run dev
-```
-Atau untuk production:
-```
-npm run build
-```
-
-### Langkah 9: Jalankan Aplikasi
+### Langkah 7: Jalankan Aplikasi
 Jalankan server lokal:
 ```
 php artisan serve
@@ -119,7 +86,7 @@ Aplikasi akan berjalan di `http://localhost:8000`. Buka browser dan akses alamat
 1. Upload seluruh folder proyek ke server Anda menggunakan FTP, SFTP, atau Git.
 2. Jika menggunakan Git, SSH ke server dan jalankan:
    ```
-   git clone https://github.com/your-repo/UltimatePOS-CodeBase-V6.12.git /path/to/your/website
+   git clone https://github.com/Indra77ya/HassaPOS.git /path/to/your/website
    ```
 
 ### Langkah 2: Install Dependensi di Server
@@ -131,14 +98,6 @@ Aplikasi akan berjalan di `http://localhost:8000`. Buka browser dan akses alamat
 3. Install dependensi PHP:
    ```
    composer install --no-dev --optimize-autoloader
-   ```
-4. Install dependensi JavaScript:
-   ```
-   npm install
-   ```
-5. Build assets untuk production:
-   ```
-   npm run build
    ```
 
 ### Langkah 3: Konfigurasi Environment
@@ -162,16 +121,10 @@ php artisan key:generate
 php artisan migrate
 ```
 
-Setelah migrasi, jalankan seeder untuk membuat user super admin:
+Setelah migrasi, jalankan seeder (opsional) untuk mengisi data awal:
 ```
 php artisan db:seed
 ```
-
-**Kredensial Super Admin:**
-- Username: `superadmin`
-- Password: `password123`
-- Email: `admin@ultimatepos.com`
-- **PENTING**: Ubah password ini setelah login pertama kali!
 
 ### Langkah 6: Konfigurasi Web Server
 
@@ -230,20 +183,15 @@ Aplikasi sekarang seharusnya dapat diakses melalui domain Anda. Jika ada masalah
 
 ## Login dan Setup Awal
 
-Setelah instalasi selesai (baik lokal maupun server), Anda dapat login dengan user super admin:
+Setelah instalasi selesai (baik lokal maupun server), Anda dapat login ke aplikasi:
 
 1. Buka aplikasi di browser (lokal: `http://localhost:8000` atau domain Anda untuk server)
-2. Login dengan kredensial berikut:
-   - **Username**: `superadmin`
-   - **Password**: `password123`
-3. **SANGAT PENTING**: Segera ubah password ini setelah login pertama kali:
-   - Klik menu profil atau settings
-   - Cari opsi "Change Password" atau "Ubah Password"
-   - Masukkan password yang aman (kombinasi huruf besar, kecil, angka, dan simbol)
+2. Login dengan kredensial administrator Anda.
+3. **PENTING**: Segera ubah password default setelah login pertama kali demi keamanan.
 
 ### Membuat User Tambahan
 
-Setelah login sebagai super admin, Anda dapat membuat user tambahan dengan langkah berikut:
+Setelah login sebagai admin, Anda dapat membuat user tambahan dengan langkah berikut:
 1. Pergi ke menu **User Management** atau **Manajemen User**
 2. Klik tombol **Create User** atau **Tambah User**
 3. Isi data user baru (nama, username, email, password)
@@ -255,20 +203,11 @@ Setelah login sebagai super admin, Anda dapat membuat user tambahan dengan langk
 ### Masalah Umum:
 1. **Error 500**: Periksa permission file dan folder.
 2. **Database connection error**: Pastikan kredensial database benar di `.env`.
-3. **Assets tidak loading**: Jalankan `npm run build` lagi.
-4. **Composer error**: Pastikan PHP versi yang benar dan ekstensi yang diperlukan aktif.
-5. **Gagal login dengan superadmin**: 
+3. **Composer error**: Pastikan PHP versi yang benar dan ekstensi yang diperlukan aktif.
+4. **Gagal login**:
    - Pastikan database sudah di-migrate dan di-seed
-   - Jalankan perintah: `php artisan db:seed --class=SuperAdminSeeder`
-   - Jika user sudah ada, Anda bisa reset password dengan artisan command:
-     ```
-     php artisan tinker
-     >>> $user = App\User::where('username', 'superadmin')->first();
-     >>> $user->password = Hash::make('password123');
-     >>> $user->save();
-     >>> exit;
-     ```
-6. **Migration error**: Coba jalankan `php artisan migrate:reset` lalu `php artisan migrate` dari awal (hati-hati: ini akan menghapus semua data)
+   - Jika perlu reset password, Anda bisa menggunakan artisan tinker.
+5. **Migration error**: Coba jalankan `php artisan migrate:reset` lalu `php artisan migrate` dari awal (hati-hati: ini akan menghapus semua data)
 
 ### Ekstensi PHP yang Diperlukan:
 - BCMath
@@ -292,8 +231,8 @@ Setelah login sebagai super admin, Anda dapat membuat user tambahan dengan langk
 ## Dukungan
 Jika Anda mengalami kesulitan, silakan:
 1. Baca dokumentasi resmi Laravel.
-2. Cari di forum komunitas UltimatePOS.
+2. Cari di forum komunitas HassaPOS.
 3. Hubungi tim dukungan jika tersedia.
 
-Selamat menggunakan UltimatePOS! 🚀
+Selamat menggunakan HassaPOS! 🚀
 # HassaPOS
