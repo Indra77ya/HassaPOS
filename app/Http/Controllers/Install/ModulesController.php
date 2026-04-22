@@ -225,14 +225,24 @@ class ModulesController extends Controller
 
         try {
             $module = Module::find($module_name);
-            // $module->delete();
 
-            $path = $module->getPath();
+            if (! empty($module)) {
+                $path = $module->getPath();
+                $public_path = public_path('modules/' . strtolower($module_name));
+
+                //Delete module folder
+                if (is_dir($path)) {
+                    \File::deleteDirectory($path);
+                }
+
+                //Delete module public assets folder
+                if (is_dir($public_path)) {
+                    \File::deleteDirectory($public_path);
+                }
+            }
 
             // Clear module assets cache when module is deleted
             Cache::forget('module_assets');
-
-            die("To delete the module delete this folder <br/>" . $path . '<br/> Go back after deleting');
 
             $output = ['success' => true,
                 'msg' => __('lang_v1.success'),

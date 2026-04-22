@@ -119,7 +119,7 @@
                             </form>
                         @endif
 
-                        {{-- <a class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info"
+                        <a class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info"
                             @if($is_demo)
                                 href="#"
                                 title="@lang('lang_v1.disabled_in_demo')"
@@ -127,7 +127,7 @@
                             @else
                                 href="{{action([\App\Http\Controllers\Install\ModulesController::class, 'download'], ['module_name' => $module['name']])}}"
                             @endif
-                            > <i class="fa fa-download"></i> @lang('lang_v1.download')</a> --}}
+                            > <i class="fa fa-download"></i> @lang('lang_v1.download')</a>
 
                         <form 
                             action="{{action([\App\Http\Controllers\Install\ModulesController::class, 'destroy'], ['module_name' => $module['name']])}}"
