@@ -53,7 +53,7 @@ Sebelum memulai, pastikan komputer atau server Anda memenuhi persyaratan berikut
    DB_USERNAME=your_username
    DB_PASSWORD=your_password
    ```
-   Ganti `your_username` dan `your_password` dengan kredensial database Anda.
+   Ganti `your_username` and `your_password` dengan kredensial database Anda.
 
 ### Langkah 4: Generate Application Key
 Jalankan perintah berikut untuk membuat kunci aplikasi:
@@ -68,22 +68,9 @@ php artisan migrate
 ```
 
 ### Langkah 6: Seed Database (Opsional)
-Jika Anda ingin mengisi database dengan data contoh dan user super admin, jalankan:
+Jika Anda ingin mengisi database dengan data awal, jalankan:
 ```
 php artisan db:seed
-```
-
-**Data yang Ditambahkan:**
-- Barcodes, Permissions, Currencies (data default)
-- User Super Admin (untuk login awal)
-  - Username: `superadmin`
-  - Password: `password123`
-  - Email: `admin@hassapos.com`
-  - **PENTING**: Ubah password ini setelah login pertama kali!
-
-Jika Anda hanya ingin menjalankan seeder user super admin saja:
-```
-php artisan db:seed --class=SuperAdminSeeder
 ```
 
 ### Langkah 7: Jalankan Aplikasi
@@ -134,16 +121,10 @@ php artisan key:generate
 php artisan migrate
 ```
 
-Setelah migrasi, jalankan seeder untuk membuat user super admin:
+Setelah migrasi, jalankan seeder (opsional) untuk mengisi data awal:
 ```
 php artisan db:seed
 ```
-
-**Kredensial Super Admin:**
-- Username: `superadmin`
-- Password: `password123`
-- Email: `admin@hassapos.com`
-- **PENTING**: Ubah password ini setelah login pertama kali!
 
 ### Langkah 6: Konfigurasi Web Server
 
@@ -202,20 +183,15 @@ Aplikasi sekarang seharusnya dapat diakses melalui domain Anda. Jika ada masalah
 
 ## Login dan Setup Awal
 
-Setelah instalasi selesai (baik lokal maupun server), Anda dapat login dengan user super admin:
+Setelah instalasi selesai (baik lokal maupun server), Anda dapat login ke aplikasi:
 
 1. Buka aplikasi di browser (lokal: `http://localhost:8000` atau domain Anda untuk server)
-2. Login dengan kredensial berikut:
-   - **Username**: `superadmin`
-   - **Password**: `password123`
-3. **SANGAT PENTING**: Segera ubah password ini setelah login pertama kali:
-   - Klik menu profil atau settings
-   - Cari opsi "Change Password" atau "Ubah Password"
-   - Masukkan password yang aman (kombinasi huruf besar, kecil, angka, dan simbol)
+2. Login dengan kredensial administrator Anda.
+3. **PENTING**: Segera ubah password default setelah login pertama kali demi keamanan.
 
 ### Membuat User Tambahan
 
-Setelah login sebagai super admin, Anda dapat membuat user tambahan dengan langkah berikut:
+Setelah login sebagai admin, Anda dapat membuat user tambahan dengan langkah berikut:
 1. Pergi ke menu **User Management** atau **Manajemen User**
 2. Klik tombol **Create User** atau **Tambah User**
 3. Isi data user baru (nama, username, email, password)
@@ -228,17 +204,9 @@ Setelah login sebagai super admin, Anda dapat membuat user tambahan dengan langk
 1. **Error 500**: Periksa permission file dan folder.
 2. **Database connection error**: Pastikan kredensial database benar di `.env`.
 3. **Composer error**: Pastikan PHP versi yang benar dan ekstensi yang diperlukan aktif.
-4. **Gagal login dengan superadmin**:
+4. **Gagal login**:
    - Pastikan database sudah di-migrate dan di-seed
-   - Jalankan perintah: `php artisan db:seed --class=SuperAdminSeeder`
-   - Jika user sudah ada, Anda bisa reset password dengan artisan command:
-     ```
-     php artisan tinker
-     >>> $user = App\User::where('username', 'superadmin')->first();
-     >>> $user->password = Hash::make('password123');
-     >>> $user->save();
-     >>> exit;
-     ```
+   - Jika perlu reset password, Anda bisa menggunakan artisan tinker.
 5. **Migration error**: Coba jalankan `php artisan migrate:reset` lalu `php artisan migrate` dari awal (hati-hati: ini akan menghapus semua data)
 
 ### Ekstensi PHP yang Diperlukan:
