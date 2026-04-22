@@ -25,12 +25,12 @@ Sebelum memulai, pastikan komputer atau server Anda memenuhi persyaratan berikut
 2. Navigasi ke folder tempat Anda ingin menyimpan proyek (misalnya: `cd Desktop`).
 3. Jalankan perintah berikut untuk mengunduh kode:
    ```
-   git clone https://github.com/your-repo/HassaPOS-CodeBase-V6.12.git
+   git clone https://github.com/Indra77ya/HassaPOS.git
    ```
    Ganti `your-repo` dengan nama repository yang benar jika berbeda.
 4. Masuk ke folder proyek:
    ```
-   cd HassaPOS-CodeBase-V6.12
+   cd HassaPOS
    ```
 
 ### Langkah 2: Install Dependensi PHP
@@ -99,7 +99,7 @@ Aplikasi akan berjalan di `http://localhost:8000`. Buka browser dan akses alamat
 1. Upload seluruh folder proyek ke server Anda menggunakan FTP, SFTP, atau Git.
 2. Jika menggunakan Git, SSH ke server dan jalankan:
    ```
-   git clone https://github.com/your-repo/HassaPOS-CodeBase-V6.12.git /path/to/your/website
+   git clone https://github.com/Indra77ya/HassaPOS.git /path/to/your/website
    ```
 
 ### Langkah 2: Install Dependensi di Server
