@@ -1,4 +1,4 @@
-# Panduan Instalasi HassaPOS v6.12
+# Panduan Instalasi HassaPOS
 
 Selamat datang di panduan instalasi HassaPOS v6.12! Panduan ini akan memandu Anda melalui proses instalasi dari awal hingga akhir, baik untuk lingkungan lokal (komputer pribadi) maupun server (hosting online). Kami akan menjelaskan setiap langkah dengan detail dan sederhana, sehingga orang awam pun bisa mengikutinya.
 
