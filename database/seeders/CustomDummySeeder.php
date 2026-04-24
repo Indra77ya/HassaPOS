@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\NotificationTemplate;
-use App\Utils\InstallUtil;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -26,30 +24,33 @@ class CustomDummySeeder extends Seeder
         }
         $user_id = $user->id;
 
-        // 2. Get the first existing business
+        // 2. Get the first existing business or create one
         $business = DB::table('business')->first();
         if (!$business) {
-            // Create a dummy business if none exists
             $productcatalogue_settings = json_encode([
                 'enable_whatsapp_ordering' => 1,
                 'order_receiving_whatsapp_number' => '123456789',
             ]);
             $business_id = DB::table('business')->insertGetId([
-                'name' => 'Awesome Shop',
-                'currency_id' => 2,
-                'start_date' => '2018-01-01',
+                'name' => 'Toko Dummy Indonesia',
+                'currency_id' => 54, // IDR
+                'start_date' => '2023-01-01',
                 'owner_id' => $user_id,
-                'time_zone' => 'America/Phoenix',
+                'time_zone' => 'Asia/Jakarta',
                 'fy_start_month' => 1,
                 'accounting_method' => 'fifo',
                 'default_profit_percent' => 25,
                 'created_at' => now(),
                 'productcatalogue_settings' => $productcatalogue_settings,
                 'enabled_modules' => '["purchases","add_sale","pos_sale","stock_transfers","stock_adjustment","expenses","account"]',
-                'ref_no_prefixes' => '{"purchase":"PO","stock_transfer":"ST","stock_adjustment":"SA","sell_return":"CN","expense":"EP","contacts":"CO","purchase_payment":"PP","sell_payment":"SP","business_location":"BL"}'
+                'ref_no_prefixes' => '{"purchase":"PO","stock_transfer":"ST","stock_adjustment":"SA","sell_return":"CN","expense":"EP","contacts":"CO","purchase_payment":"PP","sell_payment":"SP","business_location":"BL"}',
+                'date_format' => 'd-m-Y',
+                'time_format' => '24'
             ]);
         } else {
             $business_id = $business->id;
+            // Update currency to IDR for existing business if seeding dummy data
+            DB::table('business')->where('id', $business_id)->update(['currency_id' => 54]);
         }
 
         DB::beginTransaction();
@@ -62,13 +63,9 @@ class CustomDummySeeder extends Seeder
             DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         } elseif ($driver == 'sqlite') {
             DB::statement('PRAGMA foreign_keys = OFF');
-        } elseif ($driver == 'pgsql') {
-            DB::statement('SET CONSTRAINTS ALL DEFERRED');
         }
 
         // 3. Cleanup tables (except users and business)
-        // We use TRUNCATE where possible to reset auto-increment, but for many tables TRUNCATE might fail due to FK even with checks off in some DBs.
-        // delete() is safer but IDs won't reset. We MUST use dynamic IDs.
         $tables = [
             'brands', 'categories', 'contacts', 'products', 'product_variations', 'variations',
             'variation_location_details', 'transactions', 'transaction_payments',
@@ -88,17 +85,16 @@ class CustomDummySeeder extends Seeder
             }
         }
 
-        // 4. Start Seeding Dummy Data linked to $user_id and $business_id
+        // 4. Seeding Data
 
-        // Business Location
+        // Location
         $location_id = DB::table('business_locations')->insertGetId([
             'business_id' => $business_id,
-            'name' => 'Main Store',
-            'landmark' => 'Linking Street',
-            'country' => 'USA',
-            'state' => 'Arizona',
-            'city' => 'Phoenix',
-            'zip_code' => '85001',
+            'name' => 'Toko Utama',
+            'country' => 'Indonesia',
+            'state' => 'DKI Jakarta',
+            'city' => 'Jakarta Pusat',
+            'zip_code' => '10110',
             'invoice_scheme_id' => 1,
             'invoice_layout_id' => 1,
             'sale_invoice_layout_id' => 1,
@@ -107,26 +103,39 @@ class CustomDummySeeder extends Seeder
         ]);
 
         // Units
-        $unit_id = DB::table('units')->insertGetId(['business_id' => $business_id, 'actual_name' => 'Pieces', 'short_name' => 'Pc(s)', 'allow_decimal' => 0, 'created_by' => $user_id, 'created_at' => $today]);
+        $unit_pcs = DB::table('units')->insertGetId(['business_id' => $business_id, 'actual_name' => 'Pcs', 'short_name' => 'pcs', 'allow_decimal' => 0, 'created_by' => $user_id, 'created_at' => $today]);
+        $unit_kg = DB::table('units')->insertGetId(['business_id' => $business_id, 'actual_name' => 'Kilogram', 'short_name' => 'kg', 'allow_decimal' => 1, 'created_by' => $user_id, 'created_at' => $today]);
 
         // Brands
-        $brand_id = DB::table('brands')->insertGetId(['business_id' => $business_id, 'name' => 'Levis', 'created_by' => $user_id, 'created_at' => $today]);
+        $brands = ['Indofood', 'Wings', 'Unilever', 'Aqua', 'Samsung', 'Mayora', 'ABC', 'Nestle'];
+        $brand_ids = [];
+        foreach ($brands as $b) {
+            $brand_ids[] = DB::table('brands')->insertGetId(['business_id' => $business_id, 'name' => $b, 'created_by' => $user_id, 'created_at' => $today]);
+        }
 
         // Categories
-        $cat_id = DB::table('categories')->insertGetId(['name' => 'Clothing', 'business_id' => $business_id, 'parent_id' => 0, 'created_by' => $user_id, 'category_type' => 'product', 'created_at' => $today]);
+        $categories = ['Makanan', 'Minuman', 'Elektronik', 'Kebutuhan Rumah', 'Obat-obatan', 'Pakaian'];
+        $cat_ids = [];
+        foreach ($categories as $c) {
+            $cat_ids[] = DB::table('categories')->insertGetId(['name' => $c, 'business_id' => $business_id, 'parent_id' => 0, 'created_by' => $user_id, 'category_type' => 'product', 'created_at' => $today]);
+        }
 
-        // Products
-        for ($i = 1; $i <= 5; $i++) {
+        // Products (50 items)
+        $product_list = [];
+        for ($i = 1; $i <= 50; $i++) {
+            $price = rand(2, 1000) * 500; // 1.000 to 500.000
+            $purchase_price = $price * 0.8;
+
             $product_id = DB::table('products')->insertGetId([
-                'name' => 'Dummy Product ' . $i,
+                'name' => 'Produk Contoh ' . $i,
                 'business_id' => $business_id,
                 'type' => 'single',
-                'unit_id' => $unit_id,
-                'brand_id' => $brand_id,
-                'category_id' => $cat_id,
+                'unit_id' => ($i % 5 == 0) ? $unit_kg : $unit_pcs,
+                'brand_id' => $brand_ids[array_rand($brand_ids)],
+                'category_id' => $cat_ids[array_rand($cat_ids)],
                 'tax_type' => 'exclusive',
                 'enable_stock' => 1,
-                'sku' => 'SKU-C' . time() . $i,
+                'sku' => 'SKU-' . str_pad($i, 5, '0', STR_PAD_LEFT),
                 'barcode_type' => 'C128',
                 'created_by' => $user_id,
                 'created_at' => $today
@@ -137,13 +146,13 @@ class CustomDummySeeder extends Seeder
             $v_id = DB::table('variations')->insertGetId([
                 'name' => 'DUMMY',
                 'product_id' => $product_id,
-                'sub_sku' => 'SKU-C' . time() . $i,
+                'sub_sku' => 'SKU-' . str_pad($i, 5, '0', STR_PAD_LEFT),
                 'product_variation_id' => $pv_id,
-                'default_purchase_price' => 100 * $i,
-                'dpp_inc_tax' => 100 * $i,
+                'default_purchase_price' => $purchase_price,
+                'dpp_inc_tax' => $purchase_price,
                 'profit_percent' => 25,
-                'default_sell_price' => 125 * $i,
-                'sell_price_inc_tax' => 125 * $i,
+                'default_sell_price' => $price,
+                'sell_price_inc_tax' => $price,
                 'created_at' => $today
             ]);
 
@@ -153,33 +162,34 @@ class CustomDummySeeder extends Seeder
                 'product_variation_id' => $pv_id,
                 'variation_id' => $v_id,
                 'location_id' => $location_id,
-                'qty_available' => 100,
+                'qty_available' => rand(100, 1000),
                 'created_at' => $today
             ]);
 
-            // Save first product and variation for transaction seeding
-            if ($i == 1) {
-                $first_product_id = $product_id;
-                $first_variation_id = $v_id;
-            }
+            $product_list[] = ['id' => $product_id, 'variation_id' => $v_id, 'price' => $price];
         }
 
         // Contacts
-        $contact_id = DB::table('contacts')->insertGetId(['business_id' => $business_id, 'type' => 'customer', 'name' => 'Walk-In Customer', 'is_default' => 1, 'created_by' => $user_id, 'created_at' => $today]);
+        $contact_id = DB::table('contacts')->insertGetId(['business_id' => $business_id, 'type' => 'customer', 'name' => 'Pelanggan Umum', 'is_default' => 1, 'created_by' => $user_id, 'created_at' => $today]);
+        DB::table('contacts')->insert(['business_id' => $business_id, 'type' => 'supplier', 'name' => 'Supplier Utama', 'is_default' => 0, 'created_by' => $user_id, 'created_at' => $today]);
 
-        // Invoice Schemes and Layouts
+        // Invoice
         $scheme_id = DB::table('invoice_schemes')->insertGetId(['business_id' => $business_id, 'name' => 'Default', 'scheme_type' => 'blank', 'prefix' => 'INV', 'start_number' => 1, 'invoice_count' => 0, 'total_digits' => 4, 'is_default' => 1, 'created_at' => $today]);
-        $layout_id = DB::table('invoice_layouts')->insertGetId(['business_id' => $business_id, 'name' => 'Default', 'is_default' => 1, 'created_at' => $today]);
+        $layout_id = DB::table('invoice_layouts')->insertGetId(['business_id' => $business_id, 'name' => 'Default Indonesia', 'is_default' => 1, 'created_at' => $today]);
 
-        // Update business location with new IDs if needed
         DB::table('business_locations')->where('id', $location_id)->update([
             'invoice_scheme_id' => $scheme_id,
             'invoice_layout_id' => $layout_id,
             'sale_invoice_layout_id' => $layout_id
         ]);
 
-        // Transactions (Sells)
-        for ($i = 1; $i <= 3; $i++) {
+        // Transactions (30 sales)
+        for ($i = 1; $i <= 30; $i++) {
+            $random_product = $product_list[array_rand($product_list)];
+            $qty = rand(1, 10);
+            $total = $random_product['price'] * $qty;
+            $sale_date = Carbon::now()->subDays(rand(0, 30))->subHours(rand(0, 23))->format('Y-m-d H:i:s');
+
             $trans_id = DB::table('transactions')->insertGetId([
                 'business_id' => $business_id,
                 'location_id' => $location_id,
@@ -187,56 +197,51 @@ class CustomDummySeeder extends Seeder
                 'status' => 'final',
                 'payment_status' => 'paid',
                 'contact_id' => $contact_id,
-                'invoice_no' => 'SALE-' . time() . $i,
-                'transaction_date' => $today,
-                'total_before_tax' => 125,
-                'final_total' => 125,
+                'invoice_no' => 'SALE-' . Carbon::parse($sale_date)->format('Ymd') . '-' . str_pad($i, 3, '0', STR_PAD_LEFT),
+                'transaction_date' => $sale_date,
+                'total_before_tax' => $total,
+                'final_total' => $total,
                 'created_by' => $user_id,
-                'created_at' => $today
+                'created_at' => $sale_date
             ]);
 
             DB::table('transaction_sell_lines')->insert([
                 'transaction_id' => $trans_id,
-                'product_id' => $first_product_id,
-                'variation_id' => $first_variation_id,
-                'quantity' => 1,
-                'unit_price' => 125,
-                'unit_price_inc_tax' => 125,
-                'created_at' => $today
+                'product_id' => $random_product['id'],
+                'variation_id' => $random_product['variation_id'],
+                'quantity' => $qty,
+                'unit_price' => $random_product['price'],
+                'unit_price_inc_tax' => $random_product['price'],
+                'created_at' => $sale_date
             ]);
 
             DB::table('transaction_payments')->insert([
                 'transaction_id' => $trans_id,
-                'amount' => 125,
+                'amount' => $total,
                 'method' => 'cash',
-                'paid_on' => $today,
+                'paid_on' => $sale_date,
                 'created_by' => $user_id,
-                'created_at' => $today
+                'created_at' => $sale_date
             ]);
         }
 
         if ($driver == 'mysql') {
             DB::statement('SET FOREIGN_KEY_CHECKS = 1');
-        } elseif ($driver == 'sqlite') {
-            DB::statement('PRAGMA foreign_keys = ON');
         }
 
-        // Notification templates
-        if (class_exists('App\NotificationTemplate')) {
-            $notification_template_data = NotificationTemplate::defaultNotificationTemplates();
+        // Notification templates - Safe check
+        if (class_exists('App\NotificationTemplate') && method_exists('App\NotificationTemplate', 'defaultNotificationTemplates')) {
+            $notification_template_data = \App\NotificationTemplate::defaultNotificationTemplates();
             foreach ($notification_template_data as $notification_template) {
                 $notification_template['business_id'] = $business_id;
                 DB::table('notification_templates')->insert($notification_template);
             }
         }
 
-        $installUtil = new InstallUtil();
-        if (method_exists($installUtil, 'createExistingProductsVariationsToTemplate')) {
-             $installUtil->createExistingProductsVariationsToTemplate();
-        }
-
         DB::commit();
 
-        $this->command->info("Dummy database created successfully linked to user: " . $user->username . " (ID: $user_id) and business ID: $business_id");
+        $this->command->info("Data dummy berhasil dibuat (IDR).");
+        $this->command->info("Terhubung ke user: " . $user->username);
+        $this->command->info("Volume: 50 Produk, 30 Transaksi");
     }
 }
