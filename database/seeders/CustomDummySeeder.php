@@ -80,7 +80,7 @@ class CustomDummySeeder extends Seeder
         }
         $all_u_ids = DB::table('units')->where('business_id', $business_id)->pluck('id')->toArray();
 
-        // Warranties (New Addition)
+        // Warranties
         $warranties_data = [
             ['name' => 'Garansi Resmi 1 Tahun', 'description' => 'Garansi pabrik resmi Indonesia', 'duration' => 1, 'duration_type' => 'years'],
             ['name' => 'Garansi Toko 6 Bulan', 'description' => 'Garansi servis dan sparepart di toko', 'duration' => 6, 'duration_type' => 'months'],
@@ -93,13 +93,13 @@ class CustomDummySeeder extends Seeder
             $warranty_ids[] = DB::table('warranties')->insertGetId(array_merge($wd, ['business_id' => $business_id]));
         }
 
-        // Customer Groups (100)
-        for ($i = 1; $i <= 100; $i++) {
+        // Customer Groups
+        for ($i = 1; $i <= 50; $i++) {
             DB::table('customer_groups')->insert(['business_id' => $business_id, 'name' => 'Grup Pelanggan #'.$i, 'amount' => rand(1, 15), 'created_by' => $user_id]);
         }
         $cg_ids = DB::table('customer_groups')->where('business_id', $business_id)->pluck('id')->toArray();
 
-        // Brands & Categories (50 each)
+        // Brands & Categories
         $brand_ids = [];
         for ($i = 1; $i <= 50; $i++) { $brand_ids[] = DB::table('brands')->insertGetId(['business_id' => $business_id, 'name' => 'Brand Hassa-'.str_pad($i, 3, '0', STR_PAD_LEFT), 'created_by' => $user_id]); }
         $cat_ids = [];
@@ -118,6 +118,7 @@ class CustomDummySeeder extends Seeder
         }
         DB::table('contacts')->insert($contacts);
         $cust_ids = DB::table('contacts')->where('business_id', $business_id)->where('type', 'customer')->pluck('id')->toArray();
+        $supp_ids = DB::table('contacts')->where('business_id', $business_id)->where('type', 'supplier')->pluck('id')->toArray();
 
         // 5. Products (1,000)
         $all_v_ids = [];
@@ -133,23 +134,51 @@ class CustomDummySeeder extends Seeder
             $pv_id = DB::table('product_variations')->insertGetId(['name' => 'DUMMY', 'product_id' => $p_id, 'is_dummy' => 1]);
             $buy = rand(5, 500) * 1000; $sell = $buy * 1.25;
             $v_id = DB::table('variations')->insertGetId(['name' => 'DUMMY', 'product_id' => $p_id, 'sub_sku' => 'SKU-'.str_pad($i, 5, '0', STR_PAD_LEFT), 'product_variation_id' => $pv_id, 'default_purchase_price' => $buy, 'dpp_inc_tax' => $buy * 1.11, 'profit_percent' => 25, 'default_sell_price' => $sell, 'sell_price_inc_tax' => $sell * 1.11, 'created_at' => $today]);
-            $all_v_ids[] = ['p_id' => $p_id, 'v_id' => $v_id, 'price' => $sell];
+            $all_v_ids[] = ['p_id' => $p_id, 'v_id' => $v_id, 'buy' => $buy, 'sell' => $sell];
             DB::table('variation_location_details')->insert(['product_id' => $p_id, 'product_variation_id' => $pv_id, 'variation_id' => $v_id, 'location_id' => $loc1, 'qty_available' => rand(100, 5000)]);
         }
 
-        // 6. Transactions (1,000)
+        // 6. Sales Transactions (1,000)
         for ($i = 1; $i <= 1000; $i++) {
             $p = $all_v_ids[array_rand($all_v_ids)];
             $dt = Carbon::now()->subDays(rand(0, 365))->format('Y-m-d H:i:s');
             $tid = DB::table('transactions')->insertGetId([
                 'business_id' => $business_id, 'location_id' => $loc1, 'type' => 'sell', 'status' => 'final', 'payment_status' => 'paid',
                 'contact_id' => $cust_ids[array_rand($cust_ids)], 'invoice_no' => 'INV-'.time().'-'.$i, 'transaction_date' => $dt,
-                'final_total' => $p['price'], 'created_by' => $user_id, 'created_at' => $dt
+                'final_total' => $p['sell'], 'created_by' => $user_id, 'created_at' => $dt
             ]);
-            DB::table('transaction_sell_lines')->insert(['transaction_id' => $tid, 'product_id' => $p['p_id'], 'variation_id' => $p['v_id'], 'quantity' => 1, 'unit_price' => $p['price'], 'unit_price_inc_tax' => $p['price'], 'created_at' => $dt]);
+            DB::table('transaction_sell_lines')->insert(['transaction_id' => $tid, 'product_id' => $p['p_id'], 'variation_id' => $p['v_id'], 'quantity' => 1, 'unit_price' => $p['sell'], 'unit_price_inc_tax' => $p['sell'], 'created_at' => $dt]);
+        }
+
+        // 7. Purchase Transactions (1,000) & Purchase Returns (1,000)
+        $this->command->info("Seeding 1,000 Purchases & 1,000 Purchase Returns...");
+        for ($i = 1; $i <= 1000; $i++) {
+            $p = $all_v_ids[array_rand($all_v_ids)];
+            $qty = rand(10, 100);
+            $total = $p['buy'] * $qty;
+            $dt = Carbon::now()->subDays(rand(0, 180))->format('Y-m-d H:i:s');
+
+            // Purchase
+            $tid = DB::table('transactions')->insertGetId([
+                'business_id' => $business_id, 'location_id' => $loc1, 'type' => 'purchase', 'status' => 'received', 'payment_status' => 'paid',
+                'contact_id' => $supp_ids[array_rand($supp_ids)], 'ref_no' => 'PUR-'.time().'-'.$i, 'transaction_date' => $dt,
+                'final_total' => $total, 'created_by' => $user_id, 'created_at' => $dt
+            ]);
+            DB::table('purchase_lines')->insert(['transaction_id' => $tid, 'product_id' => $p['p_id'], 'variation_id' => $p['v_id'], 'quantity' => $qty, 'purchase_price' => $p['buy'], 'purchase_price_inc_tax' => $p['buy'] * 1.11, 'item_tax' => $p['buy'] * 0.11, 'created_at' => $dt]);
+
+            // Purchase Return (Every purchase has a small return or random return)
+            if ($i % 1 == 0) { // All for now to hit the 1000 count
+                $ret_qty = rand(1, 5);
+                $ret_total = $p['buy'] * $ret_qty;
+                DB::table('transactions')->insert([
+                    'business_id' => $business_id, 'location_id' => $loc1, 'type' => 'purchase_return', 'status' => 'final', 'payment_status' => 'paid',
+                    'contact_id' => $supp_ids[array_rand($supp_ids)], 'ref_no' => 'PRET-'.time().'-'.$i, 'transaction_date' => $dt,
+                    'final_total' => $ret_total, 'created_by' => $user_id, 'created_at' => $dt
+                ]);
+            }
         }
 
         if ($driver == 'mysql') { DB::statement('SET FOREIGN_KEY_CHECKS = 1'); }
-        $this->command->info("Dummy Seeder Berhasil Selesai! 1000 Produk, 1000 Transaksi, & Data Garansi Lengkap.");
+        $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 1000 Sales, 1000 Purchase, & 1000 Purchase Return.");
     }
 }
