@@ -78,7 +78,7 @@ class CustomDummySeeder extends Seeder
             ['business_id' => $business_id, 'actual_name' => 'Kilogram', 'short_name' => 'kg', 'allow_decimal' => 1, 'base_unit_id' => $u_gr, 'base_unit_multiplier' => 1000, 'created_by' => $user_id],
             ['business_id' => $business_id, 'actual_name' => 'Liter', 'short_name' => 'ltr', 'allow_decimal' => 1, 'base_unit_id' => $u_ml, 'base_unit_multiplier' => 1000, 'created_by' => $user_id],
             ['business_id' => $business_id, 'actual_name' => 'Box', 'short_name' => 'box', 'allow_decimal' => 0, 'base_unit_id' => $u_pcs, 'base_unit_multiplier' => 24, 'created_by' => $user_id],
-            ['business_id' => $business_id, 'actual_name' => 'Sachet', 'short_name' => 'sct', 'allow_decimal' => 0, 'created_by' => $user_id]
+            ['business_id' => $business_id, 'actual_name' => 'Sachet', 'short_name' => 'sct', 'allow_decimal' => 0, 'base_unit_id' => null, 'base_unit_multiplier' => null, 'created_by' => $user_id]
         ]);
         $all_u_ids = DB::table('units')->where('business_id', $business_id)->pluck('id')->toArray();
 
