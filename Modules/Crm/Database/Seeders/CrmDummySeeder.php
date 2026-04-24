@@ -5,11 +5,16 @@ namespace Modules\Crm\Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
+use Illuminate\Support\Facades\Schema;
 
 class CrmDummySeeder extends Seeder
 {
     public function run()
     {
+        if (!Schema::hasTable('crm_schedules')) {
+            return;
+        }
+
         $faker = Faker::create();
         $business_id = DB::table('business')->pluck('id')->first();
         $user_id = DB::table('users')->where('business_id', $business_id)->pluck('id')->first();
@@ -34,19 +39,21 @@ class CrmDummySeeder extends Seeder
         }
 
         // Campaigns
-        for ($i = 0; $i < 10; $i++) {
-            DB::table('crm_campaigns')->insert([
-                'business_id' => $business_id,
-                'name' => $faker->word . ' Campaign',
-                'description' => $faker->sentence,
-                'created_by' => $user_id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+        if (Schema::hasTable('crm_campaigns')) {
+            for ($i = 0; $i < 10; $i++) {
+                DB::table('crm_campaigns')->insert([
+                    'business_id' => $business_id,
+                    'name' => $faker->word . ' Campaign',
+                    'description' => $faker->sentence,
+                    'created_by' => $user_id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
         }
 
         // Call Logs
-        if ($contact_id) {
+        if ($contact_id && Schema::hasTable('crm_call_logs')) {
             for ($i = 0; $i < 15; $i++) {
                 DB::table('crm_call_logs')->insert([
                     'business_id' => $business_id,
@@ -62,7 +69,7 @@ class CrmDummySeeder extends Seeder
         }
 
         // Proposals
-        if ($contact_id) {
+        if ($contact_id && Schema::hasTable('crm_proposals')) {
             for ($i = 0; $i < 10; $i++) {
                 DB::table('crm_proposals')->insert([
                     'business_id' => $business_id,

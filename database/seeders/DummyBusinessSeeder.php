@@ -107,128 +107,136 @@ class DummyBusinessSeeder extends Seeder
 
         DB::table('business_locations')->insert($business_locations);
 
-        $hms_room_types = [
-            [
-                'id' => 1,
-                'type' => 'Standard Room',
-                'no_of_adult' => 2,
-                'no_of_child' => 1,
-                'max_occupancy' => 3,
-                'amenities' => 'Free WiFi, Air conditioning, TV',
-                'description' => 'Comfortable standard room suitable for small families or business travellers.',
-                'business_id' => 1,
-                'created_by' => 7,
-                'created_at' => $today,
-                'updated_at' => $today,
-            ],
-            [
-                'id' => 2,
-                'type' => 'Deluxe Room',
-                'no_of_adult' => 2,
-                'no_of_child' => 2,
-                'max_occupancy' => 4,
-                'amenities' => 'Free WiFi, Air conditioning, TV, Mini fridge, Workspace',
-                'description' => 'Spacious deluxe room with extra amenities for longer stays.',
-                'business_id' => 5,
-                'created_by' => 7,
-                'created_at' => $today,
-                'updated_at' => $today,
-            ],
-            [
-                'id' => 3,
-                'type' => 'Suite',
-                'no_of_adult' => 3,
-                'no_of_child' => 2,
-                'max_occupancy' => 5,
-                'amenities' => 'Free WiFi, Air conditioning, TV, Living area, Coffee machine',
-                'description' => 'Premium suite with separate living area for families or VIP guests.',
-                'business_id' => 5,
-                'created_by' => 7,
-                'created_at' => $today,
-                'updated_at' => $today,
-            ],
-        ];
+        if (\Illuminate\Support\Facades\Schema::hasTable('hms_room_types')) {
+            $hms_room_types = [
+                [
+                    'id' => 1,
+                    'type' => 'Standard Room',
+                    'no_of_adult' => 2,
+                    'no_of_child' => 1,
+                    'max_occupancy' => 3,
+                    'amenities' => 'Free WiFi, Air conditioning, TV',
+                    'description' => 'Comfortable standard room suitable for small families or business travellers.',
+                    'business_id' => 1,
+                    'created_by' => 7,
+                    'created_at' => $today,
+                    'updated_at' => $today,
+                ],
+                [
+                    'id' => 2,
+                    'type' => 'Deluxe Room',
+                    'no_of_adult' => 2,
+                    'no_of_child' => 2,
+                    'max_occupancy' => 4,
+                    'amenities' => 'Free WiFi, Air conditioning, TV, Mini fridge, Workspace',
+                    'description' => 'Spacious deluxe room with extra amenities for longer stays.',
+                    'business_id' => 5,
+                    'created_by' => 7,
+                    'created_at' => $today,
+                    'updated_at' => $today,
+                ],
+                [
+                    'id' => 3,
+                    'type' => 'Suite',
+                    'no_of_adult' => 3,
+                    'no_of_child' => 2,
+                    'max_occupancy' => 5,
+                    'amenities' => 'Free WiFi, Air conditioning, TV, Living area, Coffee machine',
+                    'description' => 'Premium suite with separate living area for families or VIP guests.',
+                    'business_id' => 5,
+                    'created_by' => 7,
+                    'created_at' => $today,
+                    'updated_at' => $today,
+                ],
+            ];
 
-        DB::table('hms_room_types')->insert($hms_room_types);
+            DB::table('hms_room_types')->insert($hms_room_types);
+        }
 
-        $hms_rooms = [
-            [
-                'id' => 1,
-                'hms_room_type_id' => 1,
-                'room_number' => '101',
-                'created_at' => $today,
-                'updated_at' => $today,
-            ],
-        ];
+        if (\Illuminate\Support\Facades\Schema::hasTable('hms_rooms')) {
+            $hms_rooms = [
+                [
+                    'id' => 1,
+                    'hms_room_type_id' => 1,
+                    'room_number' => '101',
+                    'created_at' => $today,
+                    'updated_at' => $today,
+                ],
+            ];
 
-        DB::table('hms_rooms')->insert($hms_rooms);
+            DB::table('hms_rooms')->insert($hms_rooms);
+        }
 
-        $hms_extras = [
-            [
-                'id' => 1,
-                'name' => 'Breakfast',
-                'price' => 15.00,
-                'price_per' => 'per_night',
-                'business_id' => 1,
-                'created_by' => 7,
-                'is_active' => true,
-                'created_at' => $today,
-                'updated_at' => $today,
-            ],
-            [
-                'id' => 2,
-                'name' => 'Airport Pickup',
-                'price' => 40.00,
-                'price_per' => 'per_booking',
-                'business_id' => 5,
-                'created_by' => 7,
-                'is_active' => true,
-                'created_at' => $today,
-                'updated_at' => $today,
-            ],
-            [
-                'id' => 3,
-                'name' => 'Late Checkout',
-                'price' => 25.00,
-                'price_per' => 'per_booking',
-                'business_id' => 5,
-                'created_by' => 7,
-                'is_active' => true,
-                'created_at' => $today,
-                'updated_at' => $today,
-            ],
-        ];
+        if (\Illuminate\Support\Facades\Schema::hasTable('hms_extras')) {
+            $hms_extras = [
+                [
+                    'id' => 1,
+                    'name' => 'Breakfast',
+                    'price' => 15.00,
+                    'price_per' => 'per_night',
+                    'business_id' => 1,
+                    'created_by' => 7,
+                    'is_active' => true,
+                    'created_at' => $today,
+                    'updated_at' => $today,
+                ],
+                [
+                    'id' => 2,
+                    'name' => 'Airport Pickup',
+                    'price' => 40.00,
+                    'price_per' => 'per_booking',
+                    'business_id' => 5,
+                    'created_by' => 7,
+                    'is_active' => true,
+                    'created_at' => $today,
+                    'updated_at' => $today,
+                ],
+                [
+                    'id' => 3,
+                    'name' => 'Late Checkout',
+                    'price' => 25.00,
+                    'price_per' => 'per_booking',
+                    'business_id' => 5,
+                    'created_by' => 7,
+                    'is_active' => true,
+                    'created_at' => $today,
+                    'updated_at' => $today,
+                ],
+            ];
 
-        DB::table('hms_extras')->insert($hms_extras);
+            DB::table('hms_extras')->insert($hms_extras);
+        }
 
-        $hms_coupons = [
-            [
-                'id' => 1,
-                'hms_room_type_id' => 1,
-                'business_id' => 1,
-                'start_date' => \Carbon::now()->subDays(7)->format('Y-m-d'),
-                'end_date' => \Carbon::now()->addDays(30)->format('Y-m-d'),
-                'coupon_code' => 'STD10',
-                'discount' => 10,
-                'discount_type' => 'percentage',
-                'created_at' => $today,
-                'updated_at' => $today,
-            ],
-            [
-                'id' => 2,
-                'hms_room_type_id' => 2,
-                'business_id' => 5,
-                'start_date' => \Carbon::now()->subDays(7)->format('Y-m-d'),
-                'end_date' => \Carbon::now()->addDays(30)->format('Y-m-d'),
-                'coupon_code' => 'DLX15',
-                'discount' => 15,
-                'discount_type' => 'percentage',
-                'created_at' => $today,
-                'updated_at' => $today,
-            ],
-        ];
+        if (\Illuminate\Support\Facades\Schema::hasTable('hms_coupons')) {
+            $hms_coupons = [
+                [
+                    'id' => 1,
+                    'hms_room_type_id' => 1,
+                    'business_id' => 1,
+                    'start_date' => \Carbon::now()->subDays(7)->format('Y-m-d'),
+                    'end_date' => \Carbon::now()->addDays(30)->format('Y-m-d'),
+                    'coupon_code' => 'STD10',
+                    'discount' => 10,
+                    'discount_type' => 'percentage',
+                    'created_at' => $today,
+                    'updated_at' => $today,
+                ],
+                [
+                    'id' => 2,
+                    'hms_room_type_id' => 2,
+                    'business_id' => 5,
+                    'start_date' => \Carbon::now()->subDays(7)->format('Y-m-d'),
+                    'end_date' => \Carbon::now()->addDays(30)->format('Y-m-d'),
+                    'coupon_code' => 'DLX15',
+                    'discount' => 15,
+                    'discount_type' => 'percentage',
+                    'created_at' => $today,
+                    'updated_at' => $today,
+                ],
+            ];
 
-        DB::table('hms_coupons')->insert($hms_coupons);
+            DB::table('hms_coupons')->insert($hms_coupons);
+        }
 
         $hms_arrival = \Carbon::now()->addDays(1)->format('Y-m-d H:i:s');
         $hms_departure = \Carbon::now()->addDays(3)->format('Y-m-d H:i:s');
@@ -286,35 +294,39 @@ class DummyBusinessSeeder extends Seeder
 
         DB::table('transactions')->insert($hms_booking_transactions);
 
-        $hms_booking_lines = [
-            [
-                'id' => 1,
-                'transaction_id' => 54,
-                'hms_room_id' => 1,
-                'hms_room_type_id' => 1,
-                'adults' => 2,
-                'childrens' => 0,
-                'price' => '100.00',
-                'total_price' => '100.00',
-                'created_at' => $today,
-                'updated_at' => $today,
-            ],
-        ];
+        if (\Illuminate\Support\Facades\Schema::hasTable('hms_booking_lines')) {
+            $hms_booking_lines = [
+                [
+                    'id' => 1,
+                    'transaction_id' => 54,
+                    'hms_room_id' => 1,
+                    'hms_room_type_id' => 1,
+                    'adults' => 2,
+                    'childrens' => 0,
+                    'price' => '100.00',
+                    'total_price' => '100.00',
+                    'created_at' => $today,
+                    'updated_at' => $today,
+                ],
+            ];
 
-        DB::table('hms_booking_lines')->insert($hms_booking_lines);
+            DB::table('hms_booking_lines')->insert($hms_booking_lines);
+        }
 
-        $hms_booking_extras = [
-            [
-                'id' => 1,
-                'transaction_id' => 54,
-                'hms_extra_id' => 1,
-                'price' => '15.00',
-                'created_at' => $today,
-                'updated_at' => $today,
-            ],
-        ];
+        if (\Illuminate\Support\Facades\Schema::hasTable('hms_booking_extras')) {
+            $hms_booking_extras = [
+                [
+                    'id' => 1,
+                    'transaction_id' => 54,
+                    'hms_extra_id' => 1,
+                    'price' => '15.00',
+                    'created_at' => $today,
+                    'updated_at' => $today,
+                ],
+            ];
 
-        DB::table('hms_booking_extras')->insert($hms_booking_extras);
+            DB::table('hms_booking_extras')->insert($hms_booking_extras);
+        }
 
         // `pos`.`cash_register_transactions`
         $cash_register_transactions = [
@@ -1655,144 +1667,161 @@ class DummyBusinessSeeder extends Seeder
         $admin6->assignRole('Admin#6');
 
         //Essential Module : Dummy Data
-        $essentials_leave_types = [
-            ['id' => '1', 'leave_type' => 'Sick Leave', 'max_leave_count' => null, 'leave_count_interval' => null, 'business_id' => '1', 'created_at' => '2019-08-07 00:00:36', 'updated_at' => '2019-08-07 00:00:36'],
-            ['id' => '2', 'leave_type' => 'Vacation Leaves', 'max_leave_count' => null, 'leave_count_interval' => null, 'business_id' => '1', 'created_at' => '2019-08-07 00:00:49', 'updated_at' => '2019-08-07 00:00:49'],
-            ['id' => '3', 'leave_type' => 'Maternity leave', 'max_leave_count' => null, 'leave_count_interval' => null, 'business_id' => '1', 'created_at' => '2019-08-07 00:01:11', 'updated_at' => '2019-08-07 00:01:11'],
-            ['id' => '4', 'leave_type' => 'Others', 'max_leave_count' => '1', 'leave_count_interval' => 'month', 'business_id' => '1', 'created_at' => '2019-08-07 00:01:34', 'updated_at' => '2019-08-07 00:01:34'],
-        ];
-        DB::table('essentials_leave_types')->insert($essentials_leave_types);
+        if (\Illuminate\Support\Facades\Schema::hasTable('essentials_leave_types')) {
+            $essentials_leave_types = [
+                ['id' => '1', 'leave_type' => 'Sick Leave', 'max_leave_count' => null, 'leave_count_interval' => null, 'business_id' => '1', 'created_at' => '2019-08-07 00:00:36', 'updated_at' => '2019-08-07 00:00:36'],
+                ['id' => '2', 'leave_type' => 'Vacation Leaves', 'max_leave_count' => null, 'leave_count_interval' => null, 'business_id' => '1', 'created_at' => '2019-08-07 00:00:49', 'updated_at' => '2019-08-07 00:00:49'],
+                ['id' => '3', 'leave_type' => 'Maternity leave', 'max_leave_count' => null, 'leave_count_interval' => null, 'business_id' => '1', 'created_at' => '2019-08-07 00:01:11', 'updated_at' => '2019-08-07 00:01:11'],
+                ['id' => '4', 'leave_type' => 'Others', 'max_leave_count' => '1', 'leave_count_interval' => 'month', 'business_id' => '1', 'created_at' => '2019-08-07 00:01:34', 'updated_at' => '2019-08-07 00:01:34'],
+            ];
+            DB::table('essentials_leave_types')->insert($essentials_leave_types);
+        }
 
         //Repair Module Dummy Data [product/device(categories) added above]
-        $repair_device_models = [
-            ['id' => '1', 'business_id' => '4', 'name' => 'Samsung Galaxy M21', 'repair_checklist' => '"MIC|WiFi|Bluetooth|Sound|Camera|Ram"', 'brand_id' => '24', 'device_id' => '48', 'created_by' => '1', 'created_at' => '2020-05-07 21:07:24', 'updated_at' => '2020-05-11 12:35:00'],
-            ['id' => '2', 'business_id' => '4', 'name' => 'Samsung Galaxy S20+', 'repair_checklist' => '"MIC|WiFi|Bluetooth|Sound|Camera|Ram"', 'brand_id' => '24', 'device_id' => '48', 'created_by' => '1', 'created_at' => '2020-05-07 21:08:11', 'updated_at' => '2020-05-11 12:34:34'],
-            ['id' => '3', 'business_id' => '4', 'name' => 'DB43J 43 Inch Full HD Monitor', 'repair_checklist' => '"RAM|Wifi|keyBoard|Sound Quallity | Battery capacity | Mouse | USB Ports | Graphics"', 'brand_id' => '24', 'device_id' => '47', 'created_by' => '1', 'created_at' => '2020-05-07 21:09:15', 'updated_at' => '2020-05-11 12:33:47'],
-            ['id' => '4', 'business_id' => '4', 'name' => 'LS24E510CS 23.5 inch LED Monitor', 'repair_checklist' => '"Keyboard|Ram|Sound Quallity | Battery capacity | Mouse | USB Ports | Graphics"', 'brand_id' => '24', 'device_id' => '47', 'created_by' => '1', 'created_at' => '2020-05-07 21:10:11', 'updated_at' => '2020-05-11 12:33:28'],
-            ['id' => '5', 'business_id' => '4', 'name' => 'Samsung ChromeBook XE50', 'repair_checklist' => '"Camera | Windows | KeyBoard | Mouse | Battery capacity | Ram | USB Ports | Graphics"', 'brand_id' => '24', 'device_id' => '46', 'created_by' => '1', 'created_at' => '2020-05-07 21:11:44', 'updated_at' => '2020-05-11 12:30:48'],
-            ['id' => '6', 'business_id' => '4', 'name' => 'Samsung Spin 7 NP730QAA', 'repair_checklist' => '"Battery capacity | Ram | Mouse | USB Ports | Graphics"', 'brand_id' => '24', 'device_id' => '46', 'created_by' => '1', 'created_at' => '2020-05-07 21:12:48', 'updated_at' => '2020-05-11 12:30:18'],
-            ['id' => '7', 'business_id' => '4', 'name' => 'Apple MacBook Pro MVVK2LL', 'repair_checklist' => '"Camera | Windows | KeyBoard | Mouse | Battery capacity | Ram | USB Ports | Graphics"', 'brand_id' => '25', 'device_id' => '46', 'created_by' => '1', 'created_at' => '2020-05-07 21:13:54', 'updated_at' => '2020-05-11 12:37:44'],
-            ['id' => '8', 'business_id' => '4', 'name' => 'iMac (Retina 5K, 27-inch, 2019)', 'repair_checklist' => '"Keyboard|Ram|Sound Quallity | Battery capacity | Mouse | USB Ports | Graphics"', 'brand_id' => '25', 'device_id' => '47', 'created_by' => '1', 'created_at' => '2020-05-07 21:14:39', 'updated_at' => '2020-05-11 12:38:06'],
-            ['id' => '9', 'business_id' => '4', 'name' => 'Apple iPhone X', 'repair_checklist' => '"MIC|WiFi|Bluetooth|Sound|Camera|Ram"', 'brand_id' => '25', 'device_id' => '48', 'created_by' => '1', 'created_at' => '2020-05-07 21:15:38', 'updated_at' => '2020-05-11 12:38:48'],
-        ];
+        if (\Illuminate\Support\Facades\Schema::hasTable('repair_device_models')) {
+            $repair_device_models = [
+                ['id' => '1', 'business_id' => '4', 'name' => 'Samsung Galaxy M21', 'repair_checklist' => '"MIC|WiFi|Bluetooth|Sound|Camera|Ram"', 'brand_id' => '24', 'device_id' => '48', 'created_by' => '1', 'created_at' => '2020-05-07 21:07:24', 'updated_at' => '2020-05-11 12:35:00'],
+                ['id' => '2', 'business_id' => '4', 'name' => 'Samsung Galaxy S20+', 'repair_checklist' => '"MIC|WiFi|Bluetooth|Sound|Camera|Ram"', 'brand_id' => '24', 'device_id' => '48', 'created_by' => '1', 'created_at' => '2020-05-07 21:08:11', 'updated_at' => '2020-05-11 12:34:34'],
+                ['id' => '3', 'business_id' => '4', 'name' => 'DB43J 43 Inch Full HD Monitor', 'repair_checklist' => '"RAM|Wifi|keyBoard|Sound Quallity | Battery capacity | Mouse | USB Ports | Graphics"', 'brand_id' => '24', 'device_id' => '47', 'created_by' => '1', 'created_at' => '2020-05-07 21:09:15', 'updated_at' => '2020-05-11 12:33:47'],
+                ['id' => '4', 'business_id' => '4', 'name' => 'LS24E510CS 23.5 inch LED Monitor', 'repair_checklist' => '"Keyboard|Ram|Sound Quallity | Battery capacity | Mouse | USB Ports | Graphics"', 'brand_id' => '24', 'device_id' => '47', 'created_by' => '1', 'created_at' => '2020-05-07 21:10:11', 'updated_at' => '2020-05-11 12:33:28'],
+                ['id' => '5', 'business_id' => '4', 'name' => 'Samsung ChromeBook XE50', 'repair_checklist' => '"Camera | Windows | KeyBoard | Mouse | Battery capacity | Ram | USB Ports | Graphics"', 'brand_id' => '24', 'device_id' => '46', 'created_by' => '1', 'created_at' => '2020-05-07 21:11:44', 'updated_at' => '2020-05-11 12:30:48'],
+                ['id' => '6', 'business_id' => '4', 'name' => 'Samsung Spin 7 NP730QAA', 'repair_checklist' => '"Battery capacity | Ram | Mouse | USB Ports | Graphics"', 'brand_id' => '24', 'device_id' => '46', 'created_by' => '1', 'created_at' => '2020-05-07 21:12:48', 'updated_at' => '2020-05-11 12:30:18'],
+                ['id' => '7', 'business_id' => '4', 'name' => 'Apple MacBook Pro MVVK2LL', 'repair_checklist' => '"Camera | Windows | KeyBoard | Mouse | Battery capacity | Ram | USB Ports | Graphics"', 'brand_id' => '25', 'device_id' => '46', 'created_by' => '1', 'created_at' => '2020-05-07 21:13:54', 'updated_at' => '2020-05-11 12:37:44'],
+                ['id' => '8', 'business_id' => '4', 'name' => 'iMac (Retina 5K, 27-inch, 2019)', 'repair_checklist' => '"Keyboard|Ram|Sound Quallity | Battery capacity | Mouse | USB Ports | Graphics"', 'brand_id' => '25', 'device_id' => '47', 'created_by' => '1', 'created_at' => '2020-05-07 21:14:39', 'updated_at' => '2020-05-11 12:38:06'],
+                ['id' => '9', 'business_id' => '4', 'name' => 'Apple iPhone X', 'repair_checklist' => '"MIC|WiFi|Bluetooth|Sound|Camera|Ram"', 'brand_id' => '25', 'device_id' => '48', 'created_by' => '1', 'created_at' => '2020-05-07 21:15:38', 'updated_at' => '2020-05-11 12:38:48'],
+            ];
 
-        DB::table('repair_device_models')->insert($repair_device_models);
+            DB::table('repair_device_models')->insert($repair_device_models);
+        }
 
-        $repair_statuses = [
-            ['id' => '1', 'name' => 'Repaired', 'color' => '#3bd914', 'sort_order' => '4', 'business_id' => '4', 'created_at' => '2020-05-07 21:02:40', 'updated_at' => '2020-05-07 21:02:40'],
-            ['id' => '2', 'name' => 'In Progress', 'color' => '#e3b81e', 'sort_order' => '2', 'business_id' => '4', 'created_at' => '2020-05-07 21:03:14', 'updated_at' => '2020-05-07 21:03:14'],
-            ['id' => '3', 'name' => 'Not Started', 'color' => '#e3631b', 'sort_order' => '1', 'business_id' => '4', 'created_at' => '2020-05-07 21:03:43', 'updated_at' => '2020-05-07 21:03:43'],
-            ['id' => '4', 'name' => 'Can\'t be repaired', 'color' => '#f5164b', 'sort_order' => '3', 'business_id' => '4', 'created_at' => '2020-05-07 21:04:10', 'updated_at' => '2020-05-08 10:04:58'],
-        ];
+        if (\Illuminate\Support\Facades\Schema::hasTable('repair_statuses')) {
+            $repair_statuses = [
+                ['id' => '1', 'name' => 'Repaired', 'color' => '#3bd914', 'sort_order' => '4', 'business_id' => '4', 'created_at' => '2020-05-07 21:02:40', 'updated_at' => '2020-05-07 21:02:40'],
+                ['id' => '2', 'name' => 'In Progress', 'color' => '#e3b81e', 'sort_order' => '2', 'business_id' => '4', 'created_at' => '2020-05-07 21:03:14', 'updated_at' => '2020-05-07 21:03:14'],
+                ['id' => '3', 'name' => 'Not Started', 'color' => '#e3631b', 'sort_order' => '1', 'business_id' => '4', 'created_at' => '2020-05-07 21:03:43', 'updated_at' => '2020-05-07 21:03:43'],
+                ['id' => '4', 'name' => 'Can\'t be repaired', 'color' => '#f5164b', 'sort_order' => '3', 'business_id' => '4', 'created_at' => '2020-05-07 21:04:10', 'updated_at' => '2020-05-08 10:04:58'],
+            ];
 
-        DB::table('repair_statuses')->insert($repair_statuses);
+            DB::table('repair_statuses')->insert($repair_statuses);
+        }
 
-        $essentials_shifts = [
-            ['id' => '1', 'name' => 'Morning Shift', 'type' => 'fixed_shift', 'business_id' => '1', 'start_time' => '09:00:00', 'end_time' => '18:00:00', 'holidays' => '["sunday","saturday"]', 'created_at' => '2020-05-11 05:26:56', 'updated_at' => '2020-05-11 21:27:03'],
-            ['id' => '2', 'name' => 'Evening Shift', 'type' => 'flexible_shift', 'business_id' => '1', 'start_time' => null, 'end_time' => null, 'holidays' => '["sunday","saturday"]', 'created_at' => '2020-05-11 05:28:17', 'updated_at' => '2020-05-11 05:28:17'],
-        ];
+        if (\Illuminate\Support\Facades\Schema::hasTable('essentials_shifts')) {
+            $essentials_shifts = [
+                ['id' => '1', 'name' => 'Morning Shift', 'type' => 'fixed_shift', 'business_id' => '1', 'start_time' => '09:00:00', 'end_time' => '18:00:00', 'holidays' => '["sunday","saturday"]', 'created_at' => '2020-05-11 05:26:56', 'updated_at' => '2020-05-11 21:27:03'],
+                ['id' => '2', 'name' => 'Evening Shift', 'type' => 'flexible_shift', 'business_id' => '1', 'start_time' => null, 'end_time' => null, 'holidays' => '["sunday","saturday"]', 'created_at' => '2020-05-11 05:28:17', 'updated_at' => '2020-05-11 05:28:17'],
+            ];
 
-        DB::table('essentials_shifts')->insert($essentials_shifts);
+            DB::table('essentials_shifts')->insert($essentials_shifts);
+        }
 
-        $essentials_user_shifts = [
-            ['id' => '2', 'user_id' => '3', 'essentials_shift_id' => '1', 'start_date' => $start_of_week, 'end_date' => $end_of_week, 'created_at' => '2020-05-11 21:27:50', 'updated_at' => '2020-05-11 21:27:50'],
-            ['id' => '3', 'user_id' => '9', 'essentials_shift_id' => '1', 'start_date' => $start_of_week, 'end_date' => $end_of_week, 'created_at' => '2020-05-11 21:27:50', 'updated_at' => '2020-05-11 21:27:50'],
-            ['id' => '5', 'user_id' => '10', 'essentials_shift_id' => '2', 'start_date' => $start_of_week, 'end_date' => $end_of_week, 'created_at' => '2020-05-11 21:28:15', 'updated_at' => '2020-05-11 21:28:15'],
-            ['id' => '6', 'user_id' => '11', 'essentials_shift_id' => '2', 'start_date' => $start_of_week, 'end_date' => $end_of_week, 'created_at' => '2020-05-11 21:28:15', 'updated_at' => '2020-05-11 21:28:15'],
-            ['id' => '7', 'user_id' => '1', 'essentials_shift_id' => '2', 'start_date' => $start_of_week, 'end_date' => $end_of_week, 'created_at' => '2020-05-11 21:29:16', 'updated_at' => '2020-05-11 21:29:16'],
-            ['id' => '8', 'user_id' => '2', 'essentials_shift_id' => '1', 'start_date' => $start_of_week, 'end_date' => $end_of_week, 'created_at' => '2020-05-11 21:29:45', 'updated_at' => '2020-05-11 21:29:45'],
-        ];
-        DB::table('essentials_user_shifts')->insert($essentials_user_shifts);
+        if (\Illuminate\Support\Facades\Schema::hasTable('essentials_user_shifts')) {
+            $essentials_user_shifts = [
+                ['id' => '2', 'user_id' => '3', 'essentials_shift_id' => '1', 'start_date' => $start_of_week, 'end_date' => $end_of_week, 'created_at' => '2020-05-11 21:27:50', 'updated_at' => '2020-05-11 21:27:50'],
+                ['id' => '3', 'user_id' => '9', 'essentials_shift_id' => '1', 'start_date' => $start_of_week, 'end_date' => $end_of_week, 'created_at' => '2020-05-11 21:27:50', 'updated_at' => '2020-05-11 21:27:50'],
+                ['id' => '5', 'user_id' => '10', 'essentials_shift_id' => '2', 'start_date' => $start_of_week, 'end_date' => $end_of_week, 'created_at' => '2020-05-11 21:28:15', 'updated_at' => '2020-05-11 21:28:15'],
+                ['id' => '6', 'user_id' => '11', 'essentials_shift_id' => '2', 'start_date' => $start_of_week, 'end_date' => $end_of_week, 'created_at' => '2020-05-11 21:28:15', 'updated_at' => '2020-05-11 21:28:15'],
+                ['id' => '7', 'user_id' => '1', 'essentials_shift_id' => '2', 'start_date' => $start_of_week, 'end_date' => $end_of_week, 'created_at' => '2020-05-11 21:29:16', 'updated_at' => '2020-05-11 21:29:16'],
+                ['id' => '8', 'user_id' => '2', 'essentials_shift_id' => '1', 'start_date' => $start_of_week, 'end_date' => $end_of_week, 'created_at' => '2020-05-11 21:29:45', 'updated_at' => '2020-05-11 21:29:45'],
+            ];
+            DB::table('essentials_user_shifts')->insert($essentials_user_shifts);
+        }
 
 
-        $gym_classes = [
-            // Business 1
-            ['business_id' => 1, 'name' => 'Yoga', 'description' => 'A relaxing and stretching session', 'start_time' => '06:00:00', 'end_time' => '07:00:00', 'created_at' => now(), 'updated_at' => now()],
-            ['business_id' => 1, 'name' => 'HIIT', 'description' => 'High-Intensity Interval Training', 'start_time' => '08:00:00', 'end_time' => '09:00:00', 'created_at' => now(), 'updated_at' => now()],
-            ['business_id' => 1, 'name' => 'Strength Training', 'description' => 'Weightlifting and muscle building', 'start_time' => '18:00:00', 'end_time' => '19:00:00', 'created_at' => now(), 'updated_at' => now()],
-        
-            // Business 2
-            ['business_id' => 2, 'name' => 'Pilates', 'description' => 'Core strengthening and flexibility', 'start_time' => '07:00:00', 'end_time' => '08:00:00', 'created_at' => now(), 'updated_at' => now()],
-            ['business_id' => 2, 'name' => 'CrossFit', 'description' => 'Functional fitness training', 'start_time' => '09:00:00', 'end_time' => '10:00:00', 'created_at' => now(), 'updated_at' => now()],
-            ['business_id' => 2, 'name' => 'Zumba', 'description' => 'Dance-based cardio workout', 'start_time' => '19:00:00', 'end_time' => '20:00:00', 'created_at' => now(), 'updated_at' => now()],
-        
-            // Business 3
-            ['business_id' => 3, 'name' => 'Spin Class', 'description' => 'Cycling for endurance and strength', 'start_time' => '06:30:00', 'end_time' => '07:30:00', 'created_at' => now(), 'updated_at' => now()],
-            ['business_id' => 3, 'name' => 'Bootcamp', 'description' => 'Full-body conditioning', 'start_time' => '10:00:00', 'end_time' => '11:00:00', 'created_at' => now(), 'updated_at' => now()],
-            ['business_id' => 3, 'name' => 'Boxing', 'description' => 'Boxing and cardio drills', 'start_time' => '20:00:00', 'end_time' => '21:00:00', 'created_at' => now(), 'updated_at' => now()],
-        
-            // Business 4
-            ['business_id' => 4, 'name' => 'Aerobics', 'description' => 'Fun and energetic cardio workout', 'start_time' => '07:30:00', 'end_time' => '08:30:00', 'created_at' => now(), 'updated_at' => now()],
-            ['business_id' => 4, 'name' => 'Power Yoga', 'description' => 'Intense yoga flow for strength', 'start_time' => '17:00:00', 'end_time' => '18:00:00', 'created_at' => now(), 'updated_at' => now()],
-            ['business_id' => 4, 'name' => 'MMA Training', 'description' => 'Mixed martial arts techniques', 'start_time' => '19:30:00', 'end_time' => '20:30:00', 'created_at' => now(), 'updated_at' => now()],
-        ];
-        
-        // Insert into database
-        DB::table('gym_classes')->insert($gym_classes);
+        if (\Illuminate\Support\Facades\Schema::hasTable('gym_classes')) {
+            $gym_classes = [
+                // Business 1
+                ['business_id' => 1, 'name' => 'Yoga', 'description' => 'A relaxing and stretching session', 'start_time' => '06:00:00', 'end_time' => '07:00:00', 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 1, 'name' => 'HIIT', 'description' => 'High-Intensity Interval Training', 'start_time' => '08:00:00', 'end_time' => '09:00:00', 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 1, 'name' => 'Strength Training', 'description' => 'Weightlifting and muscle building', 'start_time' => '18:00:00', 'end_time' => '19:00:00', 'created_at' => now(), 'updated_at' => now()],
 
-$packages = [
-    // Business 1
-    ['business_id' => 1, 'created_by' => 1, 'name' => 'Monthly', 'duration' => 'monthly', 'amount' => 100, 'enabled' => 1, 'notes' => '1-month package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 1, 'created_by' => 1, 'name' => 'Quarterly', 'duration' => 'quarterly', 'amount' => 250, 'enabled' => 1, 'notes' => '3-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 1, 'created_by' => 1, 'name' => 'Half-Yearly', 'duration' => 'half-yearly', 'amount' => 450, 'enabled' => 1, 'notes' => '6-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 1, 'created_by' => 1, 'name' => 'Yearly', 'duration' => 'yearly', 'amount' => 800, 'enabled' => 1, 'notes' => '12-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 1, 'created_by' => 1, 'name' => 'Lifetime', 'duration' => 'lifetime', 'amount' => 5000, 'enabled' => 1, 'notes' => 'Lifetime package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                // Business 2
+                ['business_id' => 2, 'name' => 'Pilates', 'description' => 'Core strengthening and flexibility', 'start_time' => '07:00:00', 'end_time' => '08:00:00', 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 2, 'name' => 'CrossFit', 'description' => 'Functional fitness training', 'start_time' => '09:00:00', 'end_time' => '10:00:00', 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 2, 'name' => 'Zumba', 'description' => 'Dance-based cardio workout', 'start_time' => '19:00:00', 'end_time' => '20:00:00', 'created_at' => now(), 'updated_at' => now()],
 
-    // Business 2
-    ['business_id' => 2, 'created_by' => 1, 'name' => 'Monthly', 'duration' => 'monthly', 'amount' => 100, 'enabled' => 1, 'notes' => '1-month package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 2, 'created_by' => 1, 'name' => 'Quarterly', 'duration' => 'quarterly', 'amount' => 250, 'enabled' => 1, 'notes' => '3-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 2, 'created_by' => 1, 'name' => 'Half-Yearly', 'duration' => 'half-yearly', 'amount' => 450, 'enabled' => 1, 'notes' => '6-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 2, 'created_by' => 1, 'name' => 'Yearly', 'duration' => 'yearly', 'amount' => 800, 'enabled' => 1, 'notes' => '12-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 2, 'created_by' => 1, 'name' => 'Lifetime', 'duration' => 'lifetime', 'amount' => 5000, 'enabled' => 1, 'notes' => 'Lifetime package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                // Business 3
+                ['business_id' => 3, 'name' => 'Spin Class', 'description' => 'Cycling for endurance and strength', 'start_time' => '06:30:00', 'end_time' => '07:30:00', 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 3, 'name' => 'Bootcamp', 'description' => 'Full-body conditioning', 'start_time' => '10:00:00', 'end_time' => '11:00:00', 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 3, 'name' => 'Boxing', 'description' => 'Boxing and cardio drills', 'start_time' => '20:00:00', 'end_time' => '21:00:00', 'created_at' => now(), 'updated_at' => now()],
 
-    // Business 3
-    ['business_id' => 3, 'created_by' => 1, 'name' => 'Monthly', 'duration' => 'monthly', 'amount' => 100, 'enabled' => 1, 'notes' => '1-month package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 3, 'created_by' => 1, 'name' => 'Quarterly', 'duration' => 'quarterly', 'amount' => 250, 'enabled' => 1, 'notes' => '3-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 3, 'created_by' => 1, 'name' => 'Half-Yearly', 'duration' => 'half-yearly', 'amount' => 450, 'enabled' => 1, 'notes' => '6-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 3, 'created_by' => 1, 'name' => 'Yearly', 'duration' => 'yearly', 'amount' => 800, 'enabled' => 1, 'notes' => '12-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 3, 'created_by' => 1, 'name' => 'Lifetime', 'duration' => 'lifetime', 'amount' => 5000, 'enabled' => 1, 'notes' => 'Lifetime package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                // Business 4
+                ['business_id' => 4, 'name' => 'Aerobics', 'description' => 'Fun and energetic cardio workout', 'start_time' => '07:30:00', 'end_time' => '08:30:00', 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 4, 'name' => 'Power Yoga', 'description' => 'Intense yoga flow for strength', 'start_time' => '17:00:00', 'end_time' => '18:00:00', 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 4, 'name' => 'MMA Training', 'description' => 'Mixed martial arts techniques', 'start_time' => '19:30:00', 'end_time' => '20:30:00', 'created_at' => now(), 'updated_at' => now()],
+            ];
 
-    // Business 4
-    ['business_id' => 4, 'created_by' => 1, 'name' => 'Monthly', 'duration' => 'monthly', 'amount' => 100, 'enabled' => 1, 'notes' => '1-month package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 4, 'created_by' => 1, 'name' => 'Quarterly', 'duration' => 'quarterly', 'amount' => 250, 'enabled' => 1, 'notes' => '3-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 4, 'created_by' => 1, 'name' => 'Half-Yearly', 'duration' => 'half-yearly', 'amount' => 450, 'enabled' => 1, 'notes' => '6-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 4, 'created_by' => 1, 'name' => 'Yearly', 'duration' => 'yearly', 'amount' => 800, 'enabled' => 1, 'notes' => '12-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-    ['business_id' => 4, 'created_by' => 1, 'name' => 'Lifetime', 'duration' => 'lifetime', 'amount' => 5000, 'enabled' => 1, 'notes' => 'Lifetime package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
-];
+            // Insert into database
+            DB::table('gym_classes')->insert($gym_classes);
+        }
 
-// Insert into database
-    DB::table('gym_packages')->insert($packages);
+        if (\Illuminate\Support\Facades\Schema::hasTable('gym_packages')) {
+            $gym_packages = [
+                // Business 1
+                ['business_id' => 1, 'created_by' => 1, 'name' => 'Monthly', 'duration' => 'monthly', 'amount' => 100, 'enabled' => 1, 'notes' => '1-month package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 1, 'created_by' => 1, 'name' => 'Quarterly', 'duration' => 'quarterly', 'amount' => 250, 'enabled' => 1, 'notes' => '3-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 1, 'created_by' => 1, 'name' => 'Half-Yearly', 'duration' => 'half-yearly', 'amount' => 450, 'enabled' => 1, 'notes' => '6-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 1, 'created_by' => 1, 'name' => 'Yearly', 'duration' => 'yearly', 'amount' => 800, 'enabled' => 1, 'notes' => '12-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 1, 'created_by' => 1, 'name' => 'Lifetime', 'duration' => 'lifetime', 'amount' => 5000, 'enabled' => 1, 'notes' => 'Lifetime package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+
+                // Business 2
+                ['business_id' => 2, 'created_by' => 1, 'name' => 'Monthly', 'duration' => 'monthly', 'amount' => 100, 'enabled' => 1, 'notes' => '1-month package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 2, 'created_by' => 1, 'name' => 'Quarterly', 'duration' => 'quarterly', 'amount' => 250, 'enabled' => 1, 'notes' => '3-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 2, 'created_by' => 1, 'name' => 'Half-Yearly', 'duration' => 'half-yearly', 'amount' => 450, 'enabled' => 1, 'notes' => '6-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 2, 'created_by' => 1, 'name' => 'Yearly', 'duration' => 'yearly', 'amount' => 800, 'enabled' => 1, 'notes' => '12-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 2, 'created_by' => 1, 'name' => 'Lifetime', 'duration' => 'lifetime', 'amount' => 5000, 'enabled' => 1, 'notes' => 'Lifetime package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+
+                // Business 3
+                ['business_id' => 3, 'created_by' => 1, 'name' => 'Monthly', 'duration' => 'monthly', 'amount' => 100, 'enabled' => 1, 'notes' => '1-month package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 3, 'created_by' => 1, 'name' => 'Quarterly', 'duration' => 'quarterly', 'amount' => 250, 'enabled' => 1, 'notes' => '3-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 3, 'created_by' => 1, 'name' => 'Half-Yearly', 'duration' => 'half-yearly', 'amount' => 450, 'enabled' => 1, 'notes' => '6-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 3, 'created_by' => 1, 'name' => 'Yearly', 'duration' => 'yearly', 'amount' => 800, 'enabled' => 1, 'notes' => '12-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 3, 'created_by' => 1, 'name' => 'Lifetime', 'duration' => 'lifetime', 'amount' => 5000, 'enabled' => 1, 'notes' => 'Lifetime package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+
+                // Business 4
+                ['business_id' => 4, 'created_by' => 1, 'name' => 'Monthly', 'duration' => 'monthly', 'amount' => 100, 'enabled' => 1, 'notes' => '1-month package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 4, 'created_by' => 1, 'name' => 'Quarterly', 'duration' => 'quarterly', 'amount' => 250, 'enabled' => 1, 'notes' => '3-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 4, 'created_by' => 1, 'name' => 'Half-Yearly', 'duration' => 'half-yearly', 'amount' => 450, 'enabled' => 1, 'notes' => '6-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 4, 'created_by' => 1, 'name' => 'Yearly', 'duration' => 'yearly', 'amount' => 800, 'enabled' => 1, 'notes' => '12-months package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+                ['business_id' => 4, 'created_by' => 1, 'name' => 'Lifetime', 'duration' => 'lifetime', 'amount' => 5000, 'enabled' => 1, 'notes' => 'Lifetime package', 'classes' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
+            ];
+
+            // Insert into database
+            DB::table('gym_packages')->insert($gym_packages);
+        }
 
     $locations = DB::table('business_locations')->get();
 
-    foreach ($locations as $location) {
-        if (!$location->zatca_details) {
-            $zatca_details = [
-                'portal_mode' => 'developer-portal',
-                'otp' => '111222',
-                'email' => 'email@gmail.com',
-                'common_name' => 'TSTCO',
-                'country_code' => 'SA',
-                'organization_unit_name' => 'TSTCO-SA',
-                'organization_name' => 'TSTCO-SA',
-                'egs_serial_number' => '1-SDSA|2-FGDS|3-SDFG',
-                'vat_number' => '300000000000003',
-                'vat_name' => 'TSTCO VAT',
-                'invoice_type' => '1100',
-                'registered_address' => 'RMRE1234',
-                'business_category' => 'Transportations',
-                'crn' => 'CRN123456',
-                'street_name' => 'Main Street',
-                'building_number' => '123',
-                'plot_identification' => 'Plot567',
-                'sub_division_name' => 'Zone A',
-                'city_name' => 'Riyadh',
-                'postal_number' => '11564',
-                'country_name' => 'Saudi Arabia',
-            ];
-            DB::table('business_locations')
-                    ->where('id', $location->id)
-                    ->update(['zatca_details' => json_encode($zatca_details), 'zatca_response' => '{"success":true,"message":"ISSUED","data":{"complianceCertificate":"TUlJQjZUQ0NBWStnQXdJQkFnSUdBWldvbnlUcE1Bb0dDQ3FHU000OUJBTUNNQlV4RXpBUkJnTlZCQU1NQ21WSmJuWnZhV05wYm1jd0hoY05NalV3TXpFNE1Ea3pPVEV4V2hjTk16QXdNekUzTWpFd01EQXdXakJETVE0d0RBWURWUVFEREFWVVUxUkRUekVSTUE4R0ExVUVDd3dJVkZOVVEwOHRVMEV4RVRBUEJnTlZCQW9NQ0ZSVFZFTlBMVk5CTVFzd0NRWURWUVFHRXdKVFFUQldNQkFHQnlxR1NNNDlBZ0VHQlN1QkJBQUtBMElBQkNoQ3VxVkFSZmhicnR3azlFbFRNWkVzMGpsbXdQQmFaSVZYY1pCVVNvUW41WitlU1JRdWVteTliVkp5UndpOXRzcll6OXhMbW5LdWRVaWJwbGlTb2ZHamdaOHdnWnd3REFZRFZSMFRBUUgvQkFJd0FEQ0Jpd1lEVlIwUkJJR0RNSUdBcEg0d2ZERWRNQnNHQTFVRUJBd1VNUzFUUkZOQmZESXRSa2RFVTN3ekxWTkVSa2N4SHpBZEJnb0praWFKay9Jc1pBRUJEQTh6TURBd01EQXdNREF3TURBd01ETXhEVEFMQmdOVkJBd01CREV4TURBeEVUQVBCZ05WQkJvTUNGSk5Va1V4TWpNME1SZ3dGZ1lEVlFRUERBOVVjbUZ1YzNCdmNuUmhkR2x2Ym5Nd0NnWUlLb1pJemowRUF3SURTQUF3UlFJaEFKMmZTOUJSV2N1cVdlbUhlRzA2MjVHUUt4L3hFTE1vd2RwcWV2bXlZMUV2QWlBVXh1MkNQUVhSaEVseUxYa0ViWFQrOUE3bDZ5L09NTFM0cGY2RkRWQmJJUT09","complianceSecret":"k7mFPUhn8BpsDt0UM2zwT83LeQm5ENIluKjhLecPBAE=","complianceRequestID":"1234567890123","productionCertificate":"TUlJRDNqQ0NBNFNnQXdJQkFnSVRFUUFBT0FQRjkwQWpzL3hjWHdBQkFBQTRBekFLQmdncWhrak9QUVFEQWpCaU1SVXdFd1lLQ1pJbWlaUHlMR1FCR1JZRmJHOWpZV3d4RXpBUkJnb0praWFKay9Jc1pBRVpGZ05uYjNZeEZ6QVZCZ29Ka2lhSmsvSXNaQUVaRmdkbGVIUm5ZWHAwTVJzd0dRWURWUVFERXhKUVVscEZTVTVXVDBsRFJWTkRRVFF0UTBFd0hoY05NalF3TVRFeE1Ea3hPVE13V2hjTk1qa3dNVEE1TURreE9UTXdXakIxTVFzd0NRWURWUVFHRXdKVFFURW1NQ1FHQTFVRUNoTWRUV0Y0YVcxMWJTQlRjR1ZsWkNCVVpXTm9JRk4xY0hCc2VTQk1WRVF4RmpBVUJnTlZCQXNURFZKcGVXRmthQ0JDY21GdVkyZ3hKakFrQmdOVkJBTVRIVlJUVkMwNE9EWTBNekV4TkRVdE16azVPVGs1T1RrNU9UQXdNREF6TUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVvV0NLYTBTYTlGSUVyVE92MHVBa0MxVklLWHhVOW5QcHgydmxmNHloTWVqeThjMDJYSmJsRHE3dFB5ZG84bXEwYWhPTW1Obzhnd25pN1h0MUtUOVVlS09DQWdjd2dnSURNSUd0QmdOVkhSRUVnYVV3Z2FLa2daOHdnWnd4T3pBNUJnTlZCQVFNTWpFdFZGTlVmREl0VkZOVWZETXRaV1F5TW1ZeFpEZ3RaVFpoTWkweE1URTRMVGxpTlRndFpEbGhPR1l4TVdVME5EVm1NUjh3SFFZS0NaSW1pWlB5TEdRQkFRd1BNems1T1RrNU9UazVPVEF3TURBek1RMHdDd1lEVlFRTURBUXhNVEF3TVJFd0R3WURWUVFhREFoU1VsSkVNamt5T1RFYU1CZ0dBMVVFRHd3UlUzVndjR3g1SUdGamRHbDJhWFJwWlhNd0hRWURWUjBPQkJZRUZFWCtZdm1tdG5Zb0RmOUJHYktvN29jVEtZSzFNQjhHQTFVZEl3UVlNQmFBRkp2S3FxTHRtcXdza0lGelZ2cFAyUHhUKzlObk1Ic0dDQ3NHQVFVRkJ3RUJCRzh3YlRCckJnZ3JCZ0VGQlFjd0FvWmZhSFIwY0RvdkwyRnBZVFF1ZW1GMFkyRXVaMjkyTG5OaEwwTmxjblJGYm5KdmJHd3ZVRkphUlVsdWRtOXBZMlZUUTBFMExtVjRkR2RoZW5RdVoyOTJMbXh2WTJGc1gxQlNXa1ZKVGxaUFNVTkZVME5CTkMxRFFTZ3hLUzVqY25Rd0RnWURWUjBQQVFIL0JBUURBZ2VBTUR3R0NTc0dBUVFCZ2pjVkJ3UXZNQzBHSlNzR0FRUUJnamNWQ0lHR3FCMkUwUHNTaHUyZEpJZk8reG5Ud0ZWbWgvcWxaWVhaaEQ0Q0FXUUNBUkl3SFFZRFZSMGxCQll3RkFZSUt3WUJCUVVIQXdNR0NDc0dBUVVGQndNQ01DY0dDU3NHQVFRQmdqY1ZDZ1FhTUJnd0NnWUlLd1lCQlFVSEF3TXdDZ1lJS3dZQkJRVUhBd0l3Q2dZSUtvWkl6ajBFQXdJRFNBQXdSUUloQUxFL2ljaG1uV1hDVUtVYmNhM3ljaThvcXdhTHZGZEhWalFydmVJOXVxQWJBaUE5aEM0TThqZ01CQURQU3ptZDJ1aVBKQTZnS1IzTEUwM1U3NWVxYkMvclhBPT0=","productionCertificateSecret":"CkYsEXfV8c1gFHAtFWoZv73pGMvh\/Qyo4LzKM2h\/8Hg=","productionCertificateRequestID":"30368","privateKey":"LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnMGlkcmFmaDNPcHFyd012NXhhaW4KWFAwRldvamJWRUw0aFFCbG1hWnRuZXloUkFOQ0FBUW9RcnFsUUVYNFc2N2NKUFJKVXpHUkxOSTVac0R3V21TRgpWM0dRVkVxRUorV2Zua2tVTG5wc3ZXMVNja2NJdmJiSzJNL2NTNXB5cm5WSW02WllrcUh4Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K","publicKey":"LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVLRUs2cFVCRitGdXUzQ1QwU1ZNeGtTelNPV2JBOEZwawpoVmR4a0ZSS2hDZmxuNTVKRkM1NmJMMXRVbkpIQ0wyMnl0alAzRXVhY3E1MVNKdW1XSktoOFE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K","csrKey":"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQnhqQ0NBV3NDQVFBd1F6RU9NQXdHQTFVRUF3d0ZWRk5VUTA4eEVUQVBCZ05WQkFzTUNGUlRWRU5QTFZOQgpNUkV3RHdZRFZRUUtEQWhVVTFSRFR5MVRRVEVMTUFrR0ExVUVCaE1DVTBFd1ZqQVFCZ2NxaGtqT1BRSUJCZ1VyCmdRUUFDZ05DQUFRb1FycWxRRVg0VzY3Y0pQUkpVekdSTE5JNVpzRHdXbVNGVjNHUVZFcUVKK1dmbmtrVUxucHMKdlcxU2NrY0l2YmJLMk0vY1M1cHlyblZJbTZaWWtxSHhvSUhJTUlIRkJna3Foa2lHOXcwQkNRNHhnYmN3Z2JRdwpKQVlKS3dZQkJBR0NOeFFDQkJjVEZWUlRWRnBCVkVOQkxVTnZaR1V0VTJsbmJtbHVaekNCaXdZRFZSMFJCSUdECk1JR0FwSDR3ZkRFZE1Cc0dBMVVFQkF3VU1TMVRSRk5CZkRJdFJrZEVVM3d6TFZORVJrY3hIekFkQmdvSmtpYUoKay9Jc1pBRUJEQTh6TURBd01EQXdNREF3TURBd01ETXhEVEFMQmdOVkJBd01CREV4TURBeEVUQVBCZ05WQkJvTQpDRkpOVWtVeE1qTTBNUmd3RmdZRFZRUVBEQTlVY21GdWMzQnZjblJoZEdsdmJuTXdDZ1lJS29aSXpqMEVBd0lEClNRQXdSZ0loQVAwMks4L1VkcjF2Z2xQVGx0SHhxVEFCVWxiUVVZekxWQjZaYXlzdDU4WUFBaUVBblZMZWt5R3QKeDhhaVQzZ2Q2T3A5NmsxMkxSb1ZuSVFndVlSQS9md2FOdW89Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=","configData":"DQogICAgICAgICAgICBvaWRfc2VjdGlvbiA9IE9JRHMNCiAgICAgICAgICAgIFsgT0lEcyBdDQogICAgICAgICAgICBjZXJ0aWZpY2F0ZVRlbXBsYXRlTmFtZT0gMS4zLjYuMS40LjEuMzExLjIwLjINCg0KICAgICAgICAgICAgWyByZXEgXQ0KICAgICAgICAgICAgZGVmYXVsdF9iaXRzIAk9IDIwNDgNCiAgICAgICAgICAgIGVtYWlsQWRkcmVzcyAJPSBlbWFpbEBnbWFpbC5jb20NCiAgICAgICAgICAgIHJlcV9leHRlbnNpb25zCT0gdjNfcmVxDQogICAgICAgICAgICB4NTA5X2V4dGVuc2lvbnMgCT0gdjNfY2ENCiAgICAgICAgICAgIHByb21wdCA9IG5vDQogICAgICAgICAgICBkZWZhdWx0X21kID0gc2hhMjU2DQogICAgICAgICAgICByZXFfZXh0ZW5zaW9ucyA9IHJlcV9leHQNCiAgICAgICAgICAgIGRpc3Rpbmd1aXNoZWRfbmFtZSA9IGRuDQoNCiAgICAgICAgICAgIFsgdjNfcmVxIF0NCiAgICAgICAgICAgIGJhc2ljQ29uc3RyYWludHMgPSBDQTpGQUxTRQ0KICAgICAgICAgICAga2V5VXNhZ2UgPSBkaWdpdGFsU2lnbmF0dXJlLCBub25SZXB1ZGlhdGlvbiwga2V5RW5jaXBoZXJtZW50DQoNCiAgICAgICAgICAgIFtyZXFfZXh0XQ0KICAgICAgICAgICAgY2VydGlmaWNhdGVUZW1wbGF0ZU5hbWUgPSBBU04xOlBSSU5UQUJMRVNUUklORzpUU1RaQVRDQS1Db2RlLVNpZ25pbmcNCiAgICAgICAgICAgIHN1YmplY3RBbHROYW1lID0gZGlyTmFtZTphbHRfbmFtZXMNCg0KICAgICAgICAgICAgWyB2M19jYSBdDQoNCiAgICAgICAgICAgICMgRXh0ZW5zaW9ucyBmb3IgYSB0eXBpY2FsIENBDQoNCiAgICAgICAgICAgICMgUEtJWCByZWNvbW1lbmRhdGlvbi4NCg0KICAgICAgICAgICAgc3ViamVjdEtleUlkZW50aWZpZXIgPSBoYXNoDQoNCiAgICAgICAgICAgIGF1dGhvcml0eUtleUlkZW50aWZpZXIgPSBrZXlpZDphbHdheXMsaXNzdWVyOmFsd2F5cw0KDQogICAgICAgICAgICBbIGRuIF0NCiAgICAgICAgICAgIENOID0gVFNUQ08gIAkJCQkgICAgICAgICAgICAgICAgICAgICMgQ29tbW9uIE5hbWUNCiAgICAgICAgICAgIEMgPSBTQQkJCQkJCQkgICAgICAgICAgICAjIENvdW50cnkgQ29kZSBlLmcgU0ENCiAgICAgICAgICAgIE9VID0gVFNUQ08tU0EJCQkJCQkJIyBPcmdhbml6YXRpb24gVW5pdCBOYW1lDQogICAgICAgICAgICBPID0gVFNUQ08tU0EJCQkJCQkJICAgICAgICAjIE9yZ2FuaXphdGlvbiBOYW1lDQoNCiAgICAgICAgICAgIFthbHRfbmFtZXNdDQogICAgICAgICAgICBTTiA9IDEtU0RTQXwyLUZHRFN8My1TREZHCQkJCSAgICAgICAgICAgICAgICAgICAgIyBFR1MgU2VyaWFsIE51bWJlciAxLUFCQ3wyLVBRUnwzLVhZWg0KICAgICAgICAgICAgVUlEID0gMzAwMDAwMDAwMDAwMDAzCQkJCQkJICAgICAgICAgICAgICAgICMgT3JnYW5pemF0aW9uIElkZW50aWZpZXIgKFZBVCBOdW1iZXIpDQogICAgICAgICAgICB0aXRsZSA9IDExMDAJCQkJCQkJCSAgICAjIEludm9pY2UgVHlwZQ0KICAgICAgICAgICAgcmVnaXN0ZXJlZEFkZHJlc3MgPSBSTVJFMTIzNCAgCSAJCQkjIEFkZHJlc3MNCiAgICAgICAgICAgIGJ1c2luZXNzQ2F0ZWdvcnkgPSBUcmFuc3BvcnRhdGlvbnMJCQkJCSMgQnVzaW5lc3MgQ2F0ZWdvcnkNCiAgICAgICAg"}}']);
+    if (\Illuminate\Support\Facades\Schema::hasColumn('business_locations', 'zatca_details')) {
+        foreach ($locations as $location) {
+            if (!$location->zatca_details) {
+                $zatca_details = [
+                    'portal_mode' => 'developer-portal',
+                    'otp' => '111222',
+                    'email' => 'email@gmail.com',
+                    'common_name' => 'TSTCO',
+                    'country_code' => 'SA',
+                    'organization_unit_name' => 'TSTCO-SA',
+                    'organization_name' => 'TSTCO-SA',
+                    'egs_serial_number' => '1-SDSA|2-FGDS|3-SDFG',
+                    'vat_number' => '300000000000003',
+                    'vat_name' => 'TSTCO VAT',
+                    'invoice_type' => '1100',
+                    'registered_address' => 'RMRE1234',
+                    'business_category' => 'Transportations',
+                    'crn' => 'CRN123456',
+                    'street_name' => 'Main Street',
+                    'building_number' => '123',
+                    'plot_identification' => 'Plot567',
+                    'sub_division_name' => 'Zone A',
+                    'city_name' => 'Riyadh',
+                    'postal_number' => '11564',
+                    'country_name' => 'Saudi Arabia',
+                ];
+                DB::table('business_locations')
+                        ->where('id', $location->id)
+                        ->update(['zatca_details' => json_encode($zatca_details), 'zatca_response' => '{"success":true,"message":"ISSUED","data":{"complianceCertificate":"TUlJQjZUQ0NBWStnQXdJQkFnSUdBWldvbnlUcE1Bb0dDQ3FHU000OUJBTUNNQlV4RXpBUkJnTlZCQU1NQ21WSmJuWnZhV05wYm1jd0hoY05NalV3TXpFNE1Ea3pPVEV4V2hjTk16QXdNekUzTWpFd01EQXdXakJETVE0d0RBWURWUVFEREFWVVUxUkRUekVSTUE4R0ExVUVDd3dJVkZOVVEwOHRVMEV4RVRBUEJnTlZCQW9NQ0ZSVFZFTlBMVk5CTVFzd0NRWURWUVFHRXdKVFFUQldNQkFHQnlxR1NNNDlBZ0VHQlN1QkJBQUtBMElBQkNoQ3VxVkFSZmhicnR3azlFbFRNWkVzMGpsbXdQQmFaSVZYY1pCVVNvUW41WitlU1JRdWVteTliVkp5UndpOXRzcll6OXhMbW5LdWRVaWJwbGlTb2ZHamdaOHdnWnd3REFZRFZSMFRBUUgvQkFJd0FEQ0Jpd1lEVlIwUkJJR0RNSUdBcEg0d2ZERWRNQnNHQTFVRUJBd1VNUzFUUkZOQmZESXRSa2RFVTN3ekxWTkVSa2N4SHpBZEJnb0praWFKay9Jc1pBRUJEQTh6TURBd01EQXdNREF3TURBd01ETXhEVEFMQmdOVkJBd01CREV4TURBeEVUQVBCZ05WQkJvTUNGSk5Va1V4TWpNME1SZ3dGZ1lEVlFRUERBOVVjbUZ1YzNCdmNuUmhkR2x2Ym5Nd0NnWUlLb1pJemowRUF3SURTQUF3UlFJaEFKMmZTOUJSV2N1cVdlbUhlRzA2MjVHUUt4L3hFTE1vd2RwcWV2bXlZMUV2QWlBVXh1MkNQUVhSaEVseUxYa0ViWFQrOUE3bDZ5L09NTFM0cGY2RkRWQmJJUT09","complianceSecret":"k7mFPUhn8BpsDt0UM2zwT83LeQm5ENIluKjhLecPBAE=","complianceRequestID":"1234567890123","productionCertificate":"TUlJRDNqQ0NBNFNnQXdJQkFnSVRFUUFBT0FQRjkwQWpzL3hjWHdBQkFBQTRBekFLQmdncWhrak9QUVFEQWpCaU1SVXdFd1lLQ1pJbWlaUHlMR1FCR1JZRmJHOWpZV3d4RXpBUkJnb0praWFKay9Jc1pBRVpGZ05uYjNZeEZ6QVZCZ29Ka2lhSmsvSXNaQUVaRmdkbGVIUm5ZWHAwTVJzd0dRWURWUVFEREFWVVUxUkRUekVSTUE4R0ExVUVDd3dJVkZOVVEwOHRVMEV4RVRBUEJnTlZCQW9NQ0ZSVFZFTlBMVk5CTVFzd0NRWURWUVFHRXdKVFFURW1NQ1FHQTFVRUNoTWRUV0Y0YVcxMWJTQlRjR1ZsWkNCVVpXTm9JRk4xY0hCc2VTQk1WRVF4RmpBVUJnTlZCQXNURFZKcGVXRmthQ0JDY21GdVkyZ3hKakFrQmdOVkJBTVRIVlJUVkMwNE9EWTBNekV4TkRVdE16azVPVGs1T1RrNU9UQXdNREF6TUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVvV0NLYTBTYTlGSUVyVE92MHVBa0MxVklLWHhVOW5QcHgydmxmNHloTWVqeThjMDJYSmJsRHE3dFB5ZG84bXEwYWhPTW1Obzhnd25pN1h0MUtUOVVlS09DQWdjd2dnSURNSUd0QmdOVkhSRUVnYVV3Z2FLa2daOHdnWnd4T3pBNUJnTlZCQVFNTWpFdFZGTlVmREl0VkZOVWZETXRaV1F5TW1ZeFpEZ3RaVFpoTWkweE1URTRMVGxpTlRndFpEbGhPR1l4TVdVME5EVm1NUjh3SFFZS0NaSW1pWlB5TEdRQkFRd1BNems1T1RrNU9UazVPVEF3TURBek1RMHdDd1lEVlFRTURBUXhNVEF3TVRFd0R3WURWUVFhREFoU1VsSkVNamt5T1RFYU1CZ0dBMVVFRHd3UlUzVndjR3g1SUdGamRHbDJhWFJwWlhNd0hRWURWUjBPQkJZRUZFWCtZdm1tdG5Zb0RmOUJHYktvN29jVEtZSzFNQjhHQTFVZEl3UVlNQmFBRkp2S3FxTHRtcXdza0lGelZ2cFAyUHhUKzlObk1Ic0dDQ3NHQVFVRkJ3RUJCRzh3YlRCckJnZ3JCZ0VGQlFjd0FvWmZhSFIwY0RvdkwyRnBZVFF1ZW1GMFkyRXVaMjkyTG5OaEwwTmxjblJGYm5KdmJHd3ZVRkphUlVsdWRtOXBZMlZUUTBFMExtVjRkR2RoZW5RdVoyOTJMbXh2WTJGc1gxQlNXa1ZKVGxaUFNVTkZVME5CTkMxRFFTZ3hLUzVqY25Rd0RnWURWUjBQQVFIL0JBUURBZ2VBTUR3R0NTc0dBUVFCZ2pjVkJ3UXZNQzBHSlNzR0FRUUJnamNWQ0lHR3FCMkUwUHNTaHUyZEpJZk8reG5Ud0ZWbWgvcWxaWVhaaEQ0Q0FXUUNBUkl3SFFZRFZSMGxCQll3RkFZSUt3WUJCUVVIQXdNR0NDc0dBUVVGQndNQ01DY0dDU3NHQVFRQmdqY1ZDZ1FhTUJnd0NnWUlLd1lCQlFVSEF3TXdDZ1lJS3dZQkJRVUhBd0l3Q2dZSUtvWkl6ajBFQXdJRFNBQXdSUUloQUxFL2ljaG1uV1hDVUtVYmNhM3ljaThvcXdhTHZGZEhWalFydmVJOXVxQWJBaUE5aEM0TThqZ01CQURQU3ptZDJ1aVBKQTZnS1IzTEUwM1U3NWVxYkMvclhBPT0=","productionCertificateSecret":"CkYsEXfV8c1gFHAtFWoZv73pGMvh\/Qyo4LzKM2h\/8Hg=","productionCertificateRequestID":"30368","privateKey":"LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnMGlkcmFmaDNPcHFyd012NXhhaW4KWFAwRldvamJWRUw0aFFCbG1hWnRuZXloUkFOQ0FBUW9RcnFsUUVYNFc2N2NKUFJKVXpHUkxOSTVac0R3V21TRgpWM0dRVkVxRUorV2Zua2tVTG5wc3ZXMVNja2NJdmJiSzJNL2NTNXB5cm5WSW02WllrcUh4Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K","publicKey":"LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVLRUs2cFVCRitGdXUzQ1QwU1ZNeGtTelNPV2JBOEZwawpoVmR4a0ZSS2hDZmxuNTVKRkM1NmJMMXRVbkpIQ0wyMnl0alAzRXVhY3E1MVNKdW1XSktoOFE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K","csrKey":"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQnhqQ0NBV3NDQVFBd1F6RU9NQXdHQTFVRUF3d0ZWRk5VUTA4eEVUQVBCZ05WQkFzTUNGUlRWRU5QTFZOQgpNUkV3RHdZRFZRUUtEQWhVVTFSRFR5MVRRVEVMTUFrR0ExVUVCaE1DVTBFd1ZqQVFCZ2NxaGtqT1BRSUJCZ1VyCmdRUUFDZ05DQUFRb1FycWxRRVg0VzY3Y0pQUkpVekdSTE5JNVpzRHdXbVNGVjNHUVZFcUVKK1dmbmtrVUxucHMKdlcxU2NrY0l2YmJLMk0vY1M1cHlyblZJbTZaWWtxSHhvSUhJTUlIRkJna3Foa2lHOXcwQkNRNHhnYmN3Z2JRdwpKQVlKS3dZQkJBR0NOeFFDQkJjVEZWUlRWRnBCVkVOQkxVTnZaR1V0VTJsbmJtbHVaekNCaXdZRFZSMFJCSUdECk1JR0FwSDR3ZkRFZE1Cc0dBMVVFQkF3VU1TMVRSRk5CZkRJdFJrZEVVM3d6TFZORVJrY3hIekFkQmdvSmtpYUoKay9Jc1pBRUJEQTh6TURBd01EQXdNREF3TURBd01ETXhEVEFMQmdOVkJBd01CREV4TURBeEVUQVBCZ05WQkJvTUNGSk5Va1V4TWpNME1SZ3dGZ1lEVlFRUERBOVVjbUZ1YzNCdmNuUmhkR2x2Ym5Nd0NnWUlLb1pJemowRUF3SURTQUF3UlFJaEFKMmZTOUJSV2N1cVdlbUhlRzA2MjVHUUt4L3hFTE1vd2RwcWV2bXlZMUV2QWlBVXh1MkNQUVhSaEVseUxYa0ViWFQrOUE3bDZ5L09NTFM0cGY2RkRWQmJJUT09","complianceSecret":"k7mFPUhn8BpsDt0UM2zwT83LeQm5ENIluKjhLecPBAE=","complianceRequestID":"1234567890123","productionCertificate":"TUlJRDNqQ0NBNFNnQXdJQkFnSVRFUUFBT0FQRjkwQWpzL3hjWHdBQkFBQTRBekFLQmdncWhrak9QUVFEQWpCaU1SVXdFd1lLQ1pJbWlaUHlMR1FCR1JZRmJHOWpZV3d4RXpBUkJnb0praWFKay9Jc1pBRVpGZ05uYjNZeEZ6QVZCZ29Ka2lhSmsvSXNaQUVaRmdkbGVIUm5ZWHAwTVJzd0dRWURWUVFEREFWVVUxUkRUekVSTUE4R0ExVUVDd3dJVkZOVVEwOHRVMEV4RVRBUEJnTlZCQW9NQ0ZSVFZFTlBMVk5CTVFzd0NRWURWUVFHRXdKVFFURW1NQ1FHQTFVRUNoTWRUV0Y0YVcxMWJTQlRjR1ZsWkNCVVpXTm9JRk4xY0hCc2VTQk1WRVF4RmpBVUJnTlZCQXNURFZKcGVXRmthQ0JDY21GdVkyZ3hKakFrQmdOVkJBTVRIVlJUVkMwNE9EWTBNekV4TkRVdE16azVPVGs1T1RrNU9UQXdNREF6TUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVvV0NLYTBTYTlGSUVyVE92MHVBa0MxVklLWHhVOW5QcHgydmxmNHloTWVqeThjMDJYSmJsRHE3dFB5ZG84bXEwYWhPTW1Obzhnd25pN1h0MUtUOVVlS09DQWdjd2dnSURNSUd0QmdOVkhSRUVnYVV3Z2FLa2daOHdnWnd4T3pBNUJnTlZCQVFNTWpFdFZGTlVmREl0VkZOVWZETXRaV1F5TW1ZeFpEZ3RaVFpoTWkweE1URTRMVGxpTlRndFpEbGhPR1l4TVdVME5EVm1NUjh3SFFZS0NaSW1pWlB5TEdRQkFRd1BNems1T1RrNU9UazVPVEF3TURBek1RMHdDd1lEVlFRTURBUXhNVEF3TVRFd0R3WURWUVFhREFoU1VsSkVNamt5T1RFYU1CZ0dBMVVFRHd3UlUzVndjR3g1SUdGamRHbDJhWFJwWlhNd0hRWURWUjBPQkJZRUZFWCtZdm1tdG5Zb0RmOUJHYktvN29jVEtZSzFNQjhHQTFVZEl3UVlNQmFBRkp2S3FxTHRtcXdza0lGelZ2cFAyUHhUKzlObk1Ic0dDQ3NHQVFVRkJ3RUJCRzh3YlRCckJnZ3JCZ0VGQlFjd0FvWmZhSFIwY0RvdkwyRnBZVFF1ZW1GMFkyRXVaMjkyTG5OaEwwTmxjblJGYm5KdmJHd3ZVRkphUlVsdWRtOXBZMlZUUTBFMExtVjRkR2RoZW5RdVoyOTJMbXh2WTJGc1gxQlNXa1ZKVGxaUFNVTkZVME5CTkMxRFFTZ3hLUzVqY25Rd0RnWURWUjBQQVFIL0JBUURBZ2VBTUR3R0NTc0dBUVFCZ2pjVkJ3UXZNQzBHSlNzR0FRUUJnamNWQ0lHR3FCMkUwUHNTaHUyZEpJZk8reG5Ud0ZWbWgvcWxaWVhaaEQ0Q0FXUUNBUkl3SFFZRFZSMGxCQll3RkFZSUt3WUJCUVVIQXdNR0NDc0dBUVVGQndNQ01DY0dDU3NHQVFRQmdqY1ZDZ1FhTUJnd0NnWUlLd1lCQlFVSEF3TXdDZ1lJS3dZQkJRVUhBd0l3Q2dZSUtvWkl6ajBFQXdJRFNBQXdSUUloQUxFL2ljaG1uV1hDVUtVYmNhM3ljaThvcXdhTHZGZEhWalFydmVJOXVxQWJBaUE5aEM0TThqZ01CQURQU3ptZDJ1aVBKQTZnS1IzTEUwM1U3NWVxYkMvclhBPT0=","productionCertificateSecret":"CkYsEXfV8c1gFHAtFWoZv73pGMvh\/Qyo4LzKM2h\/8Hg=","productionCertificateRequestID":"30368","privateKey":"LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnMGlkcmFmaDNPcHFyd012NXhhaW4KWFAwRldvamJWRUw0aFFCbG1hWnRuZXloUkFOQ0FBUW9RcnFsUUVYNFc2N2NKUFJKVXpHUkxOSTVac0R3V21TRgpWM0dRVkVxRUorV2Zua2tVTG5wc3ZXMVNja2NJdmJiSzJNL2NTNXB5cm5WSW02WllrcUh4Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K","publicKey":"LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVLRUs2cFVCRitGdXUzQ1QwU1ZNeGtTelNPV2JBOEZwawpoVmR4a0ZSS2hDZmxuNTVKRkM1NmJMMXRVbkpIQ0wyMnl0alAzRXVhY3E1MVNKdW1XSktoOFE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K","csrKey":"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQnhqQ0NBV3NDQVFBd1F6RU9NQXdHQTFVRUF3d0ZWRk5VUTA4eEVUQVBCZ05WQkFzTUNGUlRWRU5QTFZOQgpNUkV3RHdZRFZRUUtEQWhVVTFSRFR5MVRRVEVMTUFrR0ExVUVCaE1DVTBFd1ZqQVFCZ2NxaGtqT1BRSUJCZ1VyCmdRUUFDZ05DQUFRb1FycWxRRVg0VzY3Y0pQUkpVekdSTE5JNVpzRHdXbVNGVjNHUVZFcUVKK1dmbmtrVUxucHMKdlcxU2NrY0l2YmJLMk0vY1M1cHlyblZJbTZaWWtxSHhvSUhJTUlIRkJna3Foa2lHOXcwQkNRNHhnYmN3Z2JRdwpKQVlKS3dZQkJBR0NOeFFDQkJjVEZWUlRWRnBCVkVOQkxVTnZaR1V0VTJsbmJtbHVaekNCaXdZRFZSMFJCSUdECk1JR0FwSDR3ZkRFZE1Cc0dBMVVFQkF3VU1TMVRSRk5CZkRJdFJrZEVVM3d6TFZORVJrY3hIekFkQmdvSmtpYUoKay9Jc1pBRUJEQTh6TURBd01EQXdNREF3TURBd01ETXhEVEFMQmdOVkJBd01CREV4TURBeEVUQVBCZ05WQkJvTUNGSk5Va1V4TWpNME1SZ3dGZ1lEVlFRUERBOVVjbUZ1YzNCdmNuUmhkR2x2Ym5Nd0NnWUlLb1pJemowRUF3SURTQUF3UlFJaEFKMmZTOUJSV2N1cVdlbUhlRzA2MjVHUUt4L3hFTE1vd2RwcWV2bXlZMUV2QWlBVXh1MkNQUVhSaEVseUxYa0ViWFQrOUE3bDZ5L09NTFM0cGY2RkRWQmJJUT09","configData":"DQogICAgICAgICAgICBvaWRfc2VjdGlvbiA9IE9JRHMNCiAgICAgICAgICAgIFsgT0lEcyBdDQogICAgICAgICAgICBjZXJ0aWZpY2F0ZVRlbXBsYXRlTmFtZT0gMS4zLjYuMS40LjEuMzExLjIwLjINCg0KICAgICAgICAgICAgWyByZXEgXQ0KICAgICAgICAgICAgZGVmYXVsdF9iaXRzIAk9IDIwNDgNCiAgICAgICAgICAgIGVtYWlsQWRkcmVzcyAJPSBlbWFpbEBnbWFpbC5jb20NCiAgICAgICAgICAgIHJlcV9leHRlbnNpb25zCT0gdjNfcmVxDQogICAgICAgICAgICB4NTA5X2V4dGVuc2lvbnMgCT0gdjNfY2ENCiAgICAgICAgICAgIHByb21wdCA9IG5vDQogICAgICAgICAgICBkZWZhdWx0X21kID0gc2hhMjU2DQogICAgICAgICAgICByZXFfZXh0ZW5zaW9ucyA9IHJlcV9leHQNCiAgICAgICAgICAgIGRpc3Rpbmd1aXNoZWRfbmFtZSA9IGRuDQoNCiAgICAgICAgICAgIFsgdjNfcmVxIF0NCiAgICAgICAgICAgIGJhc2ljQ29uc3RyYWludHMgPSBDQTpGQUxTRQ0KICAgICAgICAgICAga2V5VXNhZ2UgPSBkaWdpdGFsU2lnbmF0dXJlLCBub25SZXB1ZGlhdGlvbiwga2V5RW5jaXBoZXJtZW50DQoNCiAgICAgICAgICAgIFtyZXFfZXh0_DQogICAgICAgICAgICBjZXJ0aWZpY2F0ZVRlbXBsYXRlTmFtZT0gQVNONj1QUklOVEFCTEVTVFJJTkc6VFNUVEFUQ0EtQ29kZS1TaWduaW5nDQogICAgICAgICAgICBzdWJqZWN0QWx0TmFtZSA9IGRpck5hbWU6YWx0X25hbWVzDQoNCiAgIC2ICAgICAgICAgWyB2M19jYSAgXQ0KDQogICAgICAgICAgICAjIEV4dGVuc2lvbnMgZm9yIGEgdHlwaWNhbCBDQQ0KDQogICAgIC2ICAgICAgICMgUEtJWCByZWNvbW1lbmRhdGlvbi4NCg0KICAgICAgICAgICAgc3ViamVjdEtleUlkZW50aWZpZXIgPSBoYXNoDQoNCiAgICAgICAgICAgIGF1dGhvcml0eUtleUlkZW50aWZpZXIgPSBrZXlpZDphbHdheXMsaXNzdWVyOmFsd2F5cw0KDQogICAgICAgICAgICBbIGRuIF0NCiAgICAgICAgICAgIENOID0gVFNUQ08gIAkJCQkgICAgICAgICAgICAgICAgICAgICMgQ29tbW9uIE5hbWUNCiAgICAgICAgICAgIEMgPSBTQQkJCQkJCQkgICAgICAgICAgICAjIENvdW50cnkgQ29kZSBlLmcgU0ENCiAgICAgICAgICAgIE9VID0gVFNUQ08tU0EJCQkJCQkJIyBPcmdhbml6YXRpb24gVW5pdCBOYW1lDQogICAgICAgICAgICBPID0gVFNUQ08tU0EJCQkJCQkJICAgICAgICAjIE9yZ2FuaXphdGlvbiBOYW1lDQoNCiAgICAgICAgICAgIFthbHRfbmFtZXNdDQogICAgICAgICAgICBTTiA9IDEtU0RTQXwyLUZHRFN8My1TREZHCQkJCSAgICAgICAgICAgICAgICAgICAgIyBFR1MgU2VyaWFsIE51bWJlciAxLUFCQ3wyLVBRUnwzLVhZWg0KICAgIC2ICAgICAgICAgVUlEID0gMzAwMDAwMDAwMDAwMDAzCQkJCQkJICAgICAgICAgICAgICAgICMgT3JnYW5pemF0aW9uIElkZW50aWZpZXIgKFZBVCBOdW1iZXIpDQogICAgICAgICAgICB0aXRsZSA9IDExMDAJCQkJCQkJCSAgICAjIEludm9pY2UgVHlwZQ0KICAgICAgICAgICAgcmVnaXN0ZXJlZEFkZHJlc3MgPSBSTVJFMTIzNCAgCSAJCQkjIEFkZHJlc3MNCiAgICAgICAgICAgIGJ1c2luZXNzQ2F0ZWdvcnkgPSBUcmFuc3BvcnRhdGlvbnMJCQkJCSMgQnVzaW5lc3MgQ2F0ZWdvcnkNCiAgICAgICAg"}}'
+                ]);
+            }
         }
     }
     

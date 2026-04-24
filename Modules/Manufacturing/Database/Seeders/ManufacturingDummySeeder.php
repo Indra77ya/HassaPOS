@@ -5,16 +5,30 @@ namespace Modules\Manufacturing\Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
+use Illuminate\Support\Facades\Schema;
 
 class ManufacturingDummySeeder extends Seeder
 {
     public function run()
     {
+        if (!Schema::hasTable('mfg_recipes')) {
+            return;
+        }
+
         $faker = Faker::create();
         $business_id = DB::table('business')->pluck('id')->first();
-        $variation_id = DB::table('variations')->join('products', 'products.id', '=', 'variations.product_id')->where('products.business_id', $business_id)->pluck('variations.id')->first();
 
-        if (!$business_id || !$variation_id) {
+        if (!$business_id) {
+            return;
+        }
+
+        $variation_id = DB::table('variations')
+            ->join('products', 'products.id', '=', 'variations.product_id')
+            ->where('products.business_id', $business_id)
+            ->pluck('variations.id')
+            ->first();
+
+        if (!$variation_id) {
             return;
         }
 
@@ -31,14 +45,16 @@ class ManufacturingDummySeeder extends Seeder
                 'updated_at' => now(),
             ]);
 
-            // Ingredients (assuming another variation exists or using the same for dummy purposes)
-            DB::table('mfg_recipe_ingredients')->insert([
-                'mfg_recipe_id' => $recipe_id,
-                'variation_id' => $variation_id,
-                'quantity' => $faker->randomFloat(2, 1, 10),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            // Ingredients
+            if (Schema::hasTable('mfg_recipe_ingredients')) {
+                DB::table('mfg_recipe_ingredients')->insert([
+                    'mfg_recipe_id' => $recipe_id,
+                    'variation_id' => $variation_id,
+                    'quantity' => $faker->randomFloat(2, 1, 10),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
         }
     }
 }

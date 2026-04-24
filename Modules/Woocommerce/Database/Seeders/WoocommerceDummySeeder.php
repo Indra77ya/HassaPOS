@@ -5,11 +5,16 @@ namespace Modules\Woocommerce\Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
+use Illuminate\Support\Facades\Schema;
 
 class WoocommerceDummySeeder extends Seeder
 {
     public function run()
     {
+        if (!Schema::hasTable('woocommerce_sync_logs')) {
+            return;
+        }
+
         $faker = Faker::create();
         $business_id = DB::table('business')->pluck('id')->first();
 
