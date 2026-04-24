@@ -1770,6 +1770,18 @@ $packages = [
         $installUtil = new InstallUtil();
         $installUtil->createExistingProductsVariationsToTemplate();
 
+        //Call module dummy seeders
+        $this->call([
+            \Modules\Accounting\Database\Seeders\AccountingDummySeeder::class,
+            \Modules\Crm\Database\Seeders\CrmDummySeeder::class,
+            \Modules\Essentials\Database\Seeders\EssentialsDummySeeder::class,
+            \Modules\Manufacturing\Database\Seeders\ManufacturingDummySeeder::class,
+            \Modules\Project\Database\Seeders\ProjectDummySeeder::class,
+            \Modules\Repair\Database\Seeders\RepairDummySeeder::class,
+            \Modules\Superadmin\Database\Seeders\SuperadminDummySeeder::class,
+            \Modules\Woocommerce\Database\Seeders\WoocommerceDummySeeder::class,
+        ]);
+
         DB::commit();
     }
 }
