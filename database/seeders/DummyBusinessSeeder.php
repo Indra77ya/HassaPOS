@@ -21,8 +21,6 @@ class DummyBusinessSeeder extends Seeder
      */
     public function run()
     {
-        DB::beginTransaction();
-
         $password = Hash::make('123456');
 
         // $timezone = 'America/Phoenix'
@@ -43,6 +41,35 @@ class DummyBusinessSeeder extends Seeder
         $end_of_week = \Carbon::now()->endOfWeek()->format('Y-m-d');
 
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+
+        $tables = [
+            'business', 'business_locations', 'hms_room_types', 'hms_rooms', 'hms_extras', 'hms_coupons',
+            'transactions', 'hms_booking_lines', 'hms_booking_extras', 'cash_register_transactions',
+            'users', 'brands', 'categories', 'contacts', 'reference_counts', 'res_tables', 'tax_rates',
+            'group_sub_taxes', 'invoice_schemes', 'invoice_layouts', 'units', 'products', 'purchase_lines',
+            'transaction_payments', 'transaction_sell_lines', 'variation_location_details', 'packages',
+            'subscriptions', 'notification_templates', 'mfg_recipes', 'mfg_recipe_ingredients',
+            'product_locations', 'essentials_leave_types', 'repair_device_models', 'repair_statuses',
+            'essentials_shifts', 'essentials_user_shifts', 'gym_classes', 'gym_packages',
+            'accounting_accounts', 'accounting_accounts_transactions', 'accounting_budgets',
+            'crm_activities', 'crm_schedules', 'crm_campaigns', 'crm_call_logs', 'crm_marketplaces',
+            'essentials_allowances_and_deductions', 'essentials_attendances', 'essentials_leaves',
+            'essentials_memo', 'essentials_messages', 'essentials_payrolls',
+            'pjt_projects', 'pjt_project_members', 'pjt_project_task_steps', 'pjt_project_tasks',
+            'repair_job_sheets', 'product_variations', 'variations', 'res_product_modifier_sets'
+        ];
+
+        foreach ($tables as $table) {
+            if (\Illuminate\Support\Facades\Schema::hasTable($table)) {
+                DB::table($table)->delete();
+            }
+        }
+
+        // Also clear roles and permissions created here
+        DB::table('roles')->whereIn('name', ['Admin#1', 'Cashier#1', 'Admin#2', 'Cashier#2', 'Admin#3', 'Cashier#3', 'Admin#4', 'Cashier#4', 'Admin#5', 'Cashier#5', 'Waiter#5', 'Admin#6'])->delete();
+        DB::table('permissions')->whereIn('name', ['location.1', 'location.2', 'location.3', 'location.4', 'location.5'])->delete();
+
+        DB::beginTransaction();
 
         $shortcuts = '{"pos":{"express_checkout":"shift+e","pay_n_ckeckout":"shift+p","draft":"shift+d","cancel":"shift+c","edit_discount":"shift+i","edit_order_tax":"shift+t","add_payment_row":"shift+r","finalize_payment":"shift+f","recent_product_quantity":"f2","add_new_product":"f4"}}';
 
