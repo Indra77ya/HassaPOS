@@ -122,7 +122,7 @@ class CustomDummySeeder extends Seeder
             for ($i = 1; $i <= 500; $i++) {
                 $idx = ($chunk * 500) + $i;
                 $contacts[] = [ 'business_id' => $business_id, 'type' => 'customer', 'name' => $fnames[array_rand($fnames)].' '.$lnames[array_rand($lnames)].' '.$idx, 'contact_id' => 'CUST-'.str_pad($idx, 6, '0', STR_PAD_LEFT), 'customer_group_id' => $cg_ids[array_rand($cg_ids)], 'created_by' => $user_id, 'mobile' => '08'.rand(11, 59).rand(1000000, 9999999), 'created_at' => $today ];
-                $contacts[] = [ 'business_id' => $business_id, 'type' => 'supplier', 'name' => 'Supplier Hassa Utama '.$idx, 'contact_id' => 'SUPP-'.str_pad($idx, 6, '0', STR_PAD_LEFT), 'created_by' => $user_id, 'created_at' => $today ];
+                $contacts[] = [ 'business_id' => $business_id, 'type' => 'supplier', 'name' => 'Supplier Hassa Utama '.$idx, 'contact_id' => 'SUPP-'.str_pad($idx, 6, '0', STR_PAD_LEFT), 'customer_group_id' => null, 'created_by' => $user_id, 'mobile' => null, 'created_at' => $today ];
             }
             DB::table('contacts')->insert($contacts);
         }
