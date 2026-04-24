@@ -80,6 +80,19 @@ class CustomDummySeeder extends Seeder
         }
         $all_u_ids = DB::table('units')->where('business_id', $business_id)->pluck('id')->toArray();
 
+        // Warranties (New Addition)
+        $warranties_data = [
+            ['name' => 'Garansi Resmi 1 Tahun', 'description' => 'Garansi pabrik resmi Indonesia', 'duration' => 1, 'duration_type' => 'years'],
+            ['name' => 'Garansi Toko 6 Bulan', 'description' => 'Garansi servis dan sparepart di toko', 'duration' => 6, 'duration_type' => 'months'],
+            ['name' => 'Garansi Distributor 2 Tahun', 'description' => 'Garansi servis oleh pihak ketiga', 'duration' => 2, 'duration_type' => 'years'],
+            ['name' => 'Garansi Ganti Baru 7 Hari', 'description' => 'Cacat pabrik langsung ganti baru', 'duration' => 7, 'duration_type' => 'days'],
+            ['name' => 'Tanpa Garansi', 'description' => 'Barang tidak bergaransi', 'duration' => 0, 'duration_type' => 'days']
+        ];
+        $warranty_ids = [];
+        foreach ($warranties_data as $wd) {
+            $warranty_ids[] = DB::table('warranties')->insertGetId(array_merge($wd, ['business_id' => $business_id]));
+        }
+
         // Customer Groups (100)
         for ($i = 1; $i <= 100; $i++) {
             DB::table('customer_groups')->insert(['business_id' => $business_id, 'name' => 'Grup Pelanggan #'.$i, 'amount' => rand(1, 15), 'created_by' => $user_id]);
@@ -112,7 +125,8 @@ class CustomDummySeeder extends Seeder
             $p_id = DB::table('products')->insertGetId([
                 'name' => 'Produk Hassa '.$i, 'business_id' => $business_id, 'type' => 'single', 'unit_id' => $all_u_ids[array_rand($all_u_ids)],
                 'brand_id' => $brand_ids[array_rand($brand_ids)], 'category_id' => $cat_ids[array_rand($cat_ids)], 'tax' => $tax_id,
-                'enable_stock' => 1, 'sku' => 'SKU-'.str_pad($i, 5, '0', STR_PAD_LEFT), 'created_by' => $user_id, 'created_at' => $today
+                'enable_stock' => 1, 'sku' => 'SKU-'.str_pad($i, 5, '0', STR_PAD_LEFT), 'created_by' => $user_id, 'created_at' => $today,
+                'warranty_id' => $warranty_ids[array_rand($warranty_ids)]
             ]);
             DB::table('product_locations')->insert(['product_id' => $p_id, 'location_id' => $loc1]);
 
@@ -136,6 +150,6 @@ class CustomDummySeeder extends Seeder
         }
 
         if ($driver == 'mysql') { DB::statement('SET FOREIGN_KEY_CHECKS = 1'); }
-        $this->command->info("Dummy Seeder Berhasil Selesai! 1000 Produk & 1000 Transaksi.");
+        $this->command->info("Dummy Seeder Berhasil Selesai! 1000 Produk, 1000 Transaksi, & Data Garansi Lengkap.");
     }
 }
