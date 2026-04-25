@@ -138,19 +138,40 @@ class CustomDummySeeder extends Seeder
             DB::table('variation_location_details')->insert(['product_id' => $p_id, 'product_variation_id' => $pv_id, 'variation_id' => $v_id, 'location_id' => $loc1, 'qty_available' => rand(100, 5000)]);
         }
 
-        // 6. Sales Transactions (1,000)
-        for ($i = 1; $i <= 1000; $i++) {
-            $p = $all_v_ids[array_rand($all_v_ids)];
-            $dt = Carbon::now()->subDays(rand(0, 365))->format('Y-m-d H:i:s');
-            $tid = DB::table('transactions')->insertGetId([
-                'business_id' => $business_id, 'location_id' => $loc1, 'type' => 'sell', 'status' => 'final', 'payment_status' => 'paid',
-                'contact_id' => $cust_ids[array_rand($cust_ids)], 'invoice_no' => 'INV-'.time().'-'.$i, 'transaction_date' => $dt,
-                'final_total' => $p['sell'], 'created_by' => $user_id, 'created_at' => $dt
-            ]);
-            DB::table('transaction_sell_lines')->insert(['transaction_id' => $tid, 'product_id' => $p['p_id'], 'variation_id' => $p['v_id'], 'quantity' => 1, 'unit_price' => $p['sell'], 'unit_price_inc_tax' => $p['sell'], 'created_at' => $dt]);
+        // 6. Sell Transactions (All Varieties: Final, Draft, Quotation, POS)
+        $this->command->info("Seeding 4,000 Sells (Final, Draft, Quotation, POS)...");
+        $sell_types = [
+            ['status' => 'final', 'is_pos' => 0, 'label' => 'Sale'],
+            ['status' => 'final', 'is_pos' => 1, 'label' => 'POS'],
+            ['status' => 'draft', 'is_pos' => 0, 'label' => 'Draft'],
+            ['status' => 'quotation', 'is_pos' => 0, 'label' => 'Quotation']
+        ];
+        foreach ($sell_types as $stype) {
+            for ($i = 1; $i <= 1000; $i++) {
+                $p = $all_v_ids[array_rand($all_v_ids)];
+                $dt = Carbon::now()->subDays(rand(0, 365))->format('Y-m-d H:i:s');
+                $tid = DB::table('transactions')->insertGetId([
+                    'business_id' => $business_id, 'location_id' => $loc1, 'type' => 'sell', 'status' => $stype['status'], 'is_pos' => $stype['is_pos'], 'payment_status' => ($stype['status'] == 'final' ? 'paid' : 'due'),
+                    'contact_id' => $cust_ids[array_rand($cust_ids)], 'invoice_no' => 'INV-'.$stype['label'].'-'.time().'-'.$i, 'transaction_date' => $dt,
+                    'final_total' => $p['sell'], 'created_by' => $user_id, 'created_at' => $dt
+                ]);
+                DB::table('transaction_sell_lines')->insert(['transaction_id' => $tid, 'product_id' => $p['p_id'], 'variation_id' => $p['v_id'], 'quantity' => 1, 'unit_price' => $p['sell'], 'unit_price_inc_tax' => $p['sell'], 'created_at' => $dt]);
+            }
         }
 
-        // 7. Purchase Transactions (1,000) & Purchase Returns (1,000)
+        // 7. Sell Returns (1,000)
+        $this->command->info("Seeding 1,000 Sell Returns...");
+        for ($i = 1; $i <= 1000; $i++) {
+            $p = $all_v_ids[array_rand($all_v_ids)];
+            $dt = Carbon::now()->subDays(rand(0, 180))->format('Y-m-d H:i:s');
+            DB::table('transactions')->insert([
+                'business_id' => $business_id, 'location_id' => $loc1, 'type' => 'sell_return', 'status' => 'final', 'payment_status' => 'paid',
+                'contact_id' => $cust_ids[array_rand($cust_ids)], 'invoice_no' => 'SRET-'.time().'-'.$i, 'transaction_date' => $dt,
+                'final_total' => $p['sell'], 'created_by' => $user_id, 'created_at' => $dt
+            ]);
+        }
+
+        // 8. Purchase Transactions (1,000) & Purchase Returns (1,000)
         $this->command->info("Seeding 1,000 Purchases & 1,000 Purchase Returns...");
         for ($i = 1; $i <= 1000; $i++) {
             $p = $all_v_ids[array_rand($all_v_ids)];
@@ -166,19 +187,15 @@ class CustomDummySeeder extends Seeder
             ]);
             DB::table('purchase_lines')->insert(['transaction_id' => $tid, 'product_id' => $p['p_id'], 'variation_id' => $p['v_id'], 'quantity' => $qty, 'purchase_price' => $p['buy'], 'purchase_price_inc_tax' => $p['buy'] * 1.11, 'item_tax' => $p['buy'] * 0.11, 'created_at' => $dt]);
 
-            // Purchase Return (Every purchase has a small return or random return)
-            if ($i % 1 == 0) { // All for now to hit the 1000 count
-                $ret_qty = rand(1, 5);
-                $ret_total = $p['buy'] * $ret_qty;
-                DB::table('transactions')->insert([
-                    'business_id' => $business_id, 'location_id' => $loc1, 'type' => 'purchase_return', 'status' => 'final', 'payment_status' => 'paid',
-                    'contact_id' => $supp_ids[array_rand($supp_ids)], 'ref_no' => 'PRET-'.time().'-'.$i, 'transaction_date' => $dt,
-                    'final_total' => $ret_total, 'created_by' => $user_id, 'created_at' => $dt
-                ]);
-            }
+            // Purchase Return
+            DB::table('transactions')->insert([
+                'business_id' => $business_id, 'location_id' => $loc1, 'type' => 'purchase_return', 'status' => 'final', 'payment_status' => 'paid',
+                'contact_id' => $supp_ids[array_rand($supp_ids)], 'ref_no' => 'PRET-'.time().'-'.$i, 'transaction_date' => $dt,
+                'final_total' => $p['buy'] * rand(1, 5), 'created_by' => $user_id, 'created_at' => $dt
+            ]);
         }
 
         if ($driver == 'mysql') { DB::statement('SET FOREIGN_KEY_CHECKS = 1'); }
-        $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 1000 Sales, 1000 Purchase, & 1000 Purchase Return.");
+        $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 4000 Sales (inc POS, Draft, Quot), 1000 Sell Return, 1000 Purchase, & 1000 Purchase Return.");
     }
 }
