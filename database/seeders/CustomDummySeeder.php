@@ -147,6 +147,7 @@ class CustomDummySeeder extends Seeder
             ['status' => 'draft', 'is_direct_sale' => 0, 'is_quotation' => 0, 'sub_status' => null, 'label' => 'Draft'],
             ['status' => 'draft', 'is_direct_sale' => 0, 'is_quotation' => 1, 'sub_status' => 'quotation', 'label' => 'Quotation']
         ];
+        $all_sell_ids = [];
         foreach ($sell_types as $stype) {
             for ($i = 1; $i <= 1000; $i++) {
                 $p = $all_v_ids[array_rand($all_v_ids)];
@@ -162,6 +163,7 @@ class CustomDummySeeder extends Seeder
                     'total_before_tax' => $p['sell'],
                     'final_total' => $p['sell'], 'created_by' => $user_id, 'created_at' => $dt
                 ]);
+                $all_sell_ids[] = $tid;
                 DB::table('transaction_sell_lines')->insert([
                     'transaction_id' => $tid, 'product_id' => $p['p_id'], 'variation_id' => $p['v_id'],
                     'quantity' => 1, 'unit_price' => $p['sell'], 'unit_price_inc_tax' => $p['sell'],
@@ -175,16 +177,20 @@ class CustomDummySeeder extends Seeder
         for ($i = 1; $i <= 1000; $i++) {
             $p = $all_v_ids[array_rand($all_v_ids)];
             $dt = Carbon::now()->subDays(rand(0, 180))->format('Y-m-d H:i:s');
-            DB::table('transactions')->insert([
+            $rtid = DB::table('transactions')->insertGetId([
                 'business_id' => $business_id, 'location_id' => $loc1, 'type' => 'sell_return', 'status' => 'final', 'payment_status' => 'paid',
                 'contact_id' => $cust_ids[array_rand($cust_ids)], 'invoice_no' => 'SRET-'.Str::random(5).'-'.$i, 'transaction_date' => $dt,
                 'total_before_tax' => $p['sell'],
-                'final_total' => $p['sell'], 'created_by' => $user_id, 'created_at' => $dt
+                'final_total' => $p['sell'], 'return_parent_id' => $all_sell_ids[array_rand($all_sell_ids)], 'created_by' => $user_id, 'created_at' => $dt
+            ]);
+            DB::table('transaction_payments')->insert([
+                'transaction_id' => $rtid, 'amount' => $p['sell'], 'method' => 'cash', 'created_at' => $dt
             ]);
         }
 
         // 8. Purchase Transactions (1,000) & Purchase Returns (1,000)
         $this->command->info("Seeding 1,000 Purchases & 1,000 Purchase Returns...");
+        $all_purchase_ids = [];
         for ($i = 1; $i <= 1000; $i++) {
             $p = $all_v_ids[array_rand($all_v_ids)];
             $qty = rand(10, 100);
@@ -198,14 +204,18 @@ class CustomDummySeeder extends Seeder
                 'total_before_tax' => $total,
                 'final_total' => $total, 'created_by' => $user_id, 'created_at' => $dt
             ]);
+            $all_purchase_ids[] = $tid;
             DB::table('purchase_lines')->insert(['transaction_id' => $tid, 'product_id' => $p['p_id'], 'variation_id' => $p['v_id'], 'quantity' => $qty, 'purchase_price' => $p['buy'], 'purchase_price_inc_tax' => $p['buy'] * 1.11, 'item_tax' => $p['buy'] * 0.11, 'created_at' => $dt]);
 
             // Purchase Return
-            DB::table('transactions')->insert([
+            $prtid = DB::table('transactions')->insertGetId([
                 'business_id' => $business_id, 'location_id' => $loc1, 'type' => 'purchase_return', 'status' => 'final', 'payment_status' => 'paid',
                 'contact_id' => $supp_ids[array_rand($supp_ids)], 'ref_no' => 'PRET-'.Str::random(5).'-'.$i, 'transaction_date' => $dt,
                 'total_before_tax' => $p['buy'] * rand(1, 5),
-                'final_total' => $p['buy'] * rand(1, 5), 'created_by' => $user_id, 'created_at' => $dt
+                'final_total' => $p['buy'] * rand(1, 5), 'return_parent_id' => $tid, 'created_by' => $user_id, 'created_at' => $dt
+            ]);
+            DB::table('transaction_payments')->insert([
+                'transaction_id' => $prtid, 'amount' => $p['buy'] * rand(1, 5), 'method' => 'cash', 'created_at' => $dt
             ]);
         }
 
