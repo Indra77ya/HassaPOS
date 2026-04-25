@@ -55,6 +55,7 @@ class CustomDummySeeder extends Seeder
 
         // 3. Master Data
         $loc1 = DB::table('business_locations')->insertGetId(['business_id' => $business_id, 'name' => 'Toko Pusat Jakarta', 'city' => 'Jakarta Pusat', 'is_active' => 1, 'created_at' => $today]);
+        $loc2 = DB::table('business_locations')->insertGetId(['business_id' => $business_id, 'name' => 'Cabang Bandung', 'city' => 'Bandung', 'is_active' => 1, 'created_at' => $today]);
 
         // Units
         $u_pcs = DB::table('units')->insertGetId(['business_id' => $business_id, 'actual_name' => 'Pieces', 'short_name' => 'pcs', 'allow_decimal' => 0, 'created_by' => $user_id]);
@@ -151,12 +152,14 @@ class CustomDummySeeder extends Seeder
                 'warranty_id' => $warranty_ids[array_rand($warranty_ids)]
             ]);
             DB::table('product_locations')->insert(['product_id' => $p_id, 'location_id' => $loc1]);
+            DB::table('product_locations')->insert(['product_id' => $p_id, 'location_id' => $loc2]);
 
             $pv_id = DB::table('product_variations')->insertGetId(['name' => 'DUMMY', 'product_id' => $p_id, 'is_dummy' => 1]);
             $buy = rand(5, 500) * 1000; $sell = $buy * 1.25;
             $v_id = DB::table('variations')->insertGetId(['name' => 'DUMMY', 'product_id' => $p_id, 'sub_sku' => 'SKU-'.str_pad($i, 5, '0', STR_PAD_LEFT), 'product_variation_id' => $pv_id, 'default_purchase_price' => $buy, 'dpp_inc_tax' => $buy * 1.11, 'profit_percent' => 25, 'default_sell_price' => $sell, 'sell_price_inc_tax' => $sell * 1.11, 'created_at' => $today]);
             $all_v_ids[] = ['p_id' => $p_id, 'v_id' => $v_id, 'buy' => $buy, 'sell' => $sell];
             DB::table('variation_location_details')->insert(['product_id' => $p_id, 'product_variation_id' => $pv_id, 'variation_id' => $v_id, 'location_id' => $loc1, 'qty_available' => rand(100, 5000)]);
+            DB::table('variation_location_details')->insert(['product_id' => $p_id, 'product_variation_id' => $pv_id, 'variation_id' => $v_id, 'location_id' => $loc2, 'qty_available' => rand(100, 5000)]);
         }
 
         // 6. Sell Transactions (All Varieties: Final, Draft, Quotation, POS)
@@ -250,7 +253,33 @@ class CustomDummySeeder extends Seeder
             ]);
         }
 
+        // 9. Stock Transfers (1,000)
+        $this->command->info("Seeding 1,000 Stock Transfers...");
+        $st_statuses = ['pending', 'in_transit', 'final'];
+        for ($i = 1; $i <= 1000; $i++) {
+            $p = $all_v_ids[array_rand($all_v_ids)];
+            $dt = Carbon::now()->subDays(rand(0, 180))->format('Y-m-d H:i:s');
+            $qty = rand(5, 50);
+            $total = $p['buy'] * $qty;
+
+            // Sell Transfer (From Jakarta)
+            $tid = DB::table('transactions')->insertGetId([
+                'business_id' => $business_id, 'location_id' => $loc1, 'type' => 'sell_transfer', 'status' => $st_statuses[array_rand($st_statuses)],
+                'ref_no' => 'ST-'.Str::random(5).'-'.$i, 'transaction_date' => $dt,
+                'total_before_tax' => $total, 'final_total' => $total, 'created_by' => $user_id, 'created_at' => $dt
+            ]);
+
+            // Purchase Transfer (To Bandung)
+            DB::table('transactions')->insert([
+                'business_id' => $business_id, 'location_id' => $loc2, 'type' => 'purchase_transfer', 'status' => 'received',
+                'ref_no' => 'ST-'.Str::random(5).'-'.$i, 'transaction_date' => $dt,
+                'total_before_tax' => $total, 'final_total' => $total, 'transfer_parent_id' => $tid, 'created_by' => $user_id, 'created_at' => $dt
+            ]);
+
+            DB::table('purchase_lines')->insert(['transaction_id' => $tid, 'product_id' => $p['p_id'], 'variation_id' => $p['v_id'], 'quantity' => $qty, 'purchase_price' => $p['buy'], 'purchase_price_inc_tax' => $p['buy'], 'created_at' => $dt]);
+        }
+
         if ($driver == 'mysql') { DB::statement('SET FOREIGN_KEY_CHECKS = 1'); }
-        $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 10 Diskon, 4000 Sales (inc POS, Draft, Quot, Shipment, Subs), 1000 Sell Return, 1000 Purchase, & 1000 Purchase Return.");
+        $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 10 Diskon, 4000 Sales (inc POS, Draft, Quot, Shipment, Subs), 1000 Sell Return, 1000 Purchase, 1000 Purchase Return, & 1000 Stock Transfer.");
     }
 }
