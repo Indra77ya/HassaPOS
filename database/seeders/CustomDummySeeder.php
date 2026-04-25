@@ -46,7 +46,8 @@ class CustomDummySeeder extends Seeder
             'variation_location_details', 'transactions', 'transaction_payments',
             'transaction_sell_lines', 'purchase_lines', 'business_locations', 'product_locations',
             'units', 'tax_rates', 'expense_categories', 'customer_groups', 'selling_price_groups',
-            'warranties', 'variation_templates', 'variation_value_templates', 'variation_group_prices'
+            'warranties', 'variation_templates', 'variation_value_templates', 'variation_group_prices',
+            'discounts'
         ];
         foreach ($tables as $table) {
             if (Schema::hasTable($table)) { DB::table($table)->delete(); }
@@ -108,6 +109,25 @@ class CustomDummySeeder extends Seeder
 
         $tax_id = DB::table('tax_rates')->insertGetId(['business_id' => $business_id, 'name' => 'PPN 11%', 'amount' => 11, 'created_by' => $user_id]);
 
+        // Discounts (10)
+        $this->command->info("Seeding 10 Discounts...");
+        for ($i = 1; $i <= 10; $i++) {
+            DB::table('discounts')->insert([
+                'name' => 'Promo Hassa #'.$i,
+                'business_id' => $business_id,
+                'brand_id' => (rand(0, 1) ? $brand_ids[array_rand($brand_ids)] : null),
+                'category_id' => (rand(0, 1) ? $cat_ids[array_rand($cat_ids)] : null),
+                'location_id' => $loc1,
+                'priority' => $i,
+                'discount_type' => (rand(0, 1) ? 'fixed' : 'percentage'),
+                'discount_amount' => rand(5, 50) * 100,
+                'starts_at' => Carbon::now()->subDays(30)->format('Y-m-d H:i:s'),
+                'ends_at' => Carbon::now()->addDays(30)->format('Y-m-d H:i:s'),
+                'is_active' => 1,
+                'created_at' => $today
+            ]);
+        }
+
         // 4. Contacts (500 Customers, 500 Suppliers)
         $fnames = ['Andi', 'Budi', 'Cici', 'Dedi', 'Eko', 'Fani', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kiki', 'Lani', 'Maya', 'Nico', 'Oki', 'Putu', 'Rina', 'Santi', 'Tono', 'Uli'];
         $lnames = ['Saputra', 'Wijaya', 'Kusuma', 'Pratama', 'Hidayat', 'Santoso', 'Gunawan', 'Lestari', 'Sari', 'Utami'];
@@ -140,18 +160,23 @@ class CustomDummySeeder extends Seeder
         }
 
         // 6. Sell Transactions (All Varieties: Final, Draft, Quotation, POS)
-        $this->command->info("Seeding 4,000 Sells (Final, Draft, Quotation, POS)...");
+        $this->command->info("Seeding 4,000 Sells (Final, Draft, Quotation, POS, Shipments, Subscriptions)...");
         $sell_types = [
             ['status' => 'final', 'is_direct_sale' => 1, 'is_quotation' => 0, 'sub_status' => null, 'label' => 'Sale'],
             ['status' => 'final', 'is_direct_sale' => 0, 'is_quotation' => 0, 'sub_status' => null, 'label' => 'POS'],
             ['status' => 'draft', 'is_direct_sale' => 0, 'is_quotation' => 0, 'sub_status' => null, 'label' => 'Draft'],
             ['status' => 'draft', 'is_direct_sale' => 0, 'is_quotation' => 1, 'sub_status' => 'quotation', 'label' => 'Quotation']
         ];
+        $shipping_statuses = ['ordered', 'packed', 'shipped', 'delivered', 'cancelled'];
         $all_sell_ids = [];
         foreach ($sell_types as $stype) {
             for ($i = 1; $i <= 1000; $i++) {
                 $p = $all_v_ids[array_rand($all_v_ids)];
                 $dt = Carbon::now()->subDays(rand(0, 365))->format('Y-m-d H:i:s');
+
+                $ship_status = ($stype['status'] == 'final' && rand(1, 4) == 1) ? $shipping_statuses[array_rand($shipping_statuses)] : null;
+                $is_recurring = ($stype['status'] == 'final' && rand(1, 10) == 1) ? 1 : 0;
+
                 $tid = DB::table('transactions')->insertGetId([
                     'business_id' => $business_id, 'location_id' => $loc1, 'type' => 'sell',
                     'status' => $stype['status'], 'is_direct_sale' => $stype['is_direct_sale'],
@@ -161,6 +186,12 @@ class CustomDummySeeder extends Seeder
                     'invoice_no' => 'INV-'.$stype['label'].'-'.Str::random(5).'-'.$i,
                     'transaction_date' => $dt,
                     'total_before_tax' => $p['sell'],
+                    'shipping_status' => $ship_status,
+                    'delivery_person' => $ship_status ? $user_id : null,
+                    'is_recurring' => $is_recurring,
+                    'subscription_no' => $is_recurring ? 'SUB-'.Str::random(5).'-'.$i : null,
+                    'recur_interval' => $is_recurring ? 1 : null,
+                    'recur_interval_type' => $is_recurring ? 'months' : null,
                     'final_total' => $p['sell'], 'created_by' => $user_id, 'created_at' => $dt
                 ]);
                 $all_sell_ids[] = $tid;
@@ -220,6 +251,6 @@ class CustomDummySeeder extends Seeder
         }
 
         if ($driver == 'mysql') { DB::statement('SET FOREIGN_KEY_CHECKS = 1'); }
-        $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 4000 Sales (inc POS, Draft, Quot), 1000 Sell Return, 1000 Purchase, & 1000 Purchase Return.");
+        $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 10 Diskon, 4000 Sales (inc POS, Draft, Quot, Shipment, Subs), 1000 Sell Return, 1000 Purchase, & 1000 Purchase Return.");
     }
 }
