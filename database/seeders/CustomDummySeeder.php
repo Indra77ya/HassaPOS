@@ -47,7 +47,7 @@ class CustomDummySeeder extends Seeder
             'transaction_sell_lines', 'purchase_lines', 'business_locations', 'product_locations',
             'units', 'tax_rates', 'expense_categories', 'customer_groups', 'selling_price_groups',
             'warranties', 'variation_templates', 'variation_value_templates', 'variation_group_prices',
-            'discounts', 'stock_adjustment_lines', 'accounts', 'account_transactions'
+            'discounts', 'stock_adjustment_lines', 'accounts', 'account_transactions', 'account_types'
         ];
         foreach ($tables as $table) {
             if (Schema::hasTable($table)) { DB::table($table)->delete(); }
@@ -165,6 +165,7 @@ class CustomDummySeeder extends Seeder
             $p_id = DB::table('products')->insertGetId([
                 'name' => 'Produk Hassa '.$i, 'business_id' => $business_id, 'type' => 'single', 'unit_id' => $all_u_ids[array_rand($all_u_ids)],
                 'brand_id' => $brand_ids[array_rand($brand_ids)], 'category_id' => $cat_ids[array_rand($cat_ids)], 'tax' => $tax_id,
+                'tax_type' => 'exclusive', 'barcode_type' => 'C128',
                 'enable_stock' => 1, 'sku' => 'SKU-'.str_pad($i, 5, '0', STR_PAD_LEFT), 'created_by' => $user_id, 'created_at' => $today,
                 'warranty_id' => $warranty_ids[array_rand($warranty_ids)]
             ]);
@@ -334,12 +335,20 @@ class CustomDummySeeder extends Seeder
 
         // 12. Payment Accounts (5 Accounts & Transactions)
         $this->command->info("Seeding 5 Payment Accounts & Linking Transactions...");
+
+        $asset_type_id = DB::table('account_types')->insertGetId([
+            'name' => 'Assets', 'business_id' => $business_id, 'created_at' => $today
+        ]);
+        $equity_type_id = DB::table('account_types')->insertGetId([
+            'name' => 'Equity', 'business_id' => $business_id, 'created_at' => $today
+        ]);
+
         $accounts_data = [
-            ['name' => 'Kas Tunai Utama', 'account_number' => '100001', 'account_type' => 'saving_current'],
-            ['name' => 'Bank BCA - 8820123xxx', 'account_number' => '200001', 'account_type' => 'saving_current'],
-            ['name' => 'Bank Mandiri - 131001xxx', 'account_number' => '200002', 'account_type' => 'saving_current'],
-            ['name' => 'Petty Cash', 'account_number' => '100002', 'account_type' => 'saving_current'],
-            ['name' => 'Modal Pemilik', 'account_number' => '300001', 'account_type' => 'capital']
+            ['name' => 'Kas Tunai Utama', 'account_number' => '100001', 'account_type_id' => $asset_type_id],
+            ['name' => 'Bank BCA - 8820123xxx', 'account_number' => '200001', 'account_type_id' => $asset_type_id],
+            ['name' => 'Bank Mandiri - 131001xxx', 'account_number' => '200002', 'account_type_id' => $asset_type_id],
+            ['name' => 'Petty Cash', 'account_number' => '100002', 'account_type_id' => $asset_type_id],
+            ['name' => 'Modal Pemilik', 'account_number' => '300001', 'account_type_id' => $equity_type_id]
         ];
         $acc_ids = [];
         foreach ($accounts_data as $ad) {
