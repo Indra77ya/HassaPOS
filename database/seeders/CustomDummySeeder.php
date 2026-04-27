@@ -221,6 +221,12 @@ class CustomDummySeeder extends Seeder
                     'quantity' => 1, 'unit_price' => $p['sell'], 'unit_price_inc_tax' => $p['sell'],
                     'item_tax' => 0, 'unit_price_before_discount' => $p['sell'], 'created_at' => $dt
                 ]);
+
+                if ($stype['status'] == 'final') {
+                    DB::table('transaction_payments')->insert([
+                        'transaction_id' => $tid, 'business_id' => $business_id, 'amount' => $p['sell'], 'method' => 'cash', 'paid_on' => $dt, 'created_by' => $user_id, 'payment_for' => $cust_ids[array_rand($cust_ids)], 'payment_ref_no' => 'PAY-SELL-'.Str::random(5), 'created_at' => $dt
+                    ]);
+                }
             }
         }
 
@@ -236,7 +242,7 @@ class CustomDummySeeder extends Seeder
                 'final_total' => $p['sell'], 'return_parent_id' => $all_sell_ids[array_rand($all_sell_ids)], 'created_by' => $user_id, 'created_at' => $dt
             ]);
             DB::table('transaction_payments')->insert([
-                'transaction_id' => $rtid, 'amount' => $p['sell'], 'method' => 'cash', 'created_at' => $dt
+                'transaction_id' => $rtid, 'business_id' => $business_id, 'amount' => $p['sell'], 'method' => 'cash', 'paid_on' => $dt, 'created_by' => $user_id, 'payment_for' => $cust_ids[array_rand($cust_ids)], 'payment_ref_no' => 'PAY-SRET-'.Str::random(5), 'created_at' => $dt
             ]);
         }
 
@@ -259,6 +265,10 @@ class CustomDummySeeder extends Seeder
             $all_purchase_ids[] = $tid;
             DB::table('purchase_lines')->insert(['transaction_id' => $tid, 'product_id' => $p['p_id'], 'variation_id' => $p['v_id'], 'quantity' => $qty, 'purchase_price' => $p['buy'], 'purchase_price_inc_tax' => $p['buy'] * 1.11, 'item_tax' => $p['buy'] * 0.11, 'created_at' => $dt]);
 
+            DB::table('transaction_payments')->insert([
+                'transaction_id' => $tid, 'business_id' => $business_id, 'amount' => $total, 'method' => 'cash', 'paid_on' => $dt, 'created_by' => $user_id, 'payment_for' => $supp_ids[array_rand($supp_ids)], 'payment_ref_no' => 'PAY-PUR-'.Str::random(5), 'created_at' => $dt
+            ]);
+
             // Purchase Return
             $prtid = DB::table('transactions')->insertGetId([
                 'business_id' => $business_id, 'location_id' => $loc1, 'type' => 'purchase_return', 'status' => 'final', 'payment_status' => 'paid',
@@ -267,7 +277,7 @@ class CustomDummySeeder extends Seeder
                 'final_total' => $p['buy'] * rand(1, 5), 'return_parent_id' => $tid, 'created_by' => $user_id, 'created_at' => $dt
             ]);
             DB::table('transaction_payments')->insert([
-                'transaction_id' => $prtid, 'amount' => $p['buy'] * rand(1, 5), 'method' => 'cash', 'created_at' => $dt
+                'transaction_id' => $prtid, 'business_id' => $business_id, 'amount' => $p['buy'] * rand(1, 5), 'method' => 'cash', 'paid_on' => $dt, 'created_by' => $user_id, 'payment_for' => $supp_ids[array_rand($supp_ids)], 'payment_ref_no' => 'PAY-PRET-'.Str::random(5), 'created_at' => $dt
             ]);
         }
 
@@ -329,7 +339,7 @@ class CustomDummySeeder extends Seeder
             ]);
 
             DB::table('transaction_payments')->insert([
-                'transaction_id' => $tid, 'amount' => $amt, 'method' => 'cash', 'created_at' => $dt
+                'transaction_id' => $tid, 'business_id' => $business_id, 'amount' => $amt, 'method' => 'cash', 'paid_on' => $dt, 'created_by' => $user_id, 'payment_ref_no' => 'PAY-EXP-'.Str::random(5), 'created_at' => $dt
             ]);
         }
 
@@ -367,17 +377,19 @@ class CustomDummySeeder extends Seeder
         }
 
         // Link existing payments to accounts
-        $payments = DB::table('transaction_payments')->limit(2000)->get();
+        $payments = DB::table('transaction_payments')->where('business_id', $business_id)->get();
         $account_txs = [];
         foreach ($payments as $pay) {
             $aid = $acc_ids[array_rand($acc_ids)];
             $tx = DB::table('transactions')->where('id', $pay->transaction_id)->first();
 
             if ($tx) {
-                // If Sale/POS -> Account gets money (Credit in bookkeeping sometimes, but 'debit' in many POS systems for increasing balance)
-                // In this system: 'debit' usually increases balance, 'credit' decreases? Let's check AccountTransaction model if possible.
-                // Usually: Debit = Inflow (for Asset accounts), Credit = Outflow.
-                $type = in_array($tx->type, ['sell', 'purchase_return', 'sell_transfer']) ? 'debit' : 'credit';
+                // System uses: sell -> credit, purchase -> debit
+                $types = [
+                    'sell' => 'credit', 'purchase' => 'debit', 'expense' => 'debit',
+                    'purchase_return' => 'credit', 'sell_return' => 'debit', 'sell_transfer' => 'credit'
+                ];
+                $type = $types[$tx->type] ?? 'debit';
 
                 $account_txs[] = [
                     'account_id' => $aid, 'type' => $type, 'amount' => $pay->amount,
