@@ -48,7 +48,7 @@ class CustomDummySeeder extends Seeder
             'units', 'tax_rates', 'expense_categories', 'customer_groups', 'selling_price_groups',
             'warranties', 'variation_templates', 'variation_value_templates', 'variation_group_prices',
             'discounts', 'stock_adjustment_lines', 'accounts', 'account_transactions', 'account_types',
-            'res_tables', 'cash_registers', 'cash_register_transactions',
+            'res_tables', 'cash_registers', 'cash_register_transactions', 'bookings',
             'repair_statuses', 'repair_job_sheets', 'mfg_recipes', 'essentials_payrolls'
         ];
         foreach ($tables as $table) {
@@ -443,7 +443,31 @@ class CustomDummySeeder extends Seeder
         $chunks = array_chunk($reg_txs, 500);
         foreach ($chunks as $chunk) { DB::table('cash_register_transactions')->insert($chunk); }
 
-        // 14. Repair Module (If exists)
+        // 14. Bookings (Restaurant/Service)
+        if (Schema::hasTable('bookings')) {
+            $this->command->info("Seeding 100 Bookings...");
+            $booking_statuses = ['booked', 'completed', 'cancelled'];
+            for ($i = 1; $i <= 100; $i++) {
+                $start = Carbon::now()->addDays(rand(-30, 30))->addHours(rand(0, 23));
+                $end = (clone $start)->addHours(rand(1, 4));
+
+                DB::table('bookings')->insert([
+                    'business_id' => $business_id,
+                    'location_id' => (rand(0, 1) ? $loc1 : $loc2),
+                    'contact_id' => $cust_ids[array_rand($cust_ids)],
+                    'waiter_id' => $user_id,
+                    'table_id' => $table_ids[array_rand($table_ids)],
+                    'booking_start' => $start->format('Y-m-d H:i:s'),
+                    'booking_end' => $end->format('Y-m-d H:i:s'),
+                    'created_by' => $user_id,
+                    'booking_status' => $booking_statuses[array_rand($booking_statuses)],
+                    'booking_note' => 'Booking dummy Hassa POS #'.$i,
+                    'created_at' => $today
+                ]);
+            }
+        }
+
+        // 15. Repair Module (If exists)
         if (Schema::hasTable('repair_statuses')) {
             $this->command->info("Seeding Repair Statuses & Job Sheets...");
             $rep_stats = [
@@ -498,6 +522,6 @@ class CustomDummySeeder extends Seeder
         }
 
         if ($driver == 'mysql') { DB::statement('SET FOREIGN_KEY_CHECKS = 1'); }
-        $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 10 Diskon, 4000 Sales (inc POS, Draft, Quot, Shipment, Subs), 1000 Sell Return, 1000 Purchase, 1000 Purchase Return, 1000 Stock Transfer, 1000 Stock Adjustment, & 1000 Expense.");
+        $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 10 Diskon, 4000 Sales (inc POS, Draft, Quot, Shipment, Subs), 1000 Sell Return, 1000 Purchase, 1000 Purchase Return, 1000 Stock Transfer, 1000 Stock Adjustment, 1000 Expense, & 100 Bookings.");
     }
 }
