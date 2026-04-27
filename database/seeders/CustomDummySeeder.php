@@ -53,6 +53,14 @@ class CustomDummySeeder extends Seeder
             if (Schema::hasTable($table)) { DB::table($table)->delete(); }
         }
 
+        // Expense Categories (20)
+        $this->command->info("Seeding 20 Expense Categories...");
+        $exp_cats = ['Listrik & Air', 'Sewa Gedung', 'Gaji Karyawan', 'Internet & Telp', 'Biaya Kebersihan', 'Keamanan', 'Peralatan Kantor', 'Pajak', 'Iklan/Promosi', 'Transportasi', 'Konsumsi', 'Perbaikan Gedung', 'Peralatan POS', 'Aturan Toko', 'Operasional Harian', 'Lain-lain', 'Biaya Tak Terduga', 'Logistik', 'Packing', 'Bunga Bank'];
+        $exp_cat_ids = [];
+        foreach ($exp_cats as $ec) {
+            $exp_cat_ids[] = DB::table('expense_categories')->insertGetId(['business_id' => $business_id, 'name' => $ec, 'created_by' => $user_id]);
+        }
+
         // 3. Master Data
         $loc1 = DB::table('business_locations')->insertGetId(['business_id' => $business_id, 'name' => 'Toko Pusat Jakarta', 'city' => 'Jakarta Pusat', 'is_active' => 1, 'created_at' => $today]);
         $loc2 = DB::table('business_locations')->insertGetId(['business_id' => $business_id, 'name' => 'Cabang Bandung', 'city' => 'Bandung', 'is_active' => 1, 'created_at' => $today]);
@@ -298,7 +306,24 @@ class CustomDummySeeder extends Seeder
             DB::table('stock_adjustment_lines')->insert(['transaction_id' => $tid, 'product_id' => $p['p_id'], 'variation_id' => $p['v_id'], 'quantity' => $qty, 'unit_price' => $p['buy'], 'created_at' => $dt]);
         }
 
+        // 11. Expenses (1,000)
+        $this->command->info("Seeding 1,000 Expenses...");
+        for ($i = 1; $i <= 1000; $i++) {
+            $dt = Carbon::now()->subDays(rand(0, 365))->format('Y-m-d H:i:s');
+            $amt = rand(10, 500) * 1000;
+
+            $tid = DB::table('transactions')->insertGetId([
+                'business_id' => $business_id, 'location_id' => (rand(0, 1) ? $loc1 : $loc2), 'type' => 'expense', 'status' => 'final', 'payment_status' => 'paid',
+                'ref_no' => 'EXP-'.Str::random(5).'-'.$i, 'transaction_date' => $dt,
+                'total_before_tax' => $amt, 'final_total' => $amt, 'expense_category_id' => $exp_cat_ids[array_rand($exp_cat_ids)], 'expense_for' => $user_id, 'created_by' => $user_id, 'created_at' => $dt
+            ]);
+
+            DB::table('transaction_payments')->insert([
+                'transaction_id' => $tid, 'amount' => $amt, 'method' => 'cash', 'created_at' => $dt
+            ]);
+        }
+
         if ($driver == 'mysql') { DB::statement('SET FOREIGN_KEY_CHECKS = 1'); }
-        $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 10 Diskon, 4000 Sales (inc POS, Draft, Quot, Shipment, Subs), 1000 Sell Return, 1000 Purchase, 1000 Purchase Return, 1000 Stock Transfer, & 1000 Stock Adjustment.");
+        $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 10 Diskon, 4000 Sales (inc POS, Draft, Quot, Shipment, Subs), 1000 Sell Return, 1000 Purchase, 1000 Purchase Return, 1000 Stock Transfer, 1000 Stock Adjustment, & 1000 Expense.");
     }
 }
