@@ -135,6 +135,24 @@ class CustomDummySeeder extends Seeder
         $cat_ids = [];
         for ($i = 1; $i <= 50; $i++) { $cat_ids[] = DB::table('categories')->insertGetId(['business_id' => $business_id, 'name' => 'Kategori-'.str_pad($i, 3, '0', STR_PAD_LEFT), 'category_type' => 'product', 'parent_id' => 0, 'created_by' => $user_id]); }
 
+        // Modifiers (10)
+        $this->command->info("Seeding 10 Modifiers...");
+        $modifier_ids = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $m_id = DB::table('products')->insertGetId([
+                'name' => 'Ekstra Toping #'.$i, 'business_id' => $business_id, 'type' => 'modifier', 'unit_id' => $u_pcs,
+                'tax_type' => 'exclusive', 'barcode_type' => 'C128', 'sku' => 'MOD-'.str_pad($i, 5, '0', STR_PAD_LEFT),
+                'created_by' => $user_id, 'created_at' => $today
+            ]);
+            $mpv_id = DB::table('product_variations')->insertGetId(['name' => 'DUMMY', 'product_id' => $m_id, 'is_dummy' => 1]);
+            $modifier_ids[] = DB::table('variations')->insertGetId([
+                'name' => 'DUMMY', 'product_id' => $m_id, 'sub_sku' => 'MOD-'.str_pad($i, 5, '0', STR_PAD_LEFT),
+                'product_variation_id' => $mpv_id, 'default_purchase_price' => 0, 'dpp_inc_tax' => 0,
+                'profit_percent' => 0, 'default_sell_price' => rand(1, 5) * 1000, 'sell_price_inc_tax' => rand(1, 5) * 1110,
+                'created_at' => $today
+            ]);
+        }
+
         $tax_id = DB::table('tax_rates')->insertGetId(['business_id' => $business_id, 'name' => 'PPN 11%', 'amount' => 11, 'created_by' => $user_id]);
 
         // Discounts (10)
@@ -209,6 +227,7 @@ class CustomDummySeeder extends Seeder
                 $ship_status = ($stype['status'] == 'final' && rand(1, 4) == 1) ? $shipping_statuses[array_rand($shipping_statuses)] : null;
                 $is_recurring = ($stype['status'] == 'final' && rand(1, 10) == 1) ? 1 : 0;
 
+                $is_kitchen = ($stype['label'] == 'POS' && rand(0, 1));
                 $tid = DB::table('transactions')->insertGetId([
                     'business_id' => $business_id, 'location_id' => $loc1, 'type' => 'sell',
                     'status' => $stype['status'], 'is_direct_sale' => $stype['is_direct_sale'],
@@ -220,6 +239,11 @@ class CustomDummySeeder extends Seeder
                     'total_before_tax' => $p['sell'],
                     'shipping_status' => $ship_status,
                     'delivery_person' => $ship_status ? $user_id : null,
+                    'is_kitchen_order' => $is_kitchen ? 1 : 0,
+                    'res_table_id' => $is_kitchen ? $table_ids[array_rand($table_ids)] : null,
+                    'res_waiter_id' => $is_kitchen ? $user_id : null,
+                    'res_order_status' => $is_kitchen ? ['received', 'cooked', 'served'][rand(0, 2)] : null,
+                    'commission_agent' => $user_id,
                     'is_recurring' => $is_recurring,
                     'subscription_no' => $is_recurring ? 'SUB-'.Str::random(5).'-'.$i : null,
                     'recur_interval' => $is_recurring ? 1 : null,
@@ -227,11 +251,29 @@ class CustomDummySeeder extends Seeder
                     'final_total' => $p['sell'], 'created_by' => $user_id, 'created_at' => $dt
                 ]);
                 $all_sell_ids[] = $tid;
-                DB::table('transaction_sell_lines')->insert([
+
+                $line_status = $is_kitchen ? ['received', 'cooked', 'served'][rand(0, 2)] : null;
+
+                $line_id = DB::table('transaction_sell_lines')->insertGetId([
                     'transaction_id' => $tid, 'product_id' => $p['p_id'], 'variation_id' => $p['v_id'],
                     'quantity' => 1, 'unit_price' => $p['sell'], 'unit_price_inc_tax' => $p['sell'],
-                    'item_tax' => 0, 'unit_price_before_discount' => $p['sell'], 'created_at' => $dt
+                    'item_tax' => 0, 'unit_price_before_discount' => $p['sell'],
+                    'res_line_order_status' => $line_status,
+                    'res_service_staff_id' => $is_kitchen ? $user_id : null,
+                    'created_at' => $dt
                 ]);
+
+                // Random Modifier for POS Kitchen Order
+                if ($is_kitchen && rand(0, 1)) {
+                    $m_v_id = $modifier_ids[array_rand($modifier_ids)];
+                    $m_v = DB::table('variations')->where('id', $m_v_id)->first();
+                    DB::table('transaction_sell_lines')->insert([
+                        'transaction_id' => $tid, 'product_id' => $m_v->product_id, 'variation_id' => $m_v_id,
+                        'quantity' => 1, 'unit_price' => $m_v->default_sell_price, 'unit_price_inc_tax' => $m_v->sell_price_inc_tax,
+                        'item_tax' => 0, 'unit_price_before_discount' => $m_v->default_sell_price,
+                        'parent_sell_line_id' => $line_id, 'children_type' => 'modifier', 'created_at' => $dt
+                    ]);
+                }
 
                 if ($stype['status'] == 'final') {
                     DB::table('transaction_payments')->insert([
@@ -429,16 +471,6 @@ class CustomDummySeeder extends Seeder
             $reg_txs[] = [
                 'cash_register_id' => $register_id, 'amount' => $tx->final_total, 'pay_method' => 'cash', 'type' => 'debit', 'transaction_type' => 'sell', 'transaction_id' => $tx->id, 'created_at' => $tx->created_at
             ];
-
-            // Randomly assign table & waiter to some POS transactions
-            if (rand(1, 3) == 1) {
-                DB::table('transactions')->where('id', $tx->id)->update([
-                    'res_table_id' => $table_ids[array_rand($table_ids)],
-                    'res_waiter_id' => $user_id,
-                    'res_order_status' => 'served',
-                    'commission_agent' => $user_id
-                ]);
-            }
         }
         $chunks = array_chunk($reg_txs, 500);
         foreach ($chunks as $chunk) { DB::table('cash_register_transactions')->insert($chunk); }
