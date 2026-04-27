@@ -47,7 +47,7 @@ class CustomDummySeeder extends Seeder
             'transaction_sell_lines', 'purchase_lines', 'business_locations', 'product_locations',
             'units', 'tax_rates', 'expense_categories', 'customer_groups', 'selling_price_groups',
             'warranties', 'variation_templates', 'variation_value_templates', 'variation_group_prices',
-            'discounts'
+            'discounts', 'stock_adjustment_lines'
         ];
         foreach ($tables as $table) {
             if (Schema::hasTable($table)) { DB::table($table)->delete(); }
@@ -279,7 +279,26 @@ class CustomDummySeeder extends Seeder
             DB::table('purchase_lines')->insert(['transaction_id' => $tid, 'product_id' => $p['p_id'], 'variation_id' => $p['v_id'], 'quantity' => $qty, 'purchase_price' => $p['buy'], 'purchase_price_inc_tax' => $p['buy'], 'created_at' => $dt]);
         }
 
+        // 10. Stock Adjustments (1,000)
+        $this->command->info("Seeding 1,000 Stock Adjustments...");
+        $adj_types = ['normal', 'abnormal'];
+        for ($i = 1; $i <= 1000; $i++) {
+            $p = $all_v_ids[array_rand($all_v_ids)];
+            $dt = Carbon::now()->subDays(rand(0, 180))->format('Y-m-d H:i:s');
+            $qty = rand(1, 20);
+            $total = $p['buy'] * $qty;
+            $recovered = (rand(1, 5) == 1) ? $total * 0.5 : 0;
+
+            $tid = DB::table('transactions')->insertGetId([
+                'business_id' => $business_id, 'location_id' => (rand(0, 1) ? $loc1 : $loc2), 'type' => 'stock_adjustment', 'status' => 'final',
+                'adjustment_type' => $adj_types[array_rand($adj_types)], 'ref_no' => 'SA-'.Str::random(5).'-'.$i, 'transaction_date' => $dt,
+                'total_before_tax' => $total, 'final_total' => $total, 'total_amount_recovered' => $recovered, 'created_by' => $user_id, 'created_at' => $dt
+            ]);
+
+            DB::table('stock_adjustment_lines')->insert(['transaction_id' => $tid, 'product_id' => $p['p_id'], 'variation_id' => $p['v_id'], 'quantity' => $qty, 'unit_price' => $p['buy'], 'created_at' => $dt]);
+        }
+
         if ($driver == 'mysql') { DB::statement('SET FOREIGN_KEY_CHECKS = 1'); }
-        $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 10 Diskon, 4000 Sales (inc POS, Draft, Quot, Shipment, Subs), 1000 Sell Return, 1000 Purchase, 1000 Purchase Return, & 1000 Stock Transfer.");
+        $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 10 Diskon, 4000 Sales (inc POS, Draft, Quot, Shipment, Subs), 1000 Sell Return, 1000 Purchase, 1000 Purchase Return, 1000 Stock Transfer, & 1000 Stock Adjustment.");
     }
 }
