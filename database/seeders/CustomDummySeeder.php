@@ -58,12 +58,20 @@ class CustomDummySeeder extends Seeder
         $exp_cats = ['Listrik & Air', 'Sewa Gedung', 'Gaji Karyawan', 'Internet & Telp', 'Biaya Kebersihan', 'Keamanan', 'Peralatan Kantor', 'Pajak', 'Iklan/Promosi', 'Transportasi', 'Konsumsi', 'Perbaikan Gedung', 'Peralatan POS', 'Aturan Toko', 'Operasional Harian', 'Lain-lain', 'Biaya Tak Terduga', 'Logistik', 'Packing', 'Bunga Bank'];
         $exp_cat_ids = [];
         foreach ($exp_cats as $ec) {
-            $exp_cat_ids[] = DB::table('expense_categories')->insertGetId(['business_id' => $business_id, 'name' => $ec, 'created_by' => $user_id]);
+            $exp_cat_ids[] = DB::table('expense_categories')->insertGetId(['business_id' => $business_id, 'name' => $ec]);
         }
 
         // 3. Master Data
-        $loc1 = DB::table('business_locations')->insertGetId(['business_id' => $business_id, 'name' => 'Toko Pusat Jakarta', 'city' => 'Jakarta Pusat', 'is_active' => 1, 'created_at' => $today]);
-        $loc2 = DB::table('business_locations')->insertGetId(['business_id' => $business_id, 'name' => 'Cabang Bandung', 'city' => 'Bandung', 'is_active' => 1, 'created_at' => $today]);
+        $loc1 = DB::table('business_locations')->insertGetId([
+            'business_id' => $business_id, 'name' => 'Toko Pusat Jakarta', 'city' => 'Jakarta Pusat',
+            'country' => 'Indonesia', 'state' => 'DKI Jakarta', 'zip_code' => '10110',
+            'is_active' => 1, 'created_at' => $today
+        ]);
+        $loc2 = DB::table('business_locations')->insertGetId([
+            'business_id' => $business_id, 'name' => 'Cabang Bandung', 'city' => 'Bandung',
+            'country' => 'Indonesia', 'state' => 'Jawa Barat', 'zip_code' => '40111',
+            'is_active' => 1, 'created_at' => $today
+        ]);
 
         // Units
         $u_pcs = DB::table('units')->insertGetId(['business_id' => $business_id, 'actual_name' => 'Pieces', 'short_name' => 'pcs', 'allow_decimal' => 0, 'created_by' => $user_id]);
@@ -114,7 +122,7 @@ class CustomDummySeeder extends Seeder
         $brand_ids = [];
         for ($i = 1; $i <= 50; $i++) { $brand_ids[] = DB::table('brands')->insertGetId(['business_id' => $business_id, 'name' => 'Brand Hassa-'.str_pad($i, 3, '0', STR_PAD_LEFT), 'created_by' => $user_id]); }
         $cat_ids = [];
-        for ($i = 1; $i <= 50; $i++) { $cat_ids[] = DB::table('categories')->insertGetId(['business_id' => $business_id, 'name' => 'Kategori-'.str_pad($i, 3, '0', STR_PAD_LEFT), 'category_type' => 'product', 'created_by' => $user_id]); }
+        for ($i = 1; $i <= 50; $i++) { $cat_ids[] = DB::table('categories')->insertGetId(['business_id' => $business_id, 'name' => 'Kategori-'.str_pad($i, 3, '0', STR_PAD_LEFT), 'category_type' => 'product', 'parent_id' => 0, 'created_by' => $user_id]); }
 
         $tax_id = DB::table('tax_rates')->insertGetId(['business_id' => $business_id, 'name' => 'PPN 11%', 'amount' => 11, 'created_by' => $user_id]);
 
@@ -143,10 +151,11 @@ class CustomDummySeeder extends Seeder
 
         $contacts = [];
         for ($i = 1; $i <= 500; $i++) {
-            $contacts[] = [ 'business_id' => $business_id, 'type' => 'customer', 'name' => $fnames[array_rand($fnames)].' '.$lnames[array_rand($lnames)].' '.$i, 'contact_id' => 'CUST-'.str_pad($i, 5, '0', STR_PAD_LEFT), 'customer_group_id' => $cg_ids[array_rand($cg_ids)], 'created_by' => $user_id, 'mobile' => '08'.rand(11, 59).rand(1000000, 9999999), 'created_at' => $today ];
-            $contacts[] = [ 'business_id' => $business_id, 'type' => 'supplier', 'name' => 'Supplier Hassa Utama '.$i, 'contact_id' => 'SUPP-'.str_pad($i, 5, '0', STR_PAD_LEFT), 'customer_group_id' => null, 'created_by' => $user_id, 'mobile' => null, 'created_at' => $today ];
+            $contacts[] = [ 'business_id' => $business_id, 'type' => 'customer', 'name' => $fnames[array_rand($fnames)].' '.$lnames[array_rand($lnames)].' '.$i, 'contact_id' => 'CUST-'.str_pad($i, 5, '0', STR_PAD_LEFT), 'customer_group_id' => $cg_ids[array_rand($cg_ids)], 'created_by' => $user_id, 'mobile' => '08'.rand(11, 59).rand(1000000, 9999999), 'created_at' => $today, 'first_name' => $fnames[array_rand($fnames)], 'last_name' => $lnames[array_rand($lnames)] ];
+            $contacts[] = [ 'business_id' => $business_id, 'type' => 'supplier', 'name' => 'Supplier Hassa Utama '.$i, 'contact_id' => 'SUPP-'.str_pad($i, 5, '0', STR_PAD_LEFT), 'customer_group_id' => null, 'created_by' => $user_id, 'mobile' => '08'.rand(11, 59).rand(1000000, 9999999), 'created_at' => $today, 'first_name' => 'Supplier', 'last_name' => 'Hassa' ];
         }
-        DB::table('contacts')->insert($contacts);
+        $chunks = array_chunk($contacts, 200);
+        foreach ($chunks as $chunk) { DB::table('contacts')->insert($chunk); }
         $cust_ids = DB::table('contacts')->where('business_id', $business_id)->where('type', 'customer')->pluck('id')->toArray();
         $supp_ids = DB::table('contacts')->where('business_id', $business_id)->where('type', 'supplier')->pluck('id')->toArray();
 
