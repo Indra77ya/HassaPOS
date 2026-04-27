@@ -51,7 +51,7 @@ return [
     'link_account' => 'Tautkan Akun',
     'account_linked_success' => 'Akun berhasil ditautkan',
     'view_details' => 'Lihat Detail',
-    'liability_equity' => 'Pasiva & Ekuitas',
+    'liability_equity' => 'Pasiva',
     'current_assets' => 'Aktiva Lancar',
     'total_current_assets' => 'Total Aktiva Lancar',
     'fixed_assets' => 'Aktiva Tetap',
@@ -65,5 +65,5 @@ return [
     'equity' => 'Ekuitas',
     'retained_earnings' => 'Laba Ditahan',
     'total_equity' => 'Total Ekuitas',
-    'total_liability_equity' => 'Total Pasiva & Ekuitas',
+    'total_liability_equity' => 'Total Pasiva',
 ];

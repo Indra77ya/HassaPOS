@@ -51,7 +51,7 @@ return [
     'link_account' => 'Link Account',
     'account_linked_success' => 'Account linked successfully',
     'view_details' => 'View Details',
-    'liability_equity' => 'Liability & Equity',
+    'liability_equity' => 'Pasiva',
     'current_assets' => 'Current Assets',
     'total_current_assets' => 'Total Current Assets',
     'fixed_assets' => 'Fixed Assets',
@@ -65,5 +65,5 @@ return [
     'equity' => 'Equity',
     'retained_earnings' => 'Retained Earnings',
     'total_equity' => 'Total Equity',
-    'total_liability_equity' => 'Total Liability & Equity',
+    'total_liability_equity' => 'Total Pasiva',
 ];
