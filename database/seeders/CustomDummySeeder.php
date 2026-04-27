@@ -479,6 +479,36 @@ class CustomDummySeeder extends Seeder
         $chunks = array_chunk($account_txs, 500);
         foreach ($chunks as $chunk) { DB::table('account_transactions')->insert($chunk); }
 
+        // 12b. Balancing Trial Balance
+        $this->command->info("Balancing Trial Balance...");
+        $supplier_due = DB::table('transactions')->where('business_id', $business_id)->where('type', 'purchase')->sum('final_total')
+                        - DB::table('transaction_payments')->where('business_id', $business_id)->whereIn('transaction_id', DB::table('transactions')->where('type', 'purchase')->pluck('id'))->sum('amount');
+
+        $customer_due = DB::table('transactions')->where('business_id', $business_id)->where('type', 'sell')->sum('final_total')
+                        - DB::table('transaction_payments')->where('business_id', $business_id)->whereIn('transaction_id', DB::table('transactions')->where('type', 'sell')->pluck('id'))->sum('amount');
+
+        $account_sum = DB::table('account_transactions as AT')
+                        ->join('accounts as A', 'AT.account_id', '=', 'A.id')
+                        ->where('A.business_id', $business_id)
+                        ->whereNull('AT.deleted_at')
+                        ->sum(DB::raw("IF(AT.type='credit', AT.amount, -1*AT.amount)"));
+
+        // Trial Balance Logic from view:
+        // Debit Side = Customer Due + Account Balances
+        // Credit Side = Supplier Due
+        // To balance: We need (Customer Due + Account Balances) = Supplier Due
+        $current_debit = $customer_due + $account_sum;
+        $diff = $supplier_due - $current_debit;
+
+        if ($diff != 0) {
+            $balancing_account = end($acc_ids); // Modal Pemilik
+            DB::table('account_transactions')->insert([
+                'account_id' => $balancing_account, 'type' => ($diff > 0 ? 'credit' : 'debit'), 'sub_type' => 'opening_balance',
+                'amount' => abs($diff), 'reff_no' => 'BAL-'.Str::random(5),
+                'operation_date' => $today, 'created_by' => $user_id, 'created_at' => $today
+            ]);
+        }
+
         // 13. Cash Registers
         $this->command->info("Seeding Cash Register & Transactions...");
         $register_id = DB::table('cash_registers')->insertGetId([
