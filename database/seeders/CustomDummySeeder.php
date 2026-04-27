@@ -47,7 +47,9 @@ class CustomDummySeeder extends Seeder
             'transaction_sell_lines', 'purchase_lines', 'business_locations', 'product_locations',
             'units', 'tax_rates', 'expense_categories', 'customer_groups', 'selling_price_groups',
             'warranties', 'variation_templates', 'variation_value_templates', 'variation_group_prices',
-            'discounts', 'stock_adjustment_lines', 'accounts', 'account_transactions', 'account_types'
+            'discounts', 'stock_adjustment_lines', 'accounts', 'account_transactions', 'account_types',
+            'res_tables', 'cash_registers', 'cash_register_transactions',
+            'repair_statuses', 'repair_job_sheets', 'mfg_recipes', 'essentials_payrolls'
         ];
         foreach ($tables as $table) {
             if (Schema::hasTable($table)) { DB::table($table)->delete(); }
@@ -67,6 +69,15 @@ class CustomDummySeeder extends Seeder
             'country' => 'Indonesia', 'state' => 'DKI Jakarta', 'zip_code' => '10110',
             'is_active' => 1, 'created_at' => $today
         ]);
+
+        // Restaurant Tables (10)
+        $this->command->info("Seeding 10 Restaurant Tables...");
+        $table_ids = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $table_ids[] = DB::table('res_tables')->insertGetId([
+                'business_id' => $business_id, 'location_id' => $loc1, 'name' => 'Meja #'.str_pad($i, 2, '0', STR_PAD_LEFT), 'created_by' => $user_id, 'created_at' => $today
+            ]);
+        }
         $loc2 = DB::table('business_locations')->insertGetId([
             'business_id' => $business_id, 'name' => 'Cabang Bandung', 'city' => 'Bandung',
             'country' => 'Indonesia', 'state' => 'Jawa Barat', 'zip_code' => '40111',
@@ -404,6 +415,87 @@ class CustomDummySeeder extends Seeder
         }
         $chunks = array_chunk($account_txs, 500);
         foreach ($chunks as $chunk) { DB::table('account_transactions')->insert($chunk); }
+
+        // 13. Cash Registers
+        $this->command->info("Seeding Cash Register & Transactions...");
+        $register_id = DB::table('cash_registers')->insertGetId([
+            'business_id' => $business_id, 'location_id' => $loc1, 'user_id' => $user_id, 'status' => 'open', 'created_at' => $today
+        ]);
+
+        // Link POS transactions to register
+        $pos_txs = DB::table('transactions')->where('business_id', $business_id)->where('type', 'sell')->where('is_direct_sale', 0)->get();
+        $reg_txs = [];
+        foreach ($pos_txs as $tx) {
+            $reg_txs[] = [
+                'cash_register_id' => $register_id, 'amount' => $tx->final_total, 'pay_method' => 'cash', 'type' => 'debit', 'transaction_type' => 'sell', 'transaction_id' => $tx->id, 'created_at' => $tx->created_at
+            ];
+
+            // Randomly assign table & waiter to some POS transactions
+            if (rand(1, 3) == 1) {
+                DB::table('transactions')->where('id', $tx->id)->update([
+                    'res_table_id' => $table_ids[array_rand($table_ids)],
+                    'res_waiter_id' => $user_id,
+                    'res_order_status' => 'served',
+                    'commission_agent' => $user_id
+                ]);
+            }
+        }
+        $chunks = array_chunk($reg_txs, 500);
+        foreach ($chunks as $chunk) { DB::table('cash_register_transactions')->insert($chunk); }
+
+        // 14. Repair Module (If exists)
+        if (Schema::hasTable('repair_statuses')) {
+            $this->command->info("Seeding Repair Statuses & Job Sheets...");
+            $rep_stats = [
+                ['name' => 'Pending', 'color' => '#ff0000', 'sort_order' => 1],
+                ['name' => 'In Progress', 'color' => '#0000ff', 'sort_order' => 2],
+                ['name' => 'Completed', 'color' => '#00ff00', 'sort_order' => 3],
+                ['name' => 'Delivered', 'color' => '#000000', 'sort_order' => 4],
+                ['name' => 'Cancelled', 'color' => '#808080', 'sort_order' => 5]
+            ];
+            $stat_ids = [];
+            foreach ($rep_stats as $rs) {
+                $stat_ids[] = DB::table('repair_statuses')->insertGetId(array_merge($rs, ['business_id' => $business_id]));
+            }
+
+            if (Schema::hasTable('repair_job_sheets')) {
+                for ($i = 1; $i <= 50; $i++) {
+                    DB::table('repair_job_sheets')->insert([
+                        'business_id' => $business_id, 'location_id' => $loc1, 'contact_id' => $cust_ids[array_rand($cust_ids)],
+                        'job_sheet_no' => 'JOB-'.str_pad($i, 5, '0', STR_PAD_LEFT), 'service_type' => 'carry_in',
+                        'brand_id' => $brand_ids[array_rand($brand_ids)], 'serial_no' => Str::random(10),
+                        'status_id' => $stat_ids[array_rand($stat_ids)], 'estimated_cost' => rand(10, 100) * 1000,
+                        'created_by' => $user_id, 'created_at' => $today
+                    ]);
+                }
+            }
+        }
+
+        // 15. Manufacturing Module (If exists)
+        if (Schema::hasTable('mfg_recipes')) {
+            $this->command->info("Seeding 50 Manufacturing Recipes...");
+            $mfg_prods = array_slice($all_v_ids, 0, 50);
+            foreach ($mfg_prods as $mp) {
+                DB::table('mfg_recipes')->insert([
+                    'product_id' => $mp['p_id'], 'variation_id' => $mp['v_id'], 'ingredients' => '[]',
+                    'final_price' => $mp['buy'], 'created_at' => $today
+                ]);
+            }
+        }
+
+        // 16. Essentials/HRM Payroll (If exists)
+        if (Schema::hasTable('essentials_payrolls')) {
+            $this->command->info("Seeding 20 Payroll Records...");
+            for ($i = 1; $i <= 20; $i++) {
+                $month = rand(1, 12);
+                $year = 2023;
+                DB::table('essentials_payrolls')->insert([
+                    'business_id' => $business_id, 'user_id' => $user_id, 'ref_no' => 'PAYROLL-'.Str::random(5),
+                    'month' => $month, 'year' => $year, 'duration' => 1, 'duration_unit' => 'month',
+                    'amount_per_unit_duration' => 5000000, 'gross_amount' => 5000000, 'created_by' => $user_id, 'created_at' => $today
+                ]);
+            }
+        }
 
         if ($driver == 'mysql') { DB::statement('SET FOREIGN_KEY_CHECKS = 1'); }
         $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 10 Diskon, 4000 Sales (inc POS, Draft, Quot, Shipment, Subs), 1000 Sell Return, 1000 Purchase, 1000 Purchase Return, 1000 Stock Transfer, 1000 Stock Adjustment, & 1000 Expense.");
