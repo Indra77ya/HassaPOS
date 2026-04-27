@@ -417,22 +417,39 @@ class CustomDummySeeder extends Seeder
             ]);
         }
 
-        // 12. Payment Accounts (5 Accounts & Transactions)
-        $this->command->info("Seeding 5 Payment Accounts & Linking Transactions...");
+        // 12. Payment Accounts (Categorized for Indonesian Balance Sheet)
+        $this->command->info("Seeding Categorized Payment Accounts & Linking Transactions...");
 
-        $asset_type_id = DB::table('account_types')->insertGetId([
-            'name' => 'Assets', 'business_id' => $business_id, 'created_at' => $today
+        $asset_lancar_type_id = DB::table('account_types')->insertGetId([
+            'name' => 'Aktiva Lancar', 'business_id' => $business_id, 'created_at' => $today
+        ]);
+        $asset_tetap_type_id = DB::table('account_types')->insertGetId([
+            'name' => 'Aktiva Tetap', 'business_id' => $business_id, 'created_at' => $today
+        ]);
+        $asset_lainnya_type_id = DB::table('account_types')->insertGetId([
+            'name' => 'Aktiva Lainnya', 'business_id' => $business_id, 'created_at' => $today
+        ]);
+        $utang_lancar_type_id = DB::table('account_types')->insertGetId([
+            'name' => 'Utang Lancar', 'business_id' => $business_id, 'created_at' => $today
+        ]);
+        $utang_jangka_panjang_type_id = DB::table('account_types')->insertGetId([
+            'name' => 'Utang Jangka Panjang', 'business_id' => $business_id, 'created_at' => $today
         ]);
         $equity_type_id = DB::table('account_types')->insertGetId([
-            'name' => 'Equity', 'business_id' => $business_id, 'created_at' => $today
+            'name' => 'Ekuitas', 'business_id' => $business_id, 'created_at' => $today
         ]);
 
         $accounts_data = [
-            ['name' => 'Kas Tunai Utama', 'account_number' => '100001', 'account_type_id' => $asset_type_id],
-            ['name' => 'Bank BCA - 8820123xxx', 'account_number' => '200001', 'account_type_id' => $asset_type_id],
-            ['name' => 'Bank Mandiri - 131001xxx', 'account_number' => '200002', 'account_type_id' => $asset_type_id],
-            ['name' => 'Petty Cash', 'account_number' => '100002', 'account_type_id' => $asset_type_id],
-            ['name' => 'Modal Pemilik', 'account_number' => '300001', 'account_type_id' => $equity_type_id]
+            ['name' => 'Kas Tunai Utama', 'account_number' => '101001', 'account_type_id' => $asset_lancar_type_id],
+            ['name' => 'Bank BCA - 8820123xxx', 'account_number' => '101002', 'account_type_id' => $asset_lancar_type_id],
+            ['name' => 'Bank Mandiri - 131001xxx', 'account_number' => '101003', 'account_type_id' => $asset_lancar_type_id],
+            ['name' => 'Petty Cash', 'account_number' => '101004', 'account_type_id' => $asset_lancar_type_id],
+            ['name' => 'Tanah & Bangunan', 'account_number' => '102001', 'account_type_id' => $asset_tetap_type_id],
+            ['name' => 'Peralatan Kantor', 'account_number' => '102002', 'account_type_id' => $asset_tetap_type_id],
+            ['name' => 'Aset Tak Berwujud', 'account_number' => '103001', 'account_type_id' => $asset_lainnya_type_id],
+            ['name' => 'Utang Bank Jangka Pendek', 'account_number' => '201001', 'account_type_id' => $utang_lancar_type_id],
+            ['name' => 'Utang Bank Jangka Panjang', 'account_number' => '202001', 'account_type_id' => $utang_jangka_panjang_type_id],
+            ['name' => 'Modal Pemilik', 'account_number' => '301001', 'account_type_id' => $equity_type_id]
         ];
         $acc_ids = [];
         foreach ($accounts_data as $ad) {
@@ -479,32 +496,95 @@ class CustomDummySeeder extends Seeder
         $chunks = array_chunk($account_txs, 500);
         foreach ($chunks as $chunk) { DB::table('account_transactions')->insert($chunk); }
 
-        // 12b. Balancing Trial Balance
-        $this->command->info("Balancing Trial Balance...");
-        $supplier_due = DB::table('transactions')->where('business_id', $business_id)->where('type', 'purchase')->sum('final_total')
-                        - DB::table('transaction_payments')->where('business_id', $business_id)->whereIn('transaction_id', DB::table('transactions')->where('type', 'purchase')->pluck('id'))->sum('amount');
+        // 12b. Balancing Balance Sheet
+        $this->command->info("Balancing Balance Sheet...");
 
-        $customer_due = DB::table('transactions')->where('business_id', $business_id)->where('type', 'sell')->sum('final_total')
-                        - DB::table('transaction_payments')->where('business_id', $business_id)->whereIn('transaction_id', DB::table('transactions')->where('type', 'sell')->pluck('id'))->sum('amount');
+        // Calculate Supplier Due
+        $supplier_due = DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'purchase')
+            ->where('status', 'received')
+            ->sum('final_total')
+            - DB::table('transaction_payments')
+            ->where('business_id', $business_id)
+            ->whereIn('transaction_id', DB::table('transactions')->where('type', 'purchase')->pluck('id'))
+            ->sum('amount');
 
-        $account_sum = DB::table('account_transactions as AT')
-                        ->join('accounts as A', 'AT.account_id', '=', 'A.id')
-                        ->where('A.business_id', $business_id)
-                        ->whereNull('AT.deleted_at')
-                        ->sum(DB::raw("IF(AT.type='credit', AT.amount, -1*AT.amount)"));
+        // Calculate Customer Due
+        $customer_due = DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->sum('final_total')
+            - DB::table('transaction_payments')
+            ->where('business_id', $business_id)
+            ->whereIn('transaction_id', DB::table('transactions')->where('type', 'sell')->pluck('id'))
+            ->sum('amount');
 
-        // Trial Balance Logic from view:
-        // Debit Side = Customer Due + Account Balances
-        // Credit Side = Supplier Due
-        // To balance: We need (Customer Due + Account Balances) = Supplier Due
-        $current_debit = $customer_due + $account_sum;
-        $diff = $supplier_due - $current_debit;
+        // Calculate Closing Stock (simplified for seeding)
+        $closing_stock = DB::table('variation_location_details')
+            ->join('variations', 'variation_location_details.variation_id', '=', 'variations.id')
+            ->join('products', 'variations.product_id', '=', 'products.id')
+            ->where('products.business_id', $business_id)
+            ->sum(DB::raw('qty_available * variations.default_purchase_price'));
 
-        if ($diff != 0) {
-            $balancing_account = end($acc_ids); // Modal Pemilik
+        // Calculate Net Profit (simplified for seeding)
+        $total_sell = DB::table('transactions')->where('business_id', $business_id)->where('type', 'sell')->where('status', 'final')->sum('final_total');
+        $total_purchase = DB::table('transactions')->where('business_id', $business_id)->where('type', 'purchase')->where('status', 'received')->sum('final_total');
+        $total_expense = DB::table('transactions')->where('business_id', $business_id)->where('type', 'expense')->sum('final_total');
+        // Profit = Sales - Purchases + ClosingStock - Expenses
+        $retained_earnings = $total_sell - $total_purchase + $closing_stock - $total_expense;
+
+        // Calculate Account Balances (Current)
+        $asset_accounts = DB::table('accounts')
+            ->where('business_id', $business_id)
+            ->whereIn('account_type_id', [$asset_lancar_type_id, $asset_tetap_type_id, $asset_lainnya_type_id])
+            ->pluck('id')->toArray();
+
+        $liability_accounts = DB::table('accounts')
+            ->where('business_id', $business_id)
+            ->whereIn('account_type_id', [$utang_lancar_type_id, $utang_jangka_panjang_type_id])
+            ->pluck('id')->toArray();
+
+        $equity_accounts = DB::table('accounts')
+            ->where('business_id', $business_id)
+            ->where('account_type_id', $equity_type_id)
+            ->where('name', '!=', 'Modal Pemilik')
+            ->pluck('id')->toArray();
+
+        $asset_bal = DB::table('account_transactions')
+            ->whereIn('account_id', $asset_accounts)
+            ->whereNull('deleted_at')
+            ->sum(DB::raw("IF(type='debit', amount, -1*amount)"));
+
+        $liability_bal = DB::table('account_transactions')
+            ->whereIn('account_id', $liability_accounts)
+            ->whereNull('deleted_at')
+            ->sum(DB::raw("IF(type='credit', amount, -1*amount)"));
+
+        $other_equity_bal = DB::table('account_transactions')
+            ->whereIn('account_id', $equity_accounts)
+            ->whereNull('deleted_at')
+            ->sum(DB::raw("IF(type='credit', amount, -1*amount)"));
+
+        // Balance Sheet Equation:
+        // Assets = Liabilities + Equity
+        // (CustomerDue + ClosingStock + AssetAccountBal) = (SupplierDue + LiabilityAccountBal) + (ModalPemilik + OtherEquityBal + RetainedEarnings)
+
+        $total_assets = $customer_due + $closing_stock + $asset_bal;
+        $total_pasiva_except_modal = $supplier_due + $liability_bal + $other_equity_bal + $retained_earnings;
+
+        $modal_needed = $total_assets - $total_pasiva_except_modal;
+
+        $modal_account_id = DB::table('accounts')
+            ->where('business_id', $business_id)
+            ->where('name', 'Modal Pemilik')
+            ->value('id');
+
+        if ($modal_account_id) {
             DB::table('account_transactions')->insert([
-                'account_id' => $balancing_account, 'type' => ($diff > 0 ? 'credit' : 'debit'), 'sub_type' => 'opening_balance',
-                'amount' => abs($diff), 'reff_no' => 'BAL-'.Str::random(5),
+                'account_id' => $modal_account_id, 'type' => ($modal_needed > 0 ? 'credit' : 'debit'), 'sub_type' => 'opening_balance',
+                'amount' => abs($modal_needed), 'reff_no' => 'ADJ-'.Str::random(5),
                 'operation_date' => $today, 'created_by' => $user_id, 'created_at' => $today
             ]);
         }
