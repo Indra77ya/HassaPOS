@@ -417,22 +417,31 @@ class CustomDummySeeder extends Seeder
             ]);
         }
 
-        // 12. Payment Accounts (5 Accounts & Transactions)
-        $this->command->info("Seeding 5 Payment Accounts & Linking Transactions...");
+        // 12. Payment Accounts (Categorized for Indonesian Balance Sheet)
+        $this->command->info("Seeding Categorized Payment Accounts & Linking Transactions...");
 
-        $asset_type_id = DB::table('account_types')->insertGetId([
-            'name' => 'Assets', 'business_id' => $business_id, 'created_at' => $today
+        $asset_lancar_type_id = DB::table('account_types')->insertGetId([
+            'name' => 'Aktiva Lancar', 'business_id' => $business_id, 'created_at' => $today
+        ]);
+        $asset_tetap_type_id = DB::table('account_types')->insertGetId([
+            'name' => 'Aktiva Tetap', 'business_id' => $business_id, 'created_at' => $today
+        ]);
+        $utang_lancar_type_id = DB::table('account_types')->insertGetId([
+            'name' => 'Utang Lancar', 'business_id' => $business_id, 'created_at' => $today
         ]);
         $equity_type_id = DB::table('account_types')->insertGetId([
-            'name' => 'Equity', 'business_id' => $business_id, 'created_at' => $today
+            'name' => 'Ekuitas', 'business_id' => $business_id, 'created_at' => $today
         ]);
 
         $accounts_data = [
-            ['name' => 'Kas Tunai Utama', 'account_number' => '100001', 'account_type_id' => $asset_type_id],
-            ['name' => 'Bank BCA - 8820123xxx', 'account_number' => '200001', 'account_type_id' => $asset_type_id],
-            ['name' => 'Bank Mandiri - 131001xxx', 'account_number' => '200002', 'account_type_id' => $asset_type_id],
-            ['name' => 'Petty Cash', 'account_number' => '100002', 'account_type_id' => $asset_type_id],
-            ['name' => 'Modal Pemilik', 'account_number' => '300001', 'account_type_id' => $equity_type_id]
+            ['name' => 'Kas Tunai Utama', 'account_number' => '101001', 'account_type_id' => $asset_lancar_type_id],
+            ['name' => 'Bank BCA - 8820123xxx', 'account_number' => '101002', 'account_type_id' => $asset_lancar_type_id],
+            ['name' => 'Bank Mandiri - 131001xxx', 'account_number' => '101003', 'account_type_id' => $asset_lancar_type_id],
+            ['name' => 'Petty Cash', 'account_number' => '101004', 'account_type_id' => $asset_lancar_type_id],
+            ['name' => 'Tanah & Bangunan', 'account_number' => '102001', 'account_type_id' => $asset_tetap_type_id],
+            ['name' => 'Peralatan Kantor', 'account_number' => '102002', 'account_type_id' => $asset_tetap_type_id],
+            ['name' => 'Utang Bank Jangka Pendek', 'account_number' => '201001', 'account_type_id' => $utang_lancar_type_id],
+            ['name' => 'Modal Pemilik', 'account_number' => '301001', 'account_type_id' => $equity_type_id]
         ];
         $acc_ids = [];
         foreach ($accounts_data as $ad) {
