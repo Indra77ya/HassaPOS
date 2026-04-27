@@ -47,7 +47,7 @@ class CustomDummySeeder extends Seeder
             'transaction_sell_lines', 'purchase_lines', 'business_locations', 'product_locations',
             'units', 'tax_rates', 'expense_categories', 'customer_groups', 'selling_price_groups',
             'warranties', 'variation_templates', 'variation_value_templates', 'variation_group_prices',
-            'discounts', 'stock_adjustment_lines'
+            'discounts', 'stock_adjustment_lines', 'accounts', 'account_transactions'
         ];
         foreach ($tables as $table) {
             if (Schema::hasTable($table)) { DB::table($table)->delete(); }
@@ -331,6 +331,58 @@ class CustomDummySeeder extends Seeder
                 'transaction_id' => $tid, 'amount' => $amt, 'method' => 'cash', 'created_at' => $dt
             ]);
         }
+
+        // 12. Payment Accounts (5 Accounts & Transactions)
+        $this->command->info("Seeding 5 Payment Accounts & Linking Transactions...");
+        $accounts_data = [
+            ['name' => 'Kas Tunai Utama', 'account_number' => '100001', 'account_type' => 'saving_current'],
+            ['name' => 'Bank BCA - 8820123xxx', 'account_number' => '200001', 'account_type' => 'saving_current'],
+            ['name' => 'Bank Mandiri - 131001xxx', 'account_number' => '200002', 'account_type' => 'saving_current'],
+            ['name' => 'Petty Cash', 'account_number' => '100002', 'account_type' => 'saving_current'],
+            ['name' => 'Modal Pemilik', 'account_number' => '300001', 'account_type' => 'capital']
+        ];
+        $acc_ids = [];
+        foreach ($accounts_data as $ad) {
+            $aid = DB::table('accounts')->insertGetId(array_merge($ad, [
+                'business_id' => $business_id, 'created_by' => $user_id, 'created_at' => $today
+            ]));
+            $acc_ids[] = $aid;
+
+            // Opening Balance
+            DB::table('account_transactions')->insert([
+                'account_id' => $aid, 'type' => 'credit', 'sub_type' => 'opening_balance',
+                'amount' => rand(5000, 50000) * 1000, 'reff_no' => 'OB-'.Str::random(5),
+                'operation_date' => Carbon::now()->subMonths(6)->format('Y-m-d H:i:s'),
+                'created_by' => $user_id, 'created_at' => $today
+            ]);
+        }
+
+        // Link existing payments to accounts
+        $payments = DB::table('transaction_payments')->limit(2000)->get();
+        $account_txs = [];
+        foreach ($payments as $pay) {
+            $aid = $acc_ids[array_rand($acc_ids)];
+            $tx = DB::table('transactions')->where('id', $pay->transaction_id)->first();
+
+            if ($tx) {
+                // If Sale/POS -> Account gets money (Credit in bookkeeping sometimes, but 'debit' in many POS systems for increasing balance)
+                // In this system: 'debit' usually increases balance, 'credit' decreases? Let's check AccountTransaction model if possible.
+                // Usually: Debit = Inflow (for Asset accounts), Credit = Outflow.
+                $type = in_array($tx->type, ['sell', 'purchase_return', 'sell_transfer']) ? 'debit' : 'credit';
+
+                $account_txs[] = [
+                    'account_id' => $aid, 'type' => $type, 'amount' => $pay->amount,
+                    'reff_no' => 'PAY-'.Str::random(5), 'operation_date' => $pay->created_at,
+                    'created_by' => $user_id, 'transaction_id' => $tx->id,
+                    'transaction_payment_id' => $pay->id, 'created_at' => $today
+                ];
+
+                // Update payment with account_id
+                DB::table('transaction_payments')->where('id', $pay->id)->update(['account_id' => $aid]);
+            }
+        }
+        $chunks = array_chunk($account_txs, 500);
+        foreach ($chunks as $chunk) { DB::table('account_transactions')->insert($chunk); }
 
         if ($driver == 'mysql') { DB::statement('SET FOREIGN_KEY_CHECKS = 1'); }
         $this->command->info("Dummy Seeder Berhasil! 1000 Produk, 10 Diskon, 4000 Sales (inc POS, Draft, Quot, Shipment, Subs), 1000 Sell Return, 1000 Purchase, 1000 Purchase Return, 1000 Stock Transfer, 1000 Stock Adjustment, & 1000 Expense.");
