@@ -499,73 +499,63 @@ class CustomDummySeeder extends Seeder
         // 12b. Balancing Balance Sheet
         $this->command->info("Balancing Balance Sheet...");
 
+        $transactionUtil = new \App\Utils\TransactionUtil();
+
         // Calculate Supplier Due
-        $supplier_due = DB::table('transactions')
-            ->where('business_id', $business_id)
-            ->where('type', 'purchase')
-            ->where('status', 'received')
-            ->sum('final_total')
-            - DB::table('transaction_payments')
-            ->where('business_id', $business_id)
-            ->whereIn('transaction_id', DB::table('transactions')->where('type', 'purchase')->pluck('id'))
-            ->sum('amount');
+        $purchase_details = $transactionUtil->getPurchaseTotals($business_id, null, now()->format('Y-m-d'));
+        $supplier_due = $purchase_details['purchase_due'];
 
         // Calculate Customer Due
-        $customer_due = DB::table('transactions')
-            ->where('business_id', $business_id)
-            ->where('type', 'sell')
-            ->where('status', 'final')
-            ->sum('final_total')
-            - DB::table('transaction_payments')
-            ->where('business_id', $business_id)
-            ->whereIn('transaction_id', DB::table('transactions')->where('type', 'sell')->pluck('id'))
-            ->sum('amount');
+        $sell_details = $transactionUtil->getSellTotals($business_id, null, now()->format('Y-m-d'));
+        $transaction_types = ['sell_return'];
+        $sell_return_details = $transactionUtil->getTransactionTotals($business_id, $transaction_types, null, now()->format('Y-m-d'));
+        $customer_due = $sell_details['invoice_due'] - $sell_return_details['total_sell_return_inc_tax'];
 
-        // Calculate Closing Stock (simplified for seeding)
-        $closing_stock = DB::table('variation_location_details')
-            ->join('variations', 'variation_location_details.variation_id', '=', 'variations.id')
-            ->join('products', 'variations.product_id', '=', 'products.id')
-            ->where('products.business_id', $business_id)
-            ->sum(DB::raw('qty_available * variations.default_purchase_price'));
+        // Calculate Closing Stock
+        $closing_stock = $transactionUtil->getOpeningClosingStock($business_id, now()->format('Y-m-d'));
 
-        // Calculate Net Profit (simplified for seeding)
-        $total_sell = DB::table('transactions')->where('business_id', $business_id)->where('type', 'sell')->where('status', 'final')->sum('final_total');
-        $total_purchase = DB::table('transactions')->where('business_id', $business_id)->where('type', 'purchase')->where('status', 'received')->sum('final_total');
-        $total_expense = DB::table('transactions')->where('business_id', $business_id)->where('type', 'expense')->sum('final_total');
-        // Profit = Sales - Purchases + ClosingStock - Expenses
-        $retained_earnings = $total_sell - $total_purchase + $closing_stock - $total_expense;
+        // Calculate Net Profit (Retained Earnings)
+        $pl = $transactionUtil->getProfitLossDetails($business_id, null, '1970-01-01', now()->format('Y-m-d'));
+        $retained_earnings = $pl['net_profit'];
 
-        // Calculate Account Balances (Current)
-        $asset_accounts = DB::table('accounts')
-            ->where('business_id', $business_id)
-            ->whereIn('account_type_id', [$asset_lancar_type_id, $asset_tetap_type_id, $asset_lainnya_type_id])
-            ->pluck('id')->toArray();
+        // Calculate Account Balances
+        $accounts = DB::table('accounts')
+            ->leftjoin('account_transactions as AT', 'AT.account_id', '=', 'accounts.id')
+            ->leftjoin('account_types as ATY', 'accounts.account_type_id', '=', 'ATY.id')
+            ->whereNull('AT.deleted_at')
+            ->where('accounts.business_id', $business_id)
+            ->select([
+                'accounts.id',
+                'accounts.name',
+                'ATY.name as type_name',
+                DB::raw("SUM( IF(AT.type='credit', amount, 0) ) as credit_balance"),
+                DB::raw("SUM( IF(AT.type='debit', amount, 0) ) as debit_balance"),
+            ])
+            ->groupBy('accounts.id', 'accounts.name', 'ATY.name')
+            ->get();
 
-        $liability_accounts = DB::table('accounts')
-            ->where('business_id', $business_id)
-            ->whereIn('account_type_id', [$utang_lancar_type_id, $utang_jangka_panjang_type_id])
-            ->pluck('id')->toArray();
+        $asset_bal = 0;
+        $liability_bal = 0;
+        $other_equity_bal = 0;
+        $modal_account_id = null;
 
-        $equity_accounts = DB::table('accounts')
-            ->where('business_id', $business_id)
-            ->where('account_type_id', $equity_type_id)
-            ->where('name', '!=', 'Modal Pemilik')
-            ->pluck('id')->toArray();
+        foreach ($accounts as $acc) {
+            $type = strtolower($acc->type_name);
+            if ($acc->name == 'Modal Pemilik') {
+                $modal_account_id = $acc->id;
+                continue;
+            }
 
-        $asset_bal = DB::table('account_transactions')
-            ->whereIn('account_id', $asset_accounts)
-            ->whereNull('deleted_at')
-            ->sum(DB::raw("IF(type='debit', amount, -1*amount)"));
-
-        $liability_bal = DB::table('account_transactions')
-            ->whereIn('account_id', $liability_accounts)
-            ->whereNull('deleted_at')
-            ->sum(DB::raw("IF(type='credit', amount, -1*amount)"));
-
-        $other_equity_bal = DB::table('account_transactions')
-            ->whereIn('account_id', $equity_accounts)
-            ->whereNull('deleted_at')
-            ->sum(DB::raw("IF(type='credit', amount, -1*amount)"));
+            if (str_contains($type, 'liability') || str_contains($type, 'utang') || str_contains($type, 'kewajiban') || str_contains($type, 'pasiva')) {
+                $liability_bal += ($acc->credit_balance - $acc->debit_balance);
+            } elseif (str_contains($type, 'asset') || str_contains($type, 'aktiva') || str_contains($type, 'harta') || str_contains($type, 'saving') || str_contains($type, 'current')) {
+                $asset_bal += ($acc->debit_balance - $acc->credit_balance);
+            } elseif (str_contains($type, 'equity') || str_contains($type, 'modal') || str_contains($type, 'ekuitas') || str_contains($type, 'capital')) {
+                $other_equity_bal += ($acc->credit_balance - $acc->debit_balance);
+            } else {
+                $asset_bal += ($acc->debit_balance - $acc->credit_balance);
+            }
+        }
 
         // Balance Sheet Equation:
         // Assets = Liabilities + Equity
@@ -576,14 +566,9 @@ class CustomDummySeeder extends Seeder
 
         $modal_needed = $total_assets - $total_pasiva_except_modal;
 
-        $modal_account_id = DB::table('accounts')
-            ->where('business_id', $business_id)
-            ->where('name', 'Modal Pemilik')
-            ->value('id');
-
         if ($modal_account_id) {
             DB::table('account_transactions')->insert([
-                'account_id' => $modal_account_id, 'type' => ($modal_needed > 0 ? 'credit' : 'debit'), 'sub_type' => 'opening_balance',
+                'account_id' => $modal_account_id, 'type' => ($modal_needed >= 0 ? 'credit' : 'debit'), 'sub_type' => 'opening_balance',
                 'amount' => abs($modal_needed), 'reff_no' => 'ADJ-'.Str::random(5),
                 'operation_date' => $today, 'created_by' => $user_id, 'created_at' => $today
             ]);

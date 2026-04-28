@@ -95,8 +95,8 @@ class AccountReportsController extends Controller
                 'accounts.name as account_name',
                 'ATY.name as type_name',
                 'PATY.name as parent_type_name',
-                DB::raw("SUM( IF(AT.type='credit', amount, -1*amount) ) as credit_balance"),
-                DB::raw("SUM( IF(AT.type='debit', amount, -1*amount) ) as debit_balance"),
+                DB::raw("SUM( IF(AT.type='credit', amount, 0) ) as credit_balance"),
+                DB::raw("SUM( IF(AT.type='debit', amount, 0) ) as debit_balance"),
             ])
             ->groupBy('accounts.id', 'accounts.name', 'ATY.name', 'PATY.name')
             ->get();
@@ -116,14 +116,14 @@ class AccountReportsController extends Controller
                 $type = strtolower($account->type_name . ' ' . $account->parent_type_name);
 
                 if (str_contains($type, 'liability') || str_contains($type, 'utang') || str_contains($type, 'kewajiban') || str_contains($type, 'pasiva')) {
-                    $account->balance = $account->credit_balance;
+                    $account->balance = $account->credit_balance - $account->debit_balance;
                     if (str_contains($type, 'long term') || str_contains($type, 'jangka panjang')) {
                         $liabilities['long_term_liabilities'][] = $account;
                     } else {
                         $liabilities['current_liabilities'][] = $account;
                     }
                 } elseif (str_contains($type, 'asset') || str_contains($type, 'aktiva') || str_contains($type, 'harta') || str_contains($type, 'saving') || str_contains($type, 'current')) {
-                    $account->balance = $account->debit_balance;
+                    $account->balance = $account->debit_balance - $account->credit_balance;
                     if (str_contains($type, 'fixed') || str_contains($type, 'tetap')) {
                         $assets['fixed_assets'][] = $account;
                     } elseif (str_contains($type, 'other') || str_contains($type, 'lainnya')) {
@@ -132,10 +132,10 @@ class AccountReportsController extends Controller
                         $assets['current_assets'][] = $account;
                     }
                 } elseif (str_contains($type, 'equity') || str_contains($type, 'modal') || str_contains($type, 'ekuitas') || str_contains($type, 'capital')) {
-                    $account->balance = $account->credit_balance;
+                    $account->balance = $account->credit_balance - $account->debit_balance;
                     $equity[] = $account;
                 } else {
-                    $account->balance = $account->debit_balance;
+                    $account->balance = $account->debit_balance - $account->credit_balance;
                     $assets['current_assets'][] = $account;
                 }
             }
