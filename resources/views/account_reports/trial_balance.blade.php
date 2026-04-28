@@ -182,7 +182,7 @@
 
                 // 3. Income (Credit nature)
                 if (result.total_sell > 0) {
-                    rows += render_row("{{__('sale.total_sell')}}", 0, result.total_sell);
+                    rows += render_row("{{__('report.total_sell')}}", 0, result.total_sell);
                     total_credit += parseFloat(result.total_sell);
                 }
                 if (result.total_purchase_return > 0) {
@@ -200,7 +200,7 @@
 
                 // 4. Expenses (Debit nature)
                 if (result.total_purchase > 0) {
-                    rows += render_row("{{__('lang_v1.total_purchase')}}", result.total_purchase, 0);
+                    rows += render_row("{{__('report.total_purchase')}}", result.total_purchase, 0);
                     total_debit += parseFloat(result.total_purchase);
                 }
                 if (result.total_expense > 0) {
