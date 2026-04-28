@@ -512,7 +512,7 @@ class CustomDummySeeder extends Seeder
         $customer_due = $sell_details['invoice_due'] - $sell_return_details['total_sell_return_inc_tax'];
 
         // Calculate Closing Stock
-        $closing_stock = $transactionUtil->getOpeningClosingStock($business_id, now()->format('Y-m-d'));
+        $closing_stock = $transactionUtil->getOpeningClosingStock($business_id, now()->format('Y-m-d'), null);
 
         // Calculate Net Profit (Retained Earnings)
         $pl = $transactionUtil->getProfitLossDetails($business_id, null, '1970-01-01', now()->format('Y-m-d'));

@@ -46,22 +46,26 @@
                 }
                 .table-balance-sheet th, .table-balance-sheet td {
                     border: 1px solid #000 !important;
+                    padding: 8px !important;
                 }
                 .table-balance-sheet .header-side {
                     font-weight: bold;
                     text-transform: uppercase;
-                    font-size: 1.1em;
+                    font-size: 1.2em;
+                    background-color: #f9f9f9;
                 }
                 .table-balance-sheet .section-title {
                     font-weight: bold;
                     text-align: center;
+                    background-color: #eeeeee;
                 }
                 .table-balance-sheet .total-row {
                     font-weight: bold;
                 }
                 .table-balance-sheet .grand-total-row {
                     font-weight: bold;
-                    background-color: #f5f5f5;
+                    background-color: #e0e0e0;
+                    font-size: 1.1em;
                 }
                 .v-align-top {
                     vertical-align: top !important;
@@ -72,11 +76,13 @@
                 }
                 .table-inner td, .table-inner th {
                     border: none !important;
+                    padding: 4px 8px !important;
                 }
-                .border-bottom {
-                    border-bottom: 1px solid #000 !important;
+                .border-top-bold {
+                    border-top: 2px solid #000 !important;
                 }
             </style>
+            <div class="table-responsive">
             <table class="table table-balance-sheet">
                 <thead>
                     <tr>
@@ -109,24 +115,24 @@
                                 </tr>
                                 <tbody id="current_assets_accounts"></tbody>
                                 <tr class="total-row">
-                                    <td class="border-top">@lang('account.total_current_assets')</td>
-                                    <td class="text-right border-top" id="total_current_assets"></td>
+                                    <td class="border-top-bold">@lang('account.total_current_assets')</td>
+                                    <td class="text-right border-top-bold" id="total_current_assets"></td>
                                 </tr>
                                 <tr>
                                     <th colspan="2" class="section-title">@lang('account.fixed_assets')</th>
                                 </tr>
                                 <tbody id="fixed_assets_accounts"></tbody>
                                 <tr class="total-row">
-                                    <td class="border-top">@lang('account.total_fixed_assets')</td>
-                                    <td class="text-right border-top" id="total_fixed_assets"></td>
+                                    <td class="border-top-bold">@lang('account.total_fixed_assets')</td>
+                                    <td class="text-right border-top-bold" id="total_fixed_assets"></td>
                                 </tr>
                                 <tr>
                                     <th colspan="2" class="section-title">@lang('account.other_assets')</th>
                                 </tr>
                                 <tbody id="other_assets_accounts"></tbody>
                                 <tr class="total-row">
-                                    <td class="border-top">@lang('account.total_other_assets')</td>
-                                    <td class="text-right border-top" id="total_other_assets"></td>
+                                    <td class="border-top-bold">@lang('account.total_other_assets')</td>
+                                    <td class="text-right border-top-bold" id="total_other_assets"></td>
                                 </tr>
                             </table>
                         </td>
@@ -145,16 +151,16 @@
                                 </tr>
                                 <tbody id="current_liabilities_accounts"></tbody>
                                 <tr class="total-row">
-                                    <td class="border-top">@lang('account.total_current_liabilities')</td>
-                                    <td class="text-right border-top" id="total_current_liabilities"></td>
+                                    <td class="border-top-bold">@lang('account.total_current_liabilities')</td>
+                                    <td class="text-right border-top-bold" id="total_current_liabilities"></td>
                                 </tr>
                                 <tr>
                                     <th colspan="2" class="section-title">@lang('account.long_term_liabilities')</th>
                                 </tr>
                                 <tbody id="long_term_liabilities_accounts"></tbody>
                                 <tr class="total-row">
-                                    <td class="border-top">@lang('account.total_long_term_liabilities')</td>
-                                    <td class="text-right border-top" id="total_long_term_liabilities"></td>
+                                    <td class="border-top-bold">@lang('account.total_long_term_liabilities')</td>
+                                    <td class="text-right border-top-bold" id="total_long_term_liabilities"></td>
                                 </tr>
                                 <tr>
                                     <th colspan="2" class="section-title">@lang('account.equity')</th>
@@ -169,8 +175,8 @@
                                     </td>
                                 </tr>
                                 <tr class="total-row">
-                                    <td class="border-top">@lang('account.total_equity')</td>
-                                    <td class="text-right border-top" id="total_equity"></td>
+                                    <td class="border-top-bold">@lang('account.total_equity')</td>
+                                    <td class="text-right border-top-bold" id="total_equity"></td>
                                 </tr>
                             </table>
                         </td>
@@ -189,6 +195,7 @@
                     </tr>
                 </tfoot>
             </table>
+            </div>
         </div>
         <div class="box-footer">
             <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white no-print pull-right"onclick="window.print()">

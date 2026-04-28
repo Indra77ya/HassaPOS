@@ -114,26 +114,27 @@ class AccountReportsController extends Controller
 
             foreach ($accounts as $account) {
                 $type = strtolower($account->type_name . ' ' . $account->parent_type_name);
+                $name = strtolower($account->account_name);
 
-                if (str_contains($type, 'liability') || str_contains($type, 'utang') || str_contains($type, 'kewajiban') || str_contains($type, 'pasiva')) {
+                if (str_contains($type, 'liability') || str_contains($type, 'utang') || str_contains($type, 'kewajiban') || str_contains($type, 'pasiva') || str_contains($name, 'utang') || str_contains($name, 'kewajiban')) {
                     $account->balance = $account->credit_balance - $account->debit_balance;
-                    if (str_contains($type, 'long term') || str_contains($type, 'jangka panjang')) {
+                    if (str_contains($type, 'long term') || str_contains($type, 'jangka panjang') || str_contains($name, 'jangka panjang')) {
                         $liabilities['long_term_liabilities'][] = $account;
                     } else {
                         $liabilities['current_liabilities'][] = $account;
                     }
-                } elseif (str_contains($type, 'asset') || str_contains($type, 'aktiva') || str_contains($type, 'harta') || str_contains($type, 'saving') || str_contains($type, 'current')) {
+                } elseif (str_contains($type, 'equity') || str_contains($type, 'modal') || str_contains($type, 'ekuitas') || str_contains($type, 'capital') || str_contains($name, 'modal') || str_contains($name, 'ekuitas')) {
+                    $account->balance = $account->credit_balance - $account->debit_balance;
+                    $equity[] = $account;
+                } elseif (str_contains($type, 'asset') || str_contains($type, 'aktiva') || str_contains($type, 'harta') || str_contains($type, 'saving') || str_contains($type, 'current') || str_contains($name, 'kas') || str_contains($name, 'bank') || str_contains($name, 'piutang')) {
                     $account->balance = $account->debit_balance - $account->credit_balance;
-                    if (str_contains($type, 'fixed') || str_contains($type, 'tetap')) {
+                    if (str_contains($type, 'fixed') || str_contains($type, 'tetap') || str_contains($name, 'tetap') || str_contains($name, 'tanah') || str_contains($name, 'bangunan') || str_contains($name, 'mesin') || str_contains($name, 'peralatan')) {
                         $assets['fixed_assets'][] = $account;
-                    } elseif (str_contains($type, 'other') || str_contains($type, 'lainnya')) {
+                    } elseif (str_contains($type, 'other') || str_contains($type, 'lainnya') || str_contains($name, 'lainnya')) {
                         $assets['other_assets'][] = $account;
                     } else {
                         $assets['current_assets'][] = $account;
                     }
-                } elseif (str_contains($type, 'equity') || str_contains($type, 'modal') || str_contains($type, 'ekuitas') || str_contains($type, 'capital')) {
-                    $account->balance = $account->credit_balance - $account->debit_balance;
-                    $equity[] = $account;
                 } else {
                     $account->balance = $account->debit_balance - $account->credit_balance;
                     $assets['current_assets'][] = $account;
