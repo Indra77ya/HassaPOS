@@ -516,7 +516,7 @@ class CustomDummySeeder extends Seeder
 
         // Calculate Net Profit (Retained Earnings)
         $pl = $transactionUtil->getProfitLossDetails($business_id, null, '1970-01-01', now()->format('Y-m-d'));
-        $retained_earnings = $pl['net_profit'];
+        $retained_earnings = $pl['net_profit'] ?? 0;
 
         // Calculate Account Balances
         $accounts = DB::table('accounts')
@@ -541,17 +541,18 @@ class CustomDummySeeder extends Seeder
 
         foreach ($accounts as $acc) {
             $type = strtolower($acc->type_name);
+            $name = strtolower($acc->name);
             if ($acc->name == 'Modal Pemilik') {
                 $modal_account_id = $acc->id;
                 continue;
             }
 
-            if (str_contains($type, 'liability') || str_contains($type, 'utang') || str_contains($type, 'kewajiban') || str_contains($type, 'pasiva')) {
+            if (str_contains($type, 'liability') || str_contains($type, 'utang') || str_contains($type, 'kewajiban') || str_contains($type, 'pasiva') || str_contains($name, 'utang') || str_contains($name, 'kewajiban')) {
                 $liability_bal += ($acc->credit_balance - $acc->debit_balance);
-            } elseif (str_contains($type, 'asset') || str_contains($type, 'aktiva') || str_contains($type, 'harta') || str_contains($type, 'saving') || str_contains($type, 'current')) {
-                $asset_bal += ($acc->debit_balance - $acc->credit_balance);
-            } elseif (str_contains($type, 'equity') || str_contains($type, 'modal') || str_contains($type, 'ekuitas') || str_contains($type, 'capital')) {
+            } elseif (str_contains($type, 'equity') || str_contains($type, 'modal') || str_contains($type, 'ekuitas') || str_contains($type, 'capital') || str_contains($name, 'modal') || str_contains($name, 'ekuitas')) {
                 $other_equity_bal += ($acc->credit_balance - $acc->debit_balance);
+            } elseif (str_contains($type, 'asset') || str_contains($type, 'aktiva') || str_contains($type, 'harta') || str_contains($type, 'saving') || str_contains($type, 'current') || str_contains($name, 'kas') || str_contains($name, 'bank') || str_contains($name, 'piutang')) {
+                $asset_bal += ($acc->debit_balance - $acc->credit_balance);
             } else {
                 $asset_bal += ($acc->debit_balance - $acc->credit_balance);
             }
