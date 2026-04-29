@@ -17,6 +17,11 @@
         	{!! Form::label('parent_account_type_id', __( 'lang_v1.parent_account_type' ) . ':') !!}
           	{!! Form::select('parent_account_type_id', $account_types->pluck('name', 'id'), null, ['class' => 'form-control', 'placeholder' => __( 'messages.please_select' )]); !!}
       </div>
+
+      <div class="form-group">
+		{!! Form::label('balance_type', __( 'account.balance' ) . ':*') !!}
+		{!! Form::select('balance_type', ['debit' => __('account.debit'), 'credit' => __('account.credit')], null, ['class' => 'form-control', 'required', 'placeholder' => __( 'messages.please_select' )]); !!}
+      </div>
     </div>
 
     <div class="modal-footer">

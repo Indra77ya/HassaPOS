@@ -145,6 +145,11 @@ class Account extends Model
      */
     public function getBalanceType($type_name = null, $parent_type_name = null)
     {
+        // Try to get from database first
+        if (!empty($this->account_type->balance_type)) {
+            return $this->account_type->balance_type;
+        }
+
         $type = '';
         if (!empty($type_name)) {
             $type = ($parent_type_name ?? '') . ' ' . $type_name;

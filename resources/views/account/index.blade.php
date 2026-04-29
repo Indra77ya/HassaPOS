@@ -148,6 +148,7 @@
                                                 <thead>
                                                     <tr>
                                                         <th>@lang('lang_v1.name')</th>
+                                                        <th>@lang('account.balance')</th>
                                                         <th>@lang('messages.action')</th>
                                                     </tr>
                                                 </thead>
@@ -155,6 +156,7 @@
                                                     @foreach ($account_types as $account_type)
                                                         <tr class="account_type_{{ $account_type->id }}">
                                                             <th>{{ $account_type->name }}</th>
+                                                            <td>@if(!empty($account_type->balance_type)) @lang('account.' . $account_type->balance_type) @endif</td>
                                                             <td>
 
                                                                 {!! Form::open([
@@ -175,6 +177,7 @@
                                                         @foreach ($account_type->sub_types as $sub_type)
                                                             <tr>
                                                                 <td>&nbsp;&nbsp;-- {{ $sub_type->name }}</td>
+                                                                <td>@if(!empty($sub_type->balance_type)) @lang('account.' . $sub_type->balance_type) @endif</td>
                                                                 <td>
 
 
