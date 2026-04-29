@@ -131,6 +131,13 @@
                                                 data-href="{{ action([\App\Http\Controllers\AccountTypeController::class, 'create']) }}"
                                                 data-container="#account_type_modal">
                                                 <i class="fa fa-plus"></i> @lang('messages.add')</button>
+
+                                            <form action="{{ action([\App\Http\Controllers\AccountTypeController::class, 'seedDefault']) }}" method="POST" class="pull-right tw-mr-2">
+                                                @csrf
+                                                <button type="submit" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm">
+                                                    <i class="fa fa-magic"></i> @lang('account.add_default_account_types')
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                     <br>
