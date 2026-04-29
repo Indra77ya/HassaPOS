@@ -195,107 +195,109 @@ class AccountTypeController extends Controller
 
             $default_types = [
                 // 1. AKTIVA LANCAR
-                ['name' => 'AKTIVA LANCAR', 'parent' => null],
-                ['name' => 'Kas dan Setara Kas', 'parent' => 'AKTIVA LANCAR'],
-                ['name' => 'Bank', 'parent' => 'AKTIVA LANCAR'],
-                ['name' => 'Piutang Usaha', 'parent' => 'AKTIVA LANCAR'],
-                ['name' => 'Piutang Lain-lain', 'parent' => 'AKTIVA LANCAR'],
-                ['name' => 'Persediaan Barang Dagang', 'parent' => 'AKTIVA LANCAR'],
-                ['name' => 'Persediaan Bahan Baku', 'parent' => 'AKTIVA LANCAR'],
-                ['name' => 'Persediaan Bahan Pembantu', 'parent' => 'AKTIVA LANCAR'],
-                ['name' => 'Perlengkapan Toko', 'parent' => 'AKTIVA LANCAR'],
-                ['name' => 'Perlengkapan Kantor', 'parent' => 'AKTIVA LANCAR'],
-                ['name' => 'Biaya Dibayar Dimuka', 'parent' => 'AKTIVA LANCAR'],
-                ['name' => 'Sewa Dibayar Dimuka', 'parent' => 'AKTIVA LANCAR'],
-                ['name' => 'Asuransi Dibayar Dimuka', 'parent' => 'AKTIVA LANCAR'],
-                ['name' => 'Pajak Dibayar Dimuka (PPN In)', 'parent' => 'AKTIVA LANCAR'],
-                ['name' => 'Uang Muka Pembelian', 'parent' => 'AKTIVA LANCAR'],
+                ['key' => 'aktiva_lancar', 'parent' => null],
+                ['key' => 'kas_dan_setara_kas', 'parent' => 'aktiva_lancar'],
+                ['key' => 'bank', 'parent' => 'aktiva_lancar'],
+                ['key' => 'piutang_usaha', 'parent' => 'aktiva_lancar'],
+                ['key' => 'piutang_lain_lain', 'parent' => 'aktiva_lancar'],
+                ['key' => 'persediaan_barang_dagang', 'parent' => 'aktiva_lancar'],
+                ['key' => 'persediaan_bahan_baku', 'parent' => 'aktiva_lancar'],
+                ['key' => 'persediaan_bahan_pembantu', 'parent' => 'aktiva_lancar'],
+                ['key' => 'perlengkapan_toko', 'parent' => 'aktiva_lancar'],
+                ['key' => 'perlengkapan_kantor', 'parent' => 'aktiva_lancar'],
+                ['key' => 'biaya_dibayar_dimuka', 'parent' => 'aktiva_lancar'],
+                ['key' => 'sewa_dibayar_dimuka', 'parent' => 'aktiva_lancar'],
+                ['key' => 'asuransi_dibayar_dimuka', 'parent' => 'aktiva_lancar'],
+                ['key' => 'pajak_dibayar_dimuka', 'parent' => 'aktiva_lancar'],
+                ['key' => 'uang_muka_pembelian', 'parent' => 'aktiva_lancar'],
 
                 // 2. AKTIVA TETAP
-                ['name' => 'AKTIVA TETAP', 'parent' => null],
-                ['name' => 'Tanah', 'parent' => 'AKTIVA TETAP'],
-                ['name' => 'Bangunan', 'parent' => 'AKTIVA TETAP'],
-                ['name' => 'Akumulasi Penyusutan Bangunan', 'parent' => 'AKTIVA TETAP'],
-                ['name' => 'Kendaraan', 'parent' => 'AKTIVA TETAP'],
-                ['name' => 'Akumulasi Penyusutan Kendaraan', 'parent' => 'AKTIVA TETAP'],
-                ['name' => 'Peralatan Kantor', 'parent' => 'AKTIVA TETAP'],
-                ['name' => 'Akumulasi Penyusutan Peralatan Kantor', 'parent' => 'AKTIVA TETAP'],
-                ['name' => 'Mesin & Peralatan', 'parent' => 'AKTIVA TETAP'],
-                ['name' => 'Akumulasi Penyusutan Mesin', 'parent' => 'AKTIVA TETAP'],
-                ['name' => 'Inventaris Toko', 'parent' => 'AKTIVA TETAP'],
-                ['name' => 'Akumulasi Penyusutan Inventaris Toko', 'parent' => 'AKTIVA TETAP'],
+                ['key' => 'aktiva_tetap', 'parent' => null],
+                ['key' => 'tanah', 'parent' => 'aktiva_tetap'],
+                ['key' => 'bangunan', 'parent' => 'aktiva_tetap'],
+                ['key' => 'akumulasi_penyusutan_bangunan', 'parent' => 'aktiva_tetap'],
+                ['key' => 'kendaraan', 'parent' => 'aktiva_tetap'],
+                ['key' => 'akumulasi_penyusutan_kendaraan', 'parent' => 'aktiva_tetap'],
+                ['key' => 'peralatan_kantor', 'parent' => 'aktiva_tetap'],
+                ['key' => 'akumulasi_penyusutan_peralatan_kantor', 'parent' => 'aktiva_tetap'],
+                ['key' => 'mesin_dan_peralatan', 'parent' => 'aktiva_tetap'],
+                ['key' => 'akumulasi_penyusutan_mesin', 'parent' => 'aktiva_tetap'],
+                ['key' => 'inventaris_toko', 'parent' => 'aktiva_tetap'],
+                ['key' => 'akumulasi_penyusutan_inventaris_toko', 'parent' => 'aktiva_tetap'],
 
                 // 3. KEWAJIBAN LANCAR
-                ['name' => 'KEWAJIBAN LANCAR', 'parent' => null],
-                ['name' => 'Hutang Usaha', 'parent' => 'KEWAJIBAN LANCAR'],
-                ['name' => 'Hutang Gaji', 'parent' => 'KEWAJIBAN LANCAR'],
-                ['name' => 'Hutang Listrik, Air & Telepon', 'parent' => 'KEWAJIBAN LANCAR'],
-                ['name' => 'Hutang Pajak (PPN Out)', 'parent' => 'KEWAJIBAN LANCAR'],
-                ['name' => 'Hutang PPh 21', 'parent' => 'KEWAJIBAN LANCAR'],
-                ['name' => 'Uang Muka Penjualan', 'parent' => 'KEWAJIBAN LANCAR'],
-                ['name' => 'Hutang Biaya Lainnya', 'parent' => 'KEWAJIBAN LANCAR'],
+                ['key' => 'kewajiban_lancar', 'parent' => null],
+                ['key' => 'hutang_usaha', 'parent' => 'kewajiban_lancar'],
+                ['key' => 'hutang_gaji', 'parent' => 'kewajiban_lancar'],
+                ['key' => 'hutang_listrik_air_telepon', 'parent' => 'kewajiban_lancar'],
+                ['key' => 'hutang_pajak', 'parent' => 'kewajiban_lancar'],
+                ['key' => 'hutang_pph_21', 'parent' => 'kewajiban_lancar'],
+                ['key' => 'uang_muka_penjualan', 'parent' => 'kewajiban_lancar'],
+                ['key' => 'hutang_biaya_lainnya', 'parent' => 'kewajiban_lancar'],
 
                 // 4. KEWAJIBAN JANGKA PANJANG
-                ['name' => 'KEWAJIBAN JANGKA PANJANG', 'parent' => null],
-                ['name' => 'Hutang Bank (Long Term)', 'parent' => 'KEWAJIBAN JANGKA PANJANG'],
-                ['name' => 'Hutang Pembiayaan Kendaraan', 'parent' => 'KEWAJIBAN JANGKA PANJANG'],
-                ['name' => 'Hutang Jangka Panjang Lainnya', 'parent' => 'KEWAJIBAN JANGKA PANJANG'],
+                ['key' => 'kewajiban_jangka_panjang', 'parent' => null],
+                ['key' => 'hutang_bank_long_term', 'parent' => 'kewajiban_jangka_panjang'],
+                ['key' => 'hutang_pembiayaan_kendaraan', 'parent' => 'kewajiban_jangka_panjang'],
+                ['key' => 'hutang_jangka_panjang_lainnya', 'parent' => 'kewajiban_jangka_panjang'],
 
                 // 5. EKUITAS
-                ['name' => 'EKUITAS', 'parent' => null],
-                ['name' => 'Modal Pemilik', 'parent' => 'EKUITAS'],
-                ['name' => 'Prive / Pengambilan Pribadi', 'parent' => 'EKUITAS'],
-                ['name' => 'Laba Ditahan', 'parent' => 'EKUITAS'],
-                ['name' => 'Laba Tahun Berjalan', 'parent' => 'EKUITAS'],
+                ['key' => 'ekuitas', 'parent' => null],
+                ['key' => 'modal_pemilik', 'parent' => 'ekuitas'],
+                ['key' => 'prive', 'parent' => 'ekuitas'],
+                ['key' => 'laba_ditahan', 'parent' => 'ekuitas'],
+                ['key' => 'laba_tahun_berjalan', 'parent' => 'ekuitas'],
 
                 // 6. PENDAPATAN
-                ['name' => 'PENDAPATAN', 'parent' => null],
-                ['name' => 'Pendapatan Penjualan', 'parent' => 'PENDAPATAN'],
-                ['name' => 'Retur Penjualan', 'parent' => 'PENDAPATAN'],
-                ['name' => 'Potongan Penjualan', 'parent' => 'PENDAPATAN'],
-                ['name' => 'Pendapatan Jasa / Service', 'parent' => 'PENDAPATAN'],
-                ['name' => 'Pendapatan Lain-lain', 'parent' => 'PENDAPATAN'],
+                ['key' => 'pendapatan', 'parent' => null],
+                ['key' => 'pendapatan_penjualan', 'parent' => 'pendapatan'],
+                ['key' => 'retur_penjualan', 'parent' => 'pendapatan'],
+                ['key' => 'potongan_penjualan', 'parent' => 'pendapatan'],
+                ['key' => 'pendapatan_jasa', 'parent' => 'pendapatan'],
+                ['key' => 'pendapatan_lain_lain', 'parent' => 'pendapatan'],
 
                 // 7. HARGA POKOK PENJUALAN
-                ['name' => 'HARGA POKOK PENJUALAN', 'parent' => null],
-                ['name' => 'HPP Produk', 'parent' => 'HARGA POKOK PENJUALAN'],
-                ['name' => 'HPP Jasa', 'parent' => 'HARGA POKOK PENJUALAN'],
-                ['name' => 'Biaya Angkut Pembelian', 'parent' => 'HARGA POKOK PENJUALAN'],
-                ['name' => 'Potongan Pembelian', 'parent' => 'HARGA POKOK PENJUALAN'],
+                ['key' => 'harga_pokok_penjualan', 'parent' => null],
+                ['key' => 'hpp_produk', 'parent' => 'harga_pokok_penjualan'],
+                ['key' => 'hpp_jasa', 'parent' => 'harga_pokok_penjualan'],
+                ['key' => 'biaya_angkut_pembelian', 'parent' => 'harga_pokok_penjualan'],
+                ['key' => 'potongan_pembelian', 'parent' => 'harga_pokok_penjualan'],
 
                 // 8. BIAYA OPERASIONAL
-                ['name' => 'BIAYA OPERASIONAL', 'parent' => null],
-                ['name' => 'Biaya Gaji & Tunjangan', 'parent' => 'BIAYA OPERASIONAL'],
-                ['name' => 'Biaya Listrik, Air & Internet', 'parent' => 'BIAYA OPERASIONAL'],
-                ['name' => 'Biaya Sewa', 'parent' => 'BIAYA OPERASIONAL'],
-                ['name' => 'Biaya Pemasaran & Iklan', 'parent' => 'BIAYA OPERASIONAL'],
-                ['name' => 'Biaya Perbaikan & Pemeliharaan', 'parent' => 'BIAYA OPERASIONAL'],
-                ['name' => 'Biaya Transportasi & Bensin', 'parent' => 'BIAYA OPERASIONAL'],
-                ['name' => 'Biaya Keperluan Kantor', 'parent' => 'BIAYA OPERASIONAL'],
-                ['name' => 'Biaya Keperluan Toko', 'parent' => 'BIAYA OPERASIONAL'],
-                ['name' => 'Biaya Penyusutan Aktiva Tetap', 'parent' => 'BIAYA OPERASIONAL'],
-                ['name' => 'Biaya Adm Bank & Pajak Bunga', 'parent' => 'BIAYA OPERASIONAL'],
-                ['name' => 'Biaya Operasional Lainnya', 'parent' => 'BIAYA OPERASIONAL'],
+                ['key' => 'biaya_operasional', 'parent' => null],
+                ['key' => 'biaya_gaji_dan_tunjangan', 'parent' => 'biaya_operasional'],
+                ['key' => 'biaya_listrik_air_dan_internet', 'parent' => 'biaya_operasional'],
+                ['key' => 'biaya_sewa', 'parent' => 'biaya_operasional'],
+                ['key' => 'biaya_pemasaran_dan_iklan', 'parent' => 'biaya_operasional'],
+                ['key' => 'biaya_perbaikan_dan_pemeliharaan', 'parent' => 'biaya_operasional'],
+                ['key' => 'biaya_transportasi_dan_bensin', 'parent' => 'biaya_operasional'],
+                ['key' => 'biaya_keperluan_kantor', 'parent' => 'biaya_operasional'],
+                ['key' => 'biaya_keperluan_toko', 'parent' => 'biaya_operasional'],
+                ['key' => 'biaya_penyusutan_aktiva_tetap', 'parent' => 'biaya_operasional'],
+                ['key' => 'biaya_adm_bank_dan_pajak_bunga', 'parent' => 'biaya_operasional'],
+                ['key' => 'biaya_operasional_lainnya', 'parent' => 'biaya_operasional'],
             ];
 
             $type_map = [];
             foreach ($default_types as $at) {
+                $translated_name = __('account.' . $at['key']);
+
                 // Check if already exists
                 $exists = AccountType::where('business_id', $business_id)
-                                     ->where('name', $at['name'])
+                                     ->where('name', $translated_name)
                                      ->first();
                 if ($exists) {
-                    $type_map[$at['name']] = $exists->id;
+                    $type_map[$at['key']] = $exists->id;
                     continue;
                 }
 
                 $parent_id = $at['parent'] ? ($type_map[$at['parent']] ?? null) : null;
                 $new_type = AccountType::create([
-                    'name' => $at['name'],
+                    'name' => $translated_name,
                     'business_id' => $business_id,
                     'parent_account_type_id' => $parent_id
                 ]);
-                $type_map[$at['name']] = $new_type->id;
+                $type_map[$at['key']] = $new_type->id;
             }
 
             $output = ['success' => true,

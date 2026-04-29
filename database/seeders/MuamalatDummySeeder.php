@@ -78,15 +78,25 @@ class MuamalatDummySeeder extends Seeder
         foreach (['Sembako','Elektronik','Alat Tulis','Camilan','Minuman','Perabotan'] as $c) { $cat_ids[] = DB::table('categories')->insertGetId(['name'=>$c,'business_id'=>$business_id,'category_type'=>'product','parent_id'=>0,'created_by'=>2]); }
 
         // 5. Account Types & Kas Accounts
-        $ats = [['n'=>'AKTIVA LANCAR','p'=>null],['n'=>'Kas dan Bank','p'=>'AKTIVA LANCAR'],['n'=>'Piutang','p'=>'AKTIVA LANCAR'],['n'=>'Stok','p'=>'AKTIVA LANCAR'],['n'=>'AKTIVA TETAP','p'=>null],['n'=>'KEWAJIBAN','p'=>null],['n'=>'Hutang Usaha','p'=>'KEWAJIBAN'],['n'=>'EKUITAS','p'=>null],['n'=>'Modal','p'=>'EKUITAS']];
+        $ats = [
+            ['key' => 'aktiva_lancar', 'parent' => null],
+            ['key' => 'kas_dan_setara_kas', 'parent' => 'aktiva_lancar'],
+            ['key' => 'piutang_usaha', 'parent' => 'aktiva_lancar'],
+            ['key' => 'persediaan_barang_dagang', 'parent' => 'aktiva_lancar'],
+            ['key' => 'aktiva_tetap', 'parent' => null],
+            ['key' => 'kewajiban_lancar', 'parent' => null],
+            ['key' => 'hutang_usaha', 'parent' => 'kewajiban_lancar'],
+            ['key' => 'ekuitas', 'parent' => null],
+            ['key' => 'modal_pemilik', 'parent' => 'ekuitas']
+        ];
         $type_map = [];
         foreach ($ats as $at) {
-            $pid = $at['p'] ? ($type_map[$at['p']] ?? null) : null;
-            $type_map[$at['n']] = DB::table('account_types')->insertGetId(['name'=>$at['n'],'business_id'=>$business_id,'parent_account_type_id'=>$pid,'created_at'=>$today]);
+            $pid = $at['parent'] ? ($type_map[$at['parent']] ?? null) : null;
+            $type_map[$at['key']] = DB::table('account_types')->insertGetId(['name'=>__('account.' . $at['key']),'business_id'=>$business_id,'parent_account_type_id'=>$pid,'created_at'=>$today]);
         }
         $loc_kas_ids = [];
         foreach ($location_ids as $lid) {
-            $aid = DB::table('accounts')->insertGetId(['business_id'=>$business_id,'name'=>'Kas - '.DB::table('business_locations')->where('id',$lid)->value('name'),'account_number'=>'KAS-'.$lid,'account_type_id'=>$type_map['Kas dan Bank'],'created_by'=>2,'created_at'=>$today]);
+            $aid = DB::table('accounts')->insertGetId(['business_id'=>$business_id,'name'=>'Kas - '.DB::table('business_locations')->where('id',$lid)->value('name'),'account_number'=>'KAS-'.$lid,'account_type_id'=>$type_map['kas_dan_setara_kas'],'created_by'=>2,'created_at'=>$today]);
             $loc_kas_ids[$lid] = $aid;
             DB::table('account_transactions')->insert(['account_id'=>$aid,'type'=>'debit','sub_type'=>'opening_balance','amount'=>1000000000,'operation_date'=>$today,'created_by'=>2,'created_at'=>$today]);
         }
@@ -95,7 +105,7 @@ class MuamalatDummySeeder extends Seeder
         $this->command->info("Inserting 500 Products...");
         $p_v_ids = [];
         for ($i = 1; $i <= 500; $i++) {
-            $pid = DB::table('products')->insertGetId(['name'=>'Barang Muamalat '.$i,'business_id'=>$business_id,'type'=>'single','unit_id'=>$u_ids[array_rand($u_ids)],'brand_id'=>$brand_ids[array_rand($brand_ids)],'category_id'=>$cat_ids[array_rand($cat_ids)],'tax_type'=>'exclusive','barcode_type'=>'C128','enable_stock'=>1,'sku'=>'MUA-'.str_pad($i,5,'0',STR_PAD_LEFT),'created_by'=>2,'created_at'=>$today]);
+            $pid = DB::table('products')->insertGetId(['name'=>'Barang Muamalat '.$i,'business_id'=>$business_id,'type'=>'single','unit_id'=>$u_ids[array_rand($u_ids)],'brand_id'=>$brand_ids[array_rand($brand_ids)],'category_id'=>$cat_ids[array_rand($cat_ids)],'tax_type'=>'exclusive','barcode_type'=>'C128','enable_stock' => 1, 'sku'=>'MUA-'.str_pad($i,5,'0',STR_PAD_LEFT),'created_by'=>2,'created_at'=>$today]);
             foreach($location_ids as $lid){ DB::table('product_locations')->insert(['product_id'=>$pid,'location_id'=>$lid]); }
             $pvid = DB::table('product_variations')->insertGetId(['name'=>'DUMMY','product_id'=>$pid,'is_dummy'=>1]);
             $buy = rand(10,500)*1000; $sell = $buy*1.2;
@@ -106,28 +116,10 @@ class MuamalatDummySeeder extends Seeder
 
         // 7. Contacts
         $c_ids = []; $s_ids = [];
-        for($i=1;$i<=150;$i++){ $c_ids[] = DB::table('contacts')->insertGetId(['business_id'=>$business_id,'type'=>'customer','name'=>'Pelanggan '.$i,'first_name'=>'Pel','last_name'=>$i,'contact_id'=>'C-'.$i,'created_by'=>2,'mobile'=>'0812'.rand(1000,9999).rand(1000,9999)]); }
-        for($i=1;$i<=50;$i++){ $s_ids[] = DB::table('contacts')->insertGetId(['business_id'=>$business_id,'type'=>'supplier','name'=>'Supplier '.$i,'first_name'=>'Sup','last_name'=>$i,'contact_id'=>'S-'.$i,'created_by'=>2,'mobile'=>'0857'.rand(1000,9999).rand(1000,9999)]); }
+        for($i=1;$i<=150;$i++){ $c_ids[] = DB::table('contacts')->insertGetId(['business_id'=>$business_id,'type'=>'customer', 'name'=>'Pelanggan '.$i,'first_name'=>'Pel','last_name'=>$i,'contact_id'=>'C-'.$i,'created_by'=>2, 'mobile'=>'0812'.rand(1000,9999).rand(1000,9999)]); }
+        for($i=1;$i<=50;$i++){ $s_ids[] = DB::table('contacts')->insertGetId(['business_id'=>$business_id,'type'=>'supplier', 'name'=>'Supplier '.$i,'first_name'=>'Sup','last_name'=>$i,'contact_id'=>'S-'.$i,'created_by'=>2, 'mobile'=>'0857'.rand(1000,9999).rand(1000,9999)]); }
 
-        // 8. Modules: Mfg, Repair, CRM, Project
-        $this->command->info("Seeding Extra Modules...");
-        if(Schema::hasTable('mfg_recipes')){
-            foreach(array_slice($p_v_ids,0,30) as $p){
-                DB::table('mfg_recipes')->insert(['product_id'=>$p['p'],'variation_id'=>$p['v'],'ingredients'=>'[]','waste_percent'=>2,'ingredients_cost'=>$p['b']*0.7,'extra_cost'=>1000,'total_quantity'=>1,'final_price'=>$p['b']]);
-            }
-        }
-        if(Schema::hasTable('repair_job_sheets')){
-            for($i=1;$i<=50;$i++){
-                DB::table('repair_job_sheets')->insert(['business_id'=>$business_id,'location_id'=>$location_ids[array_rand($location_ids)],'contact_id'=>$c_ids[array_rand($c_ids)],'job_sheet_no'=>'JS-'.$i,'status_id'=>1,'created_by'=>2]);
-            }
-        }
-        if(Schema::hasTable('pjt_projects')){
-            for($i=1;$i<=10;$i++){
-                DB::table('pjt_projects')->insert(['business_id'=>$business_id,'name'=>'Proyek Muamalat '.$i,'contact_id'=>$c_ids[array_rand($c_ids)],'status'=>'not_started','created_by'=>2]);
-            }
-        }
-
-        // 9. Massive Transactions (5000)
+        // 8. Massive Transactions (5000)
         $this->command->info("Generating 5,000 Transactions...");
         $exp_cat_id = DB::table('expense_categories')->insertGetId(['business_id'=>$business_id,'name'=>'Ops Umum']);
         foreach ($location_ids as $loc) {
@@ -138,7 +130,7 @@ class MuamalatDummySeeder extends Seeder
                 $paid = rand(1, 10) > 2;
 
                 // Purchase
-                $tp = DB::table('transactions')->insertGetId(['business_id'=>$business_id,'location_id'=>$loc,'type'=>'purchase','status'=>'received','payment_status'=>($paid?'paid':'due'),'contact_id'=>$s_ids[array_rand($s_ids)],'ref_no'=>'P-'.$loc.'-'.$i,'transaction_date'=>$date,'total_before_tax'=>$p['b']*50,'final_total'=>$p['b']*50,'created_by'=>2,'created_at'=>$date]);
+                $tp = DB::table('transactions')->insertGetId(['business_id'=>$business_id,'location_id'=>$loc,'type'=>'purchase', 'status'=>'received','payment_status'=>($paid?'paid':'due'),'contact_id'=>$s_ids[array_rand($s_ids)],'ref_no'=>'P-'.$loc.'-'.$i,'transaction_date'=>$date,'total_before_tax'=>$p['b']*50,'final_total'=>$p['b']*50,'created_by'=>2,'created_at'=>$date]);
                 DB::table('purchase_lines')->insert(['transaction_id'=>$tp,'product_id'=>$p['p'],'variation_id'=>$p['v'],'quantity'=>50,'purchase_price'=>$p['b'],'purchase_price_inc_tax'=>$p['b'],'created_at'=>$date]);
                 if($paid){
                     $pid = DB::table('transaction_payments')->insertGetId(['transaction_id'=>$tp,'business_id'=>$business_id,'amount'=>$p['b']*50,'method'=>'cash','paid_on'=>$date,'created_by'=>2,'account_id'=>$kas_id]);
@@ -146,7 +138,7 @@ class MuamalatDummySeeder extends Seeder
                 }
 
                 // Sell
-                $ts = DB::table('transactions')->insertGetId(['business_id'=>$business_id,'location_id'=>$loc,'type'=>'sell','status'=>'final','payment_status'=>($paid?'paid':'due'),'contact_id'=>$c_ids[array_rand($c_ids)],'invoice_no'=>'S-'.$loc.'-'.$i,'transaction_date'=>$date,'total_before_tax'=>$p['s']*10,'final_total'=>$p['s']*10,'created_by'=>2,'created_at'=>$date]);
+                $ts = DB::table('transactions')->insertGetId(['business_id'=>$business_id,'location_id'=>$loc,'type'=>'sell', 'status'=>'final','payment_status'=>($paid?'paid':'due'),'contact_id'=>$c_ids[array_rand($c_ids)],'invoice_no'=>'S-'.$loc.'-'.$i,'transaction_date'=>$date,'total_before_tax'=>$p['s']*10,'final_total'=>$p['s']*10,'created_by'=>2,'created_at'=>$date]);
                 DB::table('transaction_sell_lines')->insert(['transaction_id'=>$ts,'product_id'=>$p['p'],'variation_id'=>$p['v'],'quantity'=>10,'unit_price'=>$p['s'],'unit_price_inc_tax'=>$p['s'],'item_tax'=>0,'unit_price_before_discount'=>$p['s'],'created_at'=>$date]);
                 if($paid){
                     $pid = DB::table('transaction_payments')->insertGetId(['transaction_id'=>$ts,'business_id'=>$business_id,'amount'=>$p['s']*10,'method'=>'cash','paid_on'=>$date,'created_by'=>2,'account_id'=>$kas_id]);
@@ -156,7 +148,7 @@ class MuamalatDummySeeder extends Seeder
         }
 
         // 10. Accounting Balancing
-        $this->command->info("Final Balancing...");
+        $this->command->info("Final Accounting Balance...");
         $tu = app(TransactionUtil::class);
         foreach ($location_ids as $lid) {
             $kas_id = $loc_kas_ids[$lid];
@@ -165,14 +157,16 @@ class MuamalatDummySeeder extends Seeder
             $sl = $tu->getSellTotals($business_id, null, now()->format('Y-m-d'), $lid);
             $pl = $tu->getProfitLossDetails($business_id, $lid, '1970-01-01', now()->format('Y-m-d'));
             $kb = DB::table('account_transactions')->where('account_id',$kas_id)->whereNull('deleted_at')->select([DB::raw("SUM(IF(type='debit',amount,0)) as d"),DB::raw("SUM(IF(type='credit',amount,0)) as c")])->first();
-            $td = ($sd['opening_stock']??0) + (($sl->invoice_due??0)-($pl['total_sell_return']??0)) + ($kb->d??0) + ($pl['total_purchase']??0) + ($pl['total_expense']??0) + ($pl['total_sell_return']??0) + ($pl['total_adjustment']??0) + ($pl['total_sell_discount']??0) + ($pl['total_reward_amount']??0) + ($pl['total_sell_round_off']>0?$pl['total_sell_round_off']:0);
-            $tc = ($pd->purchase_due??0) + ($kb->c??0) + ($pl['total_sell']??0) + ($pl['total_purchase_return']??0) + ($pl['total_recovered']??0) + ($pl['total_purchase_discount']??0) + ($pl['total_sell_round_off']<0?abs($pl['total_sell_round_off']):0);
-            $mid = DB::table('accounts')->insertGetId(['business_id'=>$business_id,'name'=>'Modal Cabang '.DB::table('business_locations')->where('id',$lid)->value('name'),'account_number'=>'301-'.$lid,'account_type_id'=>$type_map['Modal'],'created_by'=>2,'created_at'=>$today]);
+
+            $td = ($sd['opening_stock']??0) + (($sl->invoice_due??0)-($pl['total_sell_return']??0)) + ($kb->d??0) + ($pl['total_purchase']??0) + ($pl['total_expense'] ?? 0) + ($pl['total_sell_return'] ?? 0) + ($pl['total_adjustment'] ?? 0) + ($pl['total_sell_discount'] ?? 0) + ($pl['total_reward_amount'] ?? 0) + ($pl['total_sell_round_off'] > 0 ? $pl['total_sell_round_off'] : 0);
+            $tc = ($pd->purchase_due??0) + ($kb->c??0) + ($pl['total_sell']??0) + ($pl['total_purchase_return'] ?? 0) + ($pl['total_recovered'] ?? 0) + ($pl['total_purchase_discount'] ?? 0) + ($pl['total_sell_round_off'] < 0 ? abs($pl['total_sell_round_off']) : 0);
+
+            $mid = DB::table('accounts')->insertGetId(['business_id'=>$business_id,'name'=>'Modal Cabang '.DB::table('business_locations')->where('id',$lid)->value('name'),'account_number'=>'301-'.$lid,'account_type_id'=>$type_map['modal_pemilik'],'created_by'=>2,'created_at'=>$today]);
             $diff = $td - $tc;
             DB::table('account_transactions')->insert(['account_id'=>$mid,'type'=>($diff>=0?'credit':'debit'),'sub_type'=>'opening_balance','amount'=>abs($diff),'operation_date'=>$today,'created_by'=>2]);
         }
 
         if ($driver == 'mysql') { DB::statement('SET FOREIGN_KEY_CHECKS = 1'); }
-        $this->command->info("SELESAI! 500 Produk & 5000 Transaksi Seimbang Secara Akuntansi.");
+        $this->command->info("ULTRA-MASSIVE SUCCESS! 500 Produk & 5000 Transaksi Seimbang Secara Akuntansi.");
     }
 }
