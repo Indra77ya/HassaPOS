@@ -177,4 +177,72 @@ class AccountTypeController extends Controller
 
         return redirect()->back()->with('status', $output);
     }
+
+    /**
+     * Add default account types for the business.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function seedDefault()
+    {
+        if (! auth()->user()->can('account.access')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $business_id = session()->get('user.business_id');
+
+            $default_types = [
+                ['name' => 'AKTIVA LANCAR', 'parent' => null],
+                ['name' => 'Kas dan Setara Kas', 'parent' => 'AKTIVA LANCAR'],
+                ['name' => 'Piutang Usaha', 'parent' => 'AKTIVA LANCAR'],
+                ['name' => 'Persediaan Barang', 'parent' => 'AKTIVA LANCAR'],
+                ['name' => 'Biaya Dibayar Dimuka', 'parent' => 'AKTIVA LANCAR'],
+                ['name' => 'AKTIVA TETAP', 'parent' => null],
+                ['name' => 'Tanah dan Bangunan', 'parent' => 'AKTIVA TETAP'],
+                ['name' => 'Kendaraan', 'parent' => 'AKTIVA TETAP'],
+                ['name' => 'Peralatan Kantor', 'parent' => 'AKTIVA TETAP'],
+                ['name' => 'Akumulasi Penyusutan', 'parent' => 'AKTIVA TETAP'],
+                ['name' => 'KEWAJIBAN LANCAR', 'parent' => null],
+                ['name' => 'Hutang Usaha', 'parent' => 'KEWAJIBAN LANCAR'],
+                ['name' => 'Hutang Pajak', 'parent' => 'KEWAJIBAN LANCAR'],
+                ['name' => 'KEWAJIBAN JANGKA PANJANG', 'parent' => null],
+                ['name' => 'Hutang Bank', 'parent' => 'KEWAJIBAN JANGKA PANJANG'],
+                ['name' => 'EKUITAS', 'parent' => null],
+                ['name' => 'Modal Pemilik', 'parent' => 'EKUITAS'],
+                ['name' => 'Laba Ditahan', 'parent' => 'EKUITAS'],
+            ];
+
+            $type_map = [];
+            foreach ($default_types as $at) {
+                // Check if already exists
+                $exists = AccountType::where('business_id', $business_id)
+                                     ->where('name', $at['name'])
+                                     ->first();
+                if ($exists) {
+                    $type_map[$at['name']] = $exists->id;
+                    continue;
+                }
+
+                $parent_id = $at['parent'] ? ($type_map[$at['parent']] ?? null) : null;
+                $new_type = AccountType::create([
+                    'name' => $at['name'],
+                    'business_id' => $business_id,
+                    'parent_account_type_id' => $parent_id
+                ]);
+                $type_map[$at['name']] = $new_type->id;
+            }
+
+            $output = ['success' => true,
+                'msg' => __('lang_v1.added_success'),
+            ];
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+            $output = ['success' => false,
+                'msg' => __('messages.something_went_wrong'),
+            ];
+        }
+
+        return redirect()->back()->with('status', $output);
+    }
 }
