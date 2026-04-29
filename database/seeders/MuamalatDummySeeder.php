@@ -325,30 +325,118 @@ class MuamalatDummySeeder extends Seeder
             ]);
         }
 
-        // 11. Payment Accounts
-        $this->command->info("Seeding Payment Accounts...");
-        $acc_types = DB::table('account_types')->where('business_id', $business_id)->pluck('id')->toArray();
-        if (empty($acc_types)) {
-            $atid = DB::table('account_types')->insertGetId(['name' => 'Assets', 'business_id' => $business_id]);
-            $acc_types = [$atid];
+        // 11. Comprehensive Account Types & Accounts
+        $this->command->info("Seeding Extensive Account Types & Balancing Financials...");
+
+        $account_types_data = [
+            ['name' => 'Aktiva Lancar', 'parent_account_type_id' => null],
+            ['name' => 'Kas & Bank', 'parent_account_type_id' => 'Aktiva Lancar'],
+            ['name' => 'Piutang Usaha', 'parent_account_type_id' => 'Aktiva Lancar'],
+            ['name' => 'Persediaan', 'parent_account_type_id' => 'Aktiva Lancar'],
+            ['name' => 'Aktiva Tetap', 'parent_account_type_id' => null],
+            ['name' => 'Kendaraan', 'parent_account_type_id' => 'Aktiva Tetap'],
+            ['name' => 'Bangunan', 'parent_account_type_id' => 'Aktiva Tetap'],
+            ['name' => 'Kewajiban Lancar', 'parent_account_type_id' => null],
+            ['name' => 'Hutang Usaha', 'parent_account_type_id' => 'Kewajiban Lancar'],
+            ['name' => 'Hutang Pajak', 'parent_account_type_id' => 'Kewajiban Lancar'],
+            ['name' => 'Kewajiban Jangka Panjang', 'parent_account_type_id' => null],
+            ['name' => 'Ekuitas', 'parent_account_type_id' => null],
+            ['name' => 'Modal Pemilik', 'parent_account_type_id' => 'Ekuitas'],
+        ];
+
+        $type_map = [];
+        foreach ($account_types_data as $at) {
+            $parent_id = null;
+            if ($at['parent_account_type_id'] && isset($type_map[$at['parent_account_type_id']])) {
+                $parent_id = $type_map[$at['parent_account_type_id']];
+            }
+            $at_id = DB::table('account_types')->insertGetId([
+                'name' => $at['name'],
+                'business_id' => $business_id,
+                'parent_account_type_id' => $parent_id,
+                'created_at' => $today
+            ]);
+            $type_map[$at['name']] = $at_id;
         }
 
+        $kas_bank_type = $type_map['Kas & Bank'];
+        $modal_type = $type_map['Modal Pemilik'];
+
+        $main_modal_acc_id = null;
         foreach ($location_ids as $lid) {
             $loc_name = DB::table('business_locations')->where('id', $lid)->value('name');
             $aid = DB::table('accounts')->insertGetId([
                 'business_id' => $business_id, 'name' => 'Kas Toko - ' . $loc_name,
-                'account_number' => 'ACC-' . $lid, 'account_type_id' => $acc_types[0], 'created_by' => 2, 'created_at' => $today
+                'account_number' => 'KAS-' . $lid, 'account_type_id' => $kas_bank_type, 'created_by' => 2, 'created_at' => $today
             ]);
 
-            // Opening balance for account
+            // Asset nature is DEBIT to be positive in the report (Debit - Credit)
             DB::table('account_transactions')->insert([
-                'account_id' => $aid, 'type' => 'credit', 'sub_type' => 'opening_balance',
-                'amount' => 10000000, 'reff_no' => 'OB-MUA-' . $lid,
+                'account_id' => $aid, 'type' => 'debit', 'sub_type' => 'opening_balance',
+                'amount' => 50000000, 'reff_no' => 'OB-MUA-' . $lid,
                 'operation_date' => $today, 'created_by' => 2, 'created_at' => $today
             ]);
         }
 
+        // Create a Modal Account for balancing
+        $main_modal_acc_id = DB::table('accounts')->insertGetId([
+            'business_id' => $business_id, 'name' => 'Modal Utama Pemilik',
+            'account_number' => '301-001', 'account_type_id' => $modal_type, 'created_by' => 2, 'created_at' => $today
+        ]);
+
+        // 12. Balancing the Balance Sheet
+        $this->command->info("Calculating Balancing Entry...");
+        $transactionUtil = new \App\Utils\TransactionUtil();
+
+        // Calculate Details for Balancing
+        $closing_stock = $transactionUtil->getOpeningClosingStock($business_id, now()->format('Y-m-d'), null);
+        $purchase_details = $transactionUtil->getPurchaseTotals($business_id, null, now()->format('Y-m-d'));
+        $sell_details = $transactionUtil->getSellTotals($business_id, null, now()->format('Y-m-d'));
+        $pl = $transactionUtil->getProfitLossDetails($business_id, null, '1970-01-01', now()->format('Y-m-d'));
+
+        $customer_due = $sell_details['invoice_due'] ?? 0;
+        $supplier_due = $purchase_details['purchase_due'] ?? 0;
+        $net_profit = $pl['net_profit'] ?? 0;
+
+        // Sum current Account Balances (Assets = Debit - Credit, Pasiva = Credit - Debit)
+        $accounts_summary = DB::table('accounts')
+            ->leftjoin('account_transactions as AT', 'AT.account_id', '=', 'accounts.id')
+            ->leftjoin('account_types as ATY', 'accounts.account_type_id', '=', 'ATY.id')
+            ->whereNull('AT.deleted_at')
+            ->where('accounts.business_id', $business_id)
+            ->select([
+                'accounts.id', 'ATY.name as type_name',
+                DB::raw("SUM( IF(AT.type='credit', amount, 0) ) as credit_balance"),
+                DB::raw("SUM( IF(AT.type='debit', amount, 0) ) as debit_balance"),
+            ])
+            ->groupBy('accounts.id', 'type_name')->get();
+
+        $asset_acc_bal = 0;
+        $liab_equity_acc_bal = 0;
+        foreach ($accounts_summary as $acc) {
+            $type = strtolower($acc->type_name);
+            if ($acc->id == $main_modal_acc_id) continue;
+
+            if (str_contains($type, 'aktiva') || str_contains($type, 'asset') || str_contains($type, 'kas') || str_contains($type, 'piutang') || str_contains($type, 'persediaan')) {
+                $asset_acc_bal += ($acc->debit_balance - $acc->credit_balance);
+            } else {
+                $liab_equity_acc_bal += ($acc->credit_balance - $acc->debit_balance);
+            }
+        }
+
+        $total_assets = $customer_due + $closing_stock + $asset_acc_bal;
+        $total_pasiva_excl_modal = $supplier_due + $liab_equity_acc_bal + $net_profit;
+
+        $balancing_amount = $total_assets - $total_pasiva_excl_modal;
+
+        // Insert balancing entry to Modal account
+        DB::table('account_transactions')->insert([
+            'account_id' => $main_modal_acc_id, 'type' => ($balancing_amount >= 0 ? 'credit' : 'debit'),
+            'sub_type' => 'opening_balance', 'amount' => abs($balancing_amount),
+            'reff_no' => 'BAL-MUA-01', 'operation_date' => $today, 'created_by' => 2, 'created_at' => $today
+        ]);
+
         if ($driver == 'mysql') { DB::statement('SET FOREIGN_KEY_CHECKS = 1'); }
-        $this->command->info("Muamalat Dummy Seeder Selesai! 10 Roles, 5 Cabang, 6 User, 50 Produk, dan Transaksi telah ditambahkan.");
+        $this->command->info("Muamalat Dummy Seeder Selesai! 10 Roles, 5 Cabang, 6 User, 50 Produk, 13 Account Types, dan Keuangan telah DISEIMBANGKAN.");
     }
 }
