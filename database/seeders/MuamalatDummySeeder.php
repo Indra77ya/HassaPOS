@@ -34,20 +34,59 @@ class MuamalatDummySeeder extends Seeder
         $driver = DB::getDriverName();
         if ($driver == 'mysql') { DB::statement('SET FOREIGN_KEY_CHECKS = 0'); }
 
-        // 2. Roles (10 new roles)
-        $this->command->info("Creating 10 Roles...");
-        $role_names = [
-            'Manajer Wilayah', 'Kepala Gudang Pusat', 'Supervisor Toko',
-            'Kasir Senior', 'Admin Purchasing', 'Sales Executive',
-            'Staff Logistik', 'Audit Internal', 'Koordinator Cabang', 'Admin Finance'
+        // 2. Roles & Permissions (10 new roles with specific permissions)
+        $this->command->info("Creating 10 Roles with Permissions...");
+
+        $role_permissions = [
+            'Manajer Wilayah' => [
+                'access_all_locations', 'dashboard.data', 'purchase_n_sell_report.view',
+                'contacts_report.view', 'stock_report.view', 'tax_report.view',
+                'trending_product_report.view', 'register_report.view', 'expense_report.view',
+                'sell.view', 'purchase.view', 'product.view'
+            ],
+            'Kepala Gudang Pusat' => [
+                'product.view', 'product.create', 'product.update', 'stock_report.view',
+                'view_purchase_price', 'unit.view', 'category.view', 'brand.view'
+            ],
+            'Supervisor Toko' => [
+                'sell.view', 'sell.create', 'sell.update', 'product.view',
+                'stock_report.view', 'dashboard.data', 'customer.view'
+            ],
+            'Kasir Senior' => [
+                'sell.view', 'sell.create', 'sell.payments', 'register_report.view', 'customer.view', 'customer.create'
+            ],
+            'Admin Purchasing' => [
+                'purchase.view', 'purchase.create', 'purchase.update', 'purchase.payments',
+                'supplier.view', 'supplier.create', 'view_purchase_price'
+            ],
+            'Sales Executive' => [
+                'sell.view', 'sell.create', 'customer.view', 'customer.create', 'product.view'
+            ],
+            'Staff Logistik' => [
+                'product.view', 'stock_report.view', 'access_shipping'
+            ],
+            'Audit Internal' => [
+                'sell.view', 'purchase.view', 'product.view', 'supplier.view', 'customer.view',
+                'purchase_n_sell_report.view', 'contacts_report.view', 'stock_report.view', 'expense_report.view'
+            ],
+            'Koordinator Cabang' => [
+                'sell.view', 'product.view', 'stock_report.view', 'dashboard.data', 'expense_report.view'
+            ],
+            'Admin Finance' => [
+                'expense.access', 'expense_report.view', 'account.access', 'sell.payments', 'purchase.payments'
+            ]
         ];
-        $role_ids = [];
-        foreach ($role_names as $rname) {
+
+        foreach ($role_permissions as $rname => $permissions) {
             $role = Role::updateOrCreate(
                 ['name' => $rname . '#' . $business_id, 'business_id' => $business_id],
                 ['guard_name' => 'web']
             );
-            $role_ids[] = $role->id;
+
+            // Assign permissions to role
+            // Filter permissions that actually exist in the database to avoid errors
+            $existing_permissions = Permission::whereIn('name', $permissions)->pluck('name')->toArray();
+            $role->syncPermissions($existing_permissions);
         }
 
         // 3. Business Locations (5 new branches)
@@ -110,8 +149,9 @@ class MuamalatDummySeeder extends Seeder
             ]);
             $new_user_ids[] = $uid;
 
-            // Assign random role from the 10 created
-            $role_name = $role_names[array_rand($role_names)] . '#' . $business_id;
+            // Assign specific role from the created list
+            $roles_list = array_keys($role_permissions);
+            $role_name = $roles_list[$index % count($roles_list)] . '#' . $business_id;
             $user_obj = \App\User::find($uid);
             $user_obj->assignRole($role_name);
 
