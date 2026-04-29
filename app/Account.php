@@ -126,4 +126,68 @@ class Account extends Model
     {
         return $this->belongsTo(\App\AccountType::class, 'account_type_id');
     }
+
+    /**
+     * Returns whether the account is an asset or not.
+     *
+     * @return bool
+     */
+    public function isAsset($type_name = null, $parent_type_name = null)
+    {
+        return $this->getBalanceType($type_name, $parent_type_name) == 'debit' &&
+               !$this->isExpense($type_name, $parent_type_name);
+    }
+
+    /**
+     * Returns the balance type of the account (debit or credit).
+     *
+     * @return string
+     */
+    public function getBalanceType($type_name = null, $parent_type_name = null)
+    {
+        $type = '';
+        if (!empty($type_name)) {
+            $type = ($parent_type_name ?? '') . ' ' . $type_name;
+        } elseif (!empty($this->account_type)) {
+            $type = ($this->account_type->parent_account ? $this->account_type->parent_account->name : '') . ' ' . $this->account_type->name;
+        }
+
+        $type = strtolower($type);
+        $name = strtolower($this->name);
+
+        // Credit Normal Accounts: Liability, Equity, Income
+        if (str_contains($type, 'liability') || str_contains($type, 'utang') || str_contains($type, 'kewajiban') || str_contains($type, 'pasiva') || str_contains($name, 'utang') || str_contains($name, 'kewajiban')) {
+            return 'credit';
+        } elseif (str_contains($type, 'equity') || str_contains($type, 'modal') || str_contains($type, 'ekuitas') || str_contains($type, 'capital') || str_contains($name, 'modal') || str_contains($name, 'ekuitas')) {
+            return 'credit';
+        } elseif (str_contains($type, 'pendapatan') || str_contains($type, 'penjualan') || str_contains($type, 'income') || str_contains($type, 'revenue') || str_contains($name, 'pendapatan')) {
+            return 'credit';
+        }
+
+        // Debit Normal Accounts: Asset, Expense
+        return 'debit';
+    }
+
+    /**
+     * Returns whether the account is an expense or not.
+     *
+     * @return bool
+     */
+    public function isExpense($type_name = null, $parent_type_name = null)
+    {
+        $type = '';
+        if (!empty($type_name)) {
+            $type = ($parent_type_name ?? '') . ' ' . $type_name;
+        } elseif (!empty($this->account_type)) {
+            $type = ($this->account_type->parent_account ? $this->account_type->parent_account->name : '') . ' ' . $this->account_type->name;
+        }
+
+        $type = strtolower($type);
+        $name = strtolower($this->name);
+
+        if (str_contains($type, 'expense') || str_contains($type, 'biaya') || str_contains($type, 'beban') || str_contains($type, 'hpp') || str_contains($type, 'harga pokok') || str_contains($name, 'biaya') || str_contains($name, 'beban')) {
+            return true;
+        }
+        return false;
+    }
 }

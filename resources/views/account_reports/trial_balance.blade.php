@@ -146,6 +146,12 @@
                     } else if (type.includes('equity') || type.includes('modal') || type.includes('ekuitas') || type.includes('capital') || name.includes('modal') || name.includes('ekuitas')) {
                         balance = account.total_credit - account.total_debit;
                         is_debit = false;
+                    } else if (type.includes('pendapatan') || type.includes('penjualan') || type.includes('income') || type.includes('revenue') || name.includes('pendapatan')) {
+                        balance = account.total_credit - account.total_debit;
+                        is_debit = false;
+                    } else if (type.includes('asset') || type.includes('aktiva') || type.includes('harta') || type.includes('saving') || type.includes('current') || name.includes('kas') || name.includes('bank') || name.includes('piutang')) {
+                        balance = account.total_debit - account.total_credit;
+                        is_debit = true;
                     } else {
                         balance = account.total_debit - account.total_credit;
                         is_debit = true;
