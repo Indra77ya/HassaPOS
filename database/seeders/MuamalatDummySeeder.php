@@ -144,6 +144,24 @@ class MuamalatDummySeeder extends Seeder
                     $pid = DB::table('transaction_payments')->insertGetId(['transaction_id'=>$ts,'business_id'=>$business_id,'amount'=>$p['s']*10,'method'=>'cash','paid_on'=>$date,'created_by'=>2,'account_id'=>$kas_id]);
                     DB::table('account_transactions')->insert(['account_id'=>$kas_id,'type'=>'debit','amount'=>$p['s']*10,'operation_date'=>$date,'created_by'=>2,'transaction_id'=>$ts,'transaction_payment_id'=>$pid]);
                 }
+
+                // Random Stock Adjustment (1 in 50)
+                if ($i % 50 == 0) {
+                    $adj_type = rand(0,1) ? 'normal' : 'abnormal';
+                    $tadj = DB::table('transactions')->insertGetId(['business_id'=>$business_id,'location_id'=>$loc,'type'=>'stock_adjustment','status'=>'final','ref_no'=>'ADJ-'.$loc.'-'.$i,'transaction_date'=>$date,'total_before_tax'=>$p['b']*5,'final_total'=>$p['b']*5,'adjustment_type'=>$adj_type,'created_by'=>2,'created_at'=>$date]);
+                    DB::table('stock_adjustment_lines')->insert(['transaction_id'=>$tadj,'product_id'=>$p['p'],'variation_id'=>$p['v'],'quantity'=>5,'unit_price'=>$p['b'],'created_at'=>$date]);
+                }
+
+                // Random Stock Transfer (1 in 100)
+                if ($i % 100 == 0) {
+                    $to_loc = $location_ids[array_rand($location_ids)];
+                    if ($to_loc != $loc) {
+                        $st = DB::table('transactions')->insertGetId(['business_id'=>$business_id,'location_id'=>$loc,'type'=>'sell_transfer','status'=>'final','ref_no'=>'ST-'.$loc.'-'.$i,'transaction_date'=>$date,'total_before_tax'=>$p['b']*20,'final_total'=>$p['b']*20,'created_by'=>2,'created_at'=>$date]);
+                        DB::table('purchase_lines')->insert(['transaction_id'=>$st,'product_id'=>$p['p'],'variation_id'=>$p['v'],'quantity'=>20,'purchase_price'=>$p['b'],'purchase_price_inc_tax'=>$p['b'],'created_at'=>$date]);
+
+                        DB::table('transactions')->insertGetId(['business_id'=>$business_id,'location_id'=>$to_loc,'type'=>'purchase_transfer','status'=>'received','ref_no'=>'ST-'.$loc.'-'.$i,'transaction_date'=>$date,'total_before_tax'=>$p['b']*20,'final_total'=>$p['b']*20,'transfer_parent_id'=>$st,'created_by'=>2,'created_at'=>$date]);
+                    }
+                }
             }
         }
 

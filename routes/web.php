@@ -430,7 +430,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::get('/cash-flow', [AccountController::class, 'cashFlow']);
     });
 
-    Route::get('account-types/seed-default', [AccountTypeController::class, 'seedDefault']);
+    Route::post('account-types/seed-default', [AccountTypeController::class, 'seedDefault']);
     Route::resource('account-types', AccountTypeController::class);
 
     //Restaurant module
