@@ -1171,9 +1171,9 @@ class AccountController extends Controller
             $details = __('account.'.$row->sub_type);
             if (in_array($row->sub_type, ['fund_transfer', 'deposit']) && ! empty($row->transfer_transaction)) {
                 if ($row->type == 'credit') {
-                    $details .= ' ( '.__('account.from').': '.$row->transfer_transaction->account->name.')';
-                } else {
                     $details .= ' ( '.__('account.to').': '.$row->transfer_transaction->account->name.')';
+                } else {
+                    $details .= ' ( '.__('account.from').': '.$row->transfer_transaction->account->name.')';
                 }
             }
         } else {
