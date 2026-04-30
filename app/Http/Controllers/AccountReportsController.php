@@ -116,18 +116,19 @@ class AccountReportsController extends Controller
             foreach ($accounts as $account) {
                 $fixed_key = $account->fixed_key;
 
-                // AKTIVA
+                // AKTIVA (Normal balance: DEBIT)
                 if (in_array($fixed_key, ['kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya'])) {
                     $account->balance = $account->debit_balance - $account->credit_balance;
                     $assets['current_assets'][] = $account;
                 } elseif (in_array($fixed_key, ['aktiva_tetap', 'akumulasi_penyusutan'])) {
+                    // Akumulasi penyusutan is a contra-asset, it should reduce the asset value
                     $account->balance = $account->debit_balance - $account->credit_balance;
                     $assets['fixed_assets'][] = $account;
                 } elseif ($fixed_key == 'aktiva_lainnya') {
                     $account->balance = $account->debit_balance - $account->credit_balance;
                     $assets['other_assets'][] = $account;
                 }
-                // PASIVA
+                // PASIVA (Normal balance: CREDIT)
                 elseif (in_array($fixed_key, ['hutang_usaha', 'hutang_lancar_lainnya'])) {
                     $account->balance = $account->credit_balance - $account->debit_balance;
                     $liabilities['current_liabilities'][] = $account;
@@ -272,11 +273,10 @@ class AccountReportsController extends Controller
             'ATY.name as type_name',
             'ATY.fixed_key as fixed_key',
             'PATY.name as parent_type_name',
-            DB::raw("(SELECT SUM(IF(type='credit', amount, -1*amount)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL AND DATE(operation_date) < ?) as opening_balance"),
-            DB::raw("(SELECT SUM(amount) FROM account_transactions WHERE account_id = accounts.id AND type='debit' AND deleted_at IS NULL AND DATE(operation_date) >= ? AND DATE(operation_date) <= ?) as total_debit"),
-            DB::raw("(SELECT SUM(amount) FROM account_transactions WHERE account_id = accounts.id AND type='credit' AND deleted_at IS NULL AND DATE(operation_date) >= ? AND DATE(operation_date) <= ?) as total_credit"),
+            DB::raw("(SELECT SUM(IF(type='credit', amount, -1*amount)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL AND DATE(operation_date) < '{$start_date}') as opening_balance"),
+            DB::raw("(SELECT SUM(amount) FROM account_transactions WHERE account_id = accounts.id AND type='debit' AND deleted_at IS NULL AND DATE(operation_date) >= '{$start_date}' AND DATE(operation_date) <= '{$end_date}') as total_debit"),
+            DB::raw("(SELECT SUM(amount) FROM account_transactions WHERE account_id = accounts.id AND type='credit' AND deleted_at IS NULL AND DATE(operation_date) >= '{$start_date}' AND DATE(operation_date) <= '{$end_date}') as total_credit"),
         ])
-        ->setBindings([$start_date, $start_date, $end_date, $start_date, $end_date])
         ->get();
 
         return $account_details;

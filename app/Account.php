@@ -126,4 +126,41 @@ class Account extends Model
     {
         return $this->belongsTo(\App\AccountType::class, 'account_type_id');
     }
+
+    /**
+     * Determine if the account has a debit normal balance.
+     * Assets and Expenses are typically debit-normal.
+     *
+     * @return string (debit|credit)
+     */
+    public function getBalanceType()
+    {
+        $type_name = !empty($this->account_type) ? strtolower($this->account_type->name) : '';
+        $parent_type_name = !empty($this->account_type->parent_account) ? strtolower($this->account_type->parent_account->name) : '';
+        $fixed_key = !empty($this->account_type) ? $this->account_type->fixed_key : '';
+
+        $debit_keys = [
+            'kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya',
+            'aktiva_tetap', 'aktiva_lainnya', 'harga_pokok_penjualan',
+            'beban_operasional', 'beban_lain_lain', 'beban_pajak'
+        ];
+
+        if (in_array($fixed_key, $debit_keys)) {
+            return 'debit';
+        }
+
+        // Fallback for legacy data or if fixed_key is missing
+        $debit_names = [
+            'aktiva lancar', 'aktiva tetap', 'current assets', 'fixed assets',
+            'cogs', 'expenses', 'biaya operasional', 'harga pokok penjualan', 'beban'
+        ];
+
+        foreach ($debit_names as $name) {
+            if (strpos($type_name, $name) !== false || strpos($parent_type_name, $name) !== false) {
+                return 'debit';
+            }
+        }
+
+        return 'credit';
+    }
 }
