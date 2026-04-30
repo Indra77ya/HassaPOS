@@ -864,6 +864,7 @@ class AccountController extends Controller
                 '=',
                 'A.id'
                 )
+                ->leftjoin('account_types as ATY', 'A.account_type_id', '=', 'ATY.id')
                 ->leftjoin(
                     'transaction_payments as TP',
                     'account_transactions.transaction_payment_id',
@@ -891,6 +892,8 @@ class AccountController extends Controller
                     'account_transactions.transaction_id',
                     'account_transactions.id',
                     'A.name as account_name',
+                    'ATY.name as account_type_name',
+                    'ATY.fixed_key as fixed_key',
                     'TP.payment_ref_no as payment_ref_no',
                     'TP.is_return',
                     'TP.is_advance',
@@ -985,49 +988,15 @@ class AccountController extends Controller
             $payment_types = $this->commonUtil->payment_types(null, true, $business_id);
 
             return DataTables::of($accounts)
-                ->editColumn('method', function ($row) use ($payment_types) {
-                    if (! empty($row->method) && isset($payment_types[$row->method])) {
-                        return $payment_types[$row->method];
+                ->addColumn('activity', function ($row) {
+                    $fixed_key = $row->fixed_key;
+                    if (in_array($fixed_key, ['aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya'])) {
+                        return __('account.investing');
+                    } elseif (in_array($fixed_key, ['hutang_jangka_panjang', 'ekuitas'])) {
+                        return __('account.financing');
                     } else {
-                        return '';
+                        return __('account.operating');
                     }
-                })
-                ->addColumn('payment_details', function ($row) {
-                    $arr = [];
-                    if (! empty($row->transaction_no)) {
-                        $arr[] = '<b>'.__('lang_v1.transaction_no').'</b>: '.$row->transaction_no;
-                    }
-
-                    if ($row->method == 'card' && ! empty($row->card_transaction_number)) {
-                        $arr[] = '<b>'.__('lang_v1.card_transaction_no').'</b>: '.$row->card_transaction_number;
-                    }
-
-                    if ($row->method == 'card' && ! empty($row->card_number)) {
-                        $arr[] = '<b>'.__('lang_v1.card_no').'</b>: '.$row->card_number;
-                    }
-                    if ($row->method == 'card' && ! empty($row->card_type)) {
-                        $arr[] = '<b>'.__('lang_v1.card_type').'</b>: '.$row->card_type;
-                    }
-                    if ($row->method == 'card' && ! empty($row->card_holder_name)) {
-                        $arr[] = '<b>'.__('lang_v1.card_holder_name').'</b>: '.$row->card_holder_name;
-                    }
-                    if ($row->method == 'card' && ! empty($row->card_month)) {
-                        $arr[] = '<b>'.__('lang_v1.month').'</b>: '.$row->card_month;
-                    }
-                    if ($row->method == 'card' && ! empty($row->card_year)) {
-                        $arr[] = '<b>'.__('lang_v1.year').'</b>: '.$row->card_year;
-                    }
-                    if ($row->method == 'card' && ! empty($row->card_security)) {
-                        $arr[] = '<b>'.__('lang_v1.security_code').'</b>: '.$row->card_security;
-                    }
-                    if (! empty($row->cheque_number)) {
-                        $arr[] = '<b>'.__('lang_v1.cheque_no').'</b>: '.$row->cheque_number;
-                    }
-                    if (! empty($row->bank_account_number)) {
-                        $arr[] = '<b>'.__('lang_v1.card_no').'</b>: '.$row->bank_account_number;
-                    }
-
-                    return implode(', ', $arr);
                 })
                 ->addColumn('debit', '@if($type == "debit")<span class="debit" data-orig-value="{{$amount}}">@format_currency($amount)</span>@endif')
                 ->addColumn('credit', '@if($type == "credit")<span class="debit" data-orig-value="{{$amount}}">@format_currency($amount)</span>@endif')
@@ -1041,33 +1010,6 @@ class AccountController extends Controller
 
                     return '<span class="balance" data-orig-value="'.$balance.'">'.$this->commonUtil->num_f($balance, true).'</span>';
                 })
-                ->addColumn('total_balance', function ($row) use ($business_id, $account_ids, $permitted_locations) {
-                    $query = AccountTransaction::join(
-                                        'accounts as A',
-                                        'account_transactions.account_id',
-                                        '=',
-                                        'A.id'
-                                    )
-                                    ->where('A.business_id', $business_id)
-                                    ->where('operation_date', '<=', $row->operation_date)
-                                    ->whereNull('account_transactions.deleted_at')
-                                    ->select(DB::raw("SUM(IF(type='credit', amount, -1 * amount)) as balance"));
-
-                    if (! empty(request()->input('type'))) {
-                        $query->where('type', request()->input('type'));
-                    }
-                    if ($permitted_locations != 'all' || ! empty(request()->input('location_id'))) {
-                        $query->whereIn('A.id', $account_ids);
-                    }
-
-                    if (! empty(request()->input('account_id'))) {
-                        $query->where('A.id', request()->input('account_id'));
-                    }
-
-                    $balance = $query->first()->balance;
-
-                    return '<span class="total_balance" data-orig-value="'.$balance.'">'.$this->commonUtil->num_f($balance, true).'</span>';
-                })
                 ->editColumn('operation_date', function ($row) {
                     return $this->commonUtil->format_date($row->operation_date, true);
                 })
@@ -1075,7 +1017,7 @@ class AccountController extends Controller
                     return $this->__getPaymentDetails($row);
                 })
                 ->removeColumn('id')
-                ->rawColumns(['credit', 'debit', 'balance', 'sub_type', 'total_balance', 'payment_details'])
+                ->rawColumns(['credit', 'debit', 'balance', 'sub_type', 'activity'])
                 ->make(true);
         }
         $accounts = Account::forDropdown($business_id, false);
