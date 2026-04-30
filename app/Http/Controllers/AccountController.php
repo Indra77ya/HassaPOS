@@ -128,26 +128,8 @@ class AccountController extends Controller
                             ->editColumn('balance', function ($row) {
                                 return '<span class="balance" data-orig-value="'.$row->balance.'">'.$this->commonUtil->num_f($row->balance, true).'</span>';
                             })
-                            ->editColumn('account_type', function ($row) {
-                                $account_type = '';
-                                if (! empty($row->account_type->parent_account)) {
-                                    $account_type .= $row->account_type->parent_account->name.' - ';
-                                }
-                                if (! empty($row->account_type)) {
-                                    $account_type .= $row->account_type->name;
-                                }
-
-                                return $account_type;
-                            })
-                            ->editColumn('parent_account_type_name', function ($row) {
-                                $parent_account_type_name = empty($row->parent_account_type_name) ? $row->account_type_name : $row->parent_account_type_name;
-
-                                return $parent_account_type_name;
-                            })
                             ->editColumn('account_type_name', function ($row) {
-                                $account_type_name = empty($row->parent_account_type_name) ? '' : $row->account_type_name;
-
-                                return $account_type_name;
+                                return $row->account_type_name;
                             })
                             ->editColumn('account_details', function ($row) {
                                 $html = '';
