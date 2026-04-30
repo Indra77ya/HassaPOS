@@ -92,7 +92,7 @@
                                                     </thead>
                                                     <tfoot>
                                                         <tr class="bg-gray font-17 footer-total text-center">
-                                                            <td colspan="5"><strong>@lang('sale.total'):</strong></td>
+                                                            <td colspan="4"><strong>@lang('sale.total'):</strong></td>
                                                             <td class="footer_total_balance"></td>
                                                             <td colspan="3"></td>
                                                         </tr>
