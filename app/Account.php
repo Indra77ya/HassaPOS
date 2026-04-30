@@ -126,4 +126,46 @@ class Account extends Model
     {
         return $this->belongsTo(\App\AccountType::class, 'account_type_id');
     }
+
+    /**
+     * Returns the balance type of the account (debit or credit)
+     * based on the account type.
+     *
+     * @param  string  $type_name
+     * @param  string  $parent_type_name
+     * @return string (debit/credit)
+     */
+    public static function getBalanceType($type_name, $parent_type_name = null)
+    {
+        $debit_types = [
+            'aktiva lancar',
+            'aktiva tetap',
+            'harga pokok penjualan',
+            'biaya operasional',
+            'current assets',
+            'fixed assets',
+            'cogs',
+            'operating expenses',
+            'expenses',
+            'assets',
+        ];
+
+        $type = strtolower($type_name);
+        $parent_type = ! empty($parent_type_name) ? strtolower($parent_type_name) : null;
+
+        if (in_array($type, $debit_types) || in_array($parent_type, $debit_types)) {
+            return 'debit';
+        }
+
+        // Fallback checks for common Indonesian accounting terms if exact match fails
+        if (str_contains($type, 'aktiva') || str_contains($type, 'biaya') || str_contains($type, 'beban') || str_contains($type, 'persediaan') || str_contains($type, 'kas') || str_contains($type, 'bank')) {
+            return 'debit';
+        }
+
+        if ($parent_type && (str_contains($parent_type, 'aktiva') || str_contains($parent_type, 'biaya') || str_contains($parent_type, 'beban'))) {
+            return 'debit';
+        }
+
+        return 'credit';
+    }
 }

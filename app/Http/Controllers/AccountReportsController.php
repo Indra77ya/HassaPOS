@@ -113,29 +113,34 @@ class AccountReportsController extends Controller
             $equity = [];
 
             foreach ($accounts as $account) {
-                $type = strtolower($account->type_name . ' ' . $account->parent_type_name);
-                $name = strtolower($account->account_name);
+                $type = strtolower($account->type_name);
+                $parent_type = strtolower($account->parent_type_name);
 
-                if (str_contains($type, 'liability') || str_contains($type, 'utang') || str_contains($type, 'kewajiban') || str_contains($type, 'pasiva') || str_contains($name, 'utang') || str_contains($name, 'kewajiban')) {
+                $is_asset = str_contains($type, 'aktiva') || str_contains($parent_type, 'aktiva') || str_contains($type, 'asset') || str_contains($parent_type, 'asset');
+                $is_liability = str_contains($type, 'kewajiban') || str_contains($parent_type, 'kewajiban') || str_contains($type, 'liability') || str_contains($parent_type, 'liability') || str_contains($type, 'hutang') || str_contains($parent_type, 'hutang');
+                $is_equity = str_contains($type, 'ekuitas') || str_contains($parent_type, 'ekuitas') || str_contains($type, 'equity') || str_contains($parent_type, 'equity') || str_contains($type, 'modal') || str_contains($parent_type, 'modal');
+
+                if ($is_liability) {
                     $account->balance = $account->credit_balance - $account->debit_balance;
-                    if (str_contains($type, 'long term') || str_contains($type, 'jangka panjang') || str_contains($name, 'jangka panjang')) {
+                    if (str_contains($type, 'jangka panjang') || str_contains($parent_type, 'jangka panjang') || str_contains($type, 'long term') || str_contains($parent_type, 'long term')) {
                         $liabilities['long_term_liabilities'][] = $account;
                     } else {
                         $liabilities['current_liabilities'][] = $account;
                     }
-                } elseif (str_contains($type, 'equity') || str_contains($type, 'modal') || str_contains($type, 'ekuitas') || str_contains($type, 'capital') || str_contains($name, 'modal') || str_contains($name, 'ekuitas')) {
+                } elseif ($is_equity) {
                     $account->balance = $account->credit_balance - $account->debit_balance;
                     $equity[] = $account;
-                } elseif (str_contains($type, 'asset') || str_contains($type, 'aktiva') || str_contains($type, 'harta') || str_contains($type, 'saving') || str_contains($type, 'current') || str_contains($name, 'kas') || str_contains($name, 'bank') || str_contains($name, 'piutang')) {
+                } elseif ($is_asset) {
                     $account->balance = $account->debit_balance - $account->credit_balance;
-                    if (str_contains($type, 'fixed') || str_contains($type, 'tetap') || str_contains($name, 'tetap') || str_contains($name, 'tanah') || str_contains($name, 'bangunan') || str_contains($name, 'mesin') || str_contains($name, 'peralatan')) {
+                    if (str_contains($type, 'tetap') || str_contains($parent_type, 'tetap') || str_contains($type, 'fixed') || str_contains($parent_type, 'fixed')) {
                         $assets['fixed_assets'][] = $account;
-                    } elseif (str_contains($type, 'other') || str_contains($type, 'lainnya') || str_contains($name, 'lainnya')) {
+                    } elseif (str_contains($type, 'lainnya') || str_contains($parent_type, 'lainnya') || str_contains($type, 'other') || str_contains($parent_type, 'other')) {
                         $assets['other_assets'][] = $account;
                     } else {
                         $assets['current_assets'][] = $account;
                     }
                 } else {
+                    // Fallback to debit-normal for anything else (Expenses, etc. though shouldn't be in BS usually)
                     $account->balance = $account->debit_balance - $account->credit_balance;
                     $assets['current_assets'][] = $account;
                 }
