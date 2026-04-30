@@ -222,6 +222,13 @@ class AccountReportsController extends Controller
                 'total_purchase_discount' => $pl_details['total_purchase_discount'],
                 'total_reward_amount' => $pl_details['total_reward_amount'],
                 'total_sell_round_off' => $pl_details['total_sell_round_off'],
+                'total_sell_inc_tax' => $pl_details['total_sell_inc_tax'],
+                'total_purchase_inc_tax' => $pl_details['total_purchase_inc_tax'],
+                'total_sell_return_inc_tax' => $pl_details['total_sell_return_inc_tax'],
+                'total_purchase_return_inc_tax' => $pl_details['total_purchase_return_inc_tax'] ?? 0,
+                'total_sell_shipping_charge' => $pl_details['total_sell_shipping_charge'],
+                'total_purchase_shipping_charge' => $pl_details['total_purchase_shipping_charge'],
+                'total_purchase_additional_expense' => $pl_details['total_purchase_additional_expense'],
             ];
 
             return $output;

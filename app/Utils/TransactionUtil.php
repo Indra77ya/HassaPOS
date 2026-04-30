@@ -5730,14 +5730,18 @@ class TransactionUtil extends Util
 
         //Purchase
         $data['total_purchase'] = ! empty($purchase_details['total_purchase_exc_tax']) ? $purchase_details['total_purchase_exc_tax'] : 0;
+        $data['total_purchase_inc_tax'] = ! empty($purchase_details['total_purchase_inc_tax']) ? $purchase_details['total_purchase_inc_tax'] : 0;
         $data['total_purchase_discount'] = ! empty($total_purchase_discount) ? $total_purchase_discount : 0;
         $data['total_purchase_return'] = $transaction_totals['total_purchase_return_exc_tax'];
+        $data['total_purchase_return_inc_tax'] = $transaction_totals['total_purchase_return_inc_tax'];
 
         //Sales
         $data['total_sell'] = ! empty($sell_details['total_sell_exc_tax']) ? $sell_details['total_sell_exc_tax'] : 0;
+        $data['total_sell_inc_tax'] = ! empty($sell_details['total_sell_inc_tax']) ? $sell_details['total_sell_inc_tax'] : 0;
         $data['total_sell_discount'] = ! empty($total_sell_discount) ? $total_sell_discount : 0;
         $data['total_sell_return_discount'] = ! empty($total_sell_return_discount) ? $total_sell_return_discount : 0;
         $data['total_sell_return'] = $transaction_totals['total_sell_return_exc_tax'];
+        $data['total_sell_return_inc_tax'] = $transaction_totals['total_sell_return_inc_tax'];
 
         $data['total_sell_round_off'] = ! empty($total_sell_round_off) ? $total_sell_round_off : 0;
 

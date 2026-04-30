@@ -115,8 +115,19 @@
                 var total_credit = 0;
                 var rows = '';
 
+                // Calculate Net Tax
+                var sales_tax = result.total_sell_inc_tax - result.total_sell;
+                var sales_return_tax = result.total_sell_return_inc_tax - result.total_sell_return;
+                var net_sales_tax = sales_tax - sales_return_tax;
+
+                var purchase_tax = result.total_purchase_inc_tax - result.total_purchase;
+                var purchase_return_tax = result.total_purchase_return_inc_tax - result.total_purchase_return;
+                var net_purchase_tax = purchase_tax - purchase_return_tax;
+
+                var total_tax = net_sales_tax - net_purchase_tax;
+
                 // 1. Assets (Debit nature)
-                // Opening Stock
+                // Persediaan Barang (Opening Stock)
                 if (result.opening_stock > 0) {
                     rows += render_row("{{__('report.opening_stock')}}", result.opening_stock, 0);
                     total_debit += parseFloat(result.opening_stock);
@@ -131,7 +142,7 @@
                     total_credit += Math.abs(parseFloat(result.customer_due));
                 }
 
-                // Payment Accounts
+                // Payment Accounts & Equity
                 result.account_balances.forEach(function(account) {
                     var type = (account.type_name || '') + ' ' + (account.parent_type_name || '');
                     type = type.toLowerCase();
@@ -170,6 +181,11 @@
                     }
                 });
 
+                if (total_tax < 0) {
+                    rows += render_row("{{__('tax.tax')}}", Math.abs(total_tax), 0);
+                    total_debit += Math.abs(total_tax);
+                }
+
                 // 2. Liabilities (Credit nature)
                 // Supplier Due (Utang)
                 if (result.supplier_due > 0) {
@@ -178,6 +194,11 @@
                 } else if (result.supplier_due < 0) {
                     rows += render_row("{{__('account.supplier_due')}}", Math.abs(result.supplier_due), 0);
                     total_debit += Math.abs(parseFloat(result.supplier_due));
+                }
+
+                if (total_tax > 0) {
+                    rows += render_row("{{__('tax.tax')}}", 0, total_tax);
+                    total_credit += parseFloat(total_tax);
                 }
 
                 // 3. Income (Credit nature)
@@ -196,6 +217,10 @@
                 if (result.total_purchase_discount > 0) {
                     rows += render_row("{{__('lang_v1.total_purchase_discount')}}", 0, result.total_purchase_discount);
                     total_credit += parseFloat(result.total_purchase_discount);
+                }
+                if (result.total_sell_shipping_charge > 0) {
+                    rows += render_row("{{__('sale.shipping_charges')}}", 0, result.total_sell_shipping_charge);
+                    total_credit += parseFloat(result.total_sell_shipping_charge);
                 }
 
                 // 4. Expenses (Debit nature)
@@ -223,13 +248,23 @@
                     rows += render_row("{{__('lang_v1.total_reward_amount')}}", result.total_reward_amount, 0);
                     total_debit += parseFloat(result.total_reward_amount);
                 }
+                if (result.total_purchase_shipping_charge > 0) {
+                    rows += render_row("{{__('purchase.additional_shipping_charges')}}", result.total_purchase_shipping_charge, 0);
+                    total_debit += parseFloat(result.total_purchase_shipping_charge);
+                }
+                if (result.total_purchase_additional_expense > 0) {
+                    rows += render_row("{{__('lang_v1.additional_expense')}}", result.total_purchase_additional_expense, 0);
+                    total_debit += parseFloat(result.total_purchase_additional_expense);
+                }
                 if (result.total_sell_round_off != 0) {
                     if (result.total_sell_round_off > 0) {
-                        rows += render_row("{{__('lang_v1.round_off')}}", result.total_sell_round_off, 0);
-                        total_debit += parseFloat(result.total_sell_round_off);
+                        // Positive round off means surcharge to customer -> Income (Credit)
+                        rows += render_row("{{__('lang_v1.round_off')}}", 0, result.total_sell_round_off);
+                        total_credit += parseFloat(result.total_sell_round_off);
                     } else {
-                        rows += render_row("{{__('lang_v1.round_off')}}", 0, Math.abs(result.total_sell_round_off));
-                        total_credit += Math.abs(parseFloat(result.total_sell_round_off));
+                        // Negative round off means discount to customer -> Expense (Debit)
+                        rows += render_row("{{__('lang_v1.round_off')}}", Math.abs(result.total_sell_round_off), 0);
+                        total_debit += Math.abs(parseFloat(result.total_sell_round_off));
                     }
                 }
 
