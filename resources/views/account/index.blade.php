@@ -71,6 +71,12 @@
                                                             <path d="M5 12l14 0" />
                                                         </svg> @lang('messages.add')
                                                     </button>
+
+                                                    {!! Form::open(['url' => action([\App\Http\Controllers\AccountTypeController::class, 'seedDefault']), 'method' => 'post', 'class' => 'pull-right', 'style' => 'margin-right: 10px;']) !!}
+                                                        <button type="submit" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-font-bold tw-rounded-full">
+                                                            <i class="fas fa-magic"></i> @lang('account.add_default_account_types')
+                                                        </button>
+                                                    {!! Form::close() !!}
                                             </div>
                                             {{-- @endcomponent --}}
                                         </div>

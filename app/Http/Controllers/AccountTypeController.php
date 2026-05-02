@@ -118,22 +118,57 @@ class AccountTypeController extends Controller
                 ['key' => 'beban_pajak', 'parent' => null],
             ];
 
+            $created_types = [];
             foreach ($default_types as $at) {
                 $translated_name = __('account.' . $at['key']);
 
                 // Check if already exists
-                $exists = AccountType::where('business_id', $business_id)
-                                     ->where('name', $translated_name)
+                $type = AccountType::where('business_id', $business_id)
+                                     ->where('fixed_key', $at['key'])
                                      ->first();
-                if (! $exists) {
-                    AccountType::create([
+                if (! $type) {
+                    $type = AccountType::create([
                         'name' => $translated_name,
                         'business_id' => $business_id,
                         'parent_account_type_id' => null,
                         'fixed_key' => $at['key']
                     ]);
                 } else {
-                    $exists->update(['fixed_key' => $at['key']]);
+                    $type->update(['name' => $translated_name]);
+                }
+                $created_types[$at['key']] = $type->id;
+            }
+
+            // Seed basic accounts (COA)
+            $default_accounts = [
+                ['name' => 'Kas', 'type' => 'kas_dan_bank', 'number' => '1101', 'balance' => 'debit'],
+                ['name' => 'Bank', 'type' => 'kas_dan_bank', 'number' => '1102', 'balance' => 'debit'],
+                ['name' => 'Piutang Usaha', 'type' => 'piutang_usaha', 'number' => '1201', 'balance' => 'debit'],
+                ['name' => 'Persediaan Barang', 'type' => 'persediaan', 'number' => '1301', 'balance' => 'debit'],
+                ['name' => 'Hutang Usaha', 'type' => 'hutang_usaha', 'number' => '2101', 'balance' => 'credit'],
+                ['name' => 'Modal Pemilik', 'type' => 'ekuitas', 'number' => '3101', 'balance' => 'credit'],
+                ['name' => 'Laba Ditahan', 'type' => 'ekuitas', 'number' => '3201', 'balance' => 'credit'],
+                ['name' => 'Pendapatan Penjualan', 'type' => 'pendapatan_usaha', 'number' => '4101', 'balance' => 'credit'],
+                ['name' => 'Harga Pokok Penjualan', 'type' => 'harga_pokok_penjualan', 'number' => '5101', 'balance' => 'debit'],
+                ['name' => 'Beban Gaji', 'type' => 'beban_operasional', 'number' => '6101', 'balance' => 'debit'],
+                ['name' => 'Beban Sewa', 'type' => 'beban_operasional', 'number' => '6102', 'balance' => 'debit'],
+                ['name' => 'Beban Listrik & Air', 'type' => 'beban_operasional', 'number' => '6103', 'balance' => 'debit'],
+            ];
+
+            $user_id = $request->session()->get('user.id');
+            foreach ($default_accounts as $da) {
+                $exists = \App\Account::where('business_id', $business_id)
+                                      ->where('name', $da['name'])
+                                      ->first();
+                if (!$exists) {
+                    \App\Account::create([
+                        'name' => $da['name'],
+                        'business_id' => $business_id,
+                        'account_number' => $da['number'],
+                        'account_type_id' => $created_types[$da['type']],
+                        'normal_balance' => $da['balance'],
+                        'created_by' => $user_id
+                    ]);
                 }
             }
 
