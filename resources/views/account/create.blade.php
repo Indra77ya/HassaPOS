@@ -30,6 +30,15 @@
             </div>
 
             <div class="form-group">
+                {!! Form::label('normal_balance', __( 'account.balance' ) .":") !!}
+                <select name="normal_balance" class="form-control select2" required>
+                    <option value="">@lang('messages.please_select')</option>
+                    <option value="debit">@lang('account.debit')</option>
+                    <option value="credit">@lang('account.credit')</option>
+                </select>
+            </div>
+
+            <div class="form-group">
                 {!! Form::label('opening_balance', __( 'account.opening_balance' ) .":") !!}
                 {!! Form::text('opening_balance', 0, ['class' => 'form-control input_number','placeholder' => __( 'account.opening_balance' ) ]); !!}
             </div>

@@ -29,6 +29,15 @@
                 </select>
             </div>
 
+            <div class="form-group">
+                {!! Form::label('normal_balance', __( 'account.balance' ) .":") !!}
+                <select name="normal_balance" class="form-control select2" required>
+                    <option value="">@lang('messages.please_select')</option>
+                    <option value="debit" @if($account->normal_balance == 'debit') selected @endif>@lang('account.debit')</option>
+                    <option value="credit" @if($account->normal_balance == 'credit') selected @endif>@lang('account.credit')</option>
+                </select>
+            </div>
+
             <label>@lang('lang_v1.account_details'):</label>
             <table class="table table-striped">
                 <tr>

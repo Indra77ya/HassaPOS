@@ -135,6 +135,10 @@ class Account extends Model
      */
     public function getBalanceType()
     {
+        if (!empty($this->normal_balance)) {
+            return $this->normal_balance;
+        }
+
         $type_name = !empty($this->account_type) ? strtolower($this->account_type->name) : '';
         $parent_type_name = !empty($this->account_type->parent_account) ? strtolower($this->account_type->parent_account->name) : '';
         $fixed_key = !empty($this->account_type) ? $this->account_type->fixed_key : '';

@@ -92,7 +92,9 @@ class AccountReportsController extends Controller
             // Removed restrictive filtering to include all accounts in Balance Sheet
 
             $accounts = $accounts->select([
+                'accounts.id',
                 'accounts.name as account_name',
+                'accounts.normal_balance',
                 'ATY.name as type_name',
                 'ATY.fixed_key as fixed_key',
                 'PATY.name as parent_type_name',
@@ -115,28 +117,31 @@ class AccountReportsController extends Controller
 
             foreach ($accounts as $account) {
                 $fixed_key = $account->fixed_key;
+                $is_debit_normal = $account->normal_balance == 'debit';
+                if (empty($account->normal_balance)) {
+                    $is_debit_normal = in_array($fixed_key, ['kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya', 'aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya']);
+                }
 
-                // AKTIVA (Normal balance: DEBIT)
-                if (in_array($fixed_key, ['kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya'])) {
+                if ($is_debit_normal) {
                     $account->balance = $account->debit_balance - $account->credit_balance;
+                } else {
+                    $account->balance = $account->credit_balance - $account->debit_balance;
+                }
+
+                // AKTIVA
+                if (in_array($fixed_key, ['kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya'])) {
                     $assets['current_assets'][] = $account;
                 } elseif (in_array($fixed_key, ['aktiva_tetap', 'akumulasi_penyusutan'])) {
-                    // Akumulasi penyusutan is a contra-asset, it should reduce the asset value
-                    $account->balance = $account->debit_balance - $account->credit_balance;
                     $assets['fixed_assets'][] = $account;
                 } elseif ($fixed_key == 'aktiva_lainnya') {
-                    $account->balance = $account->debit_balance - $account->credit_balance;
                     $assets['other_assets'][] = $account;
                 }
-                // PASIVA (Normal balance: CREDIT)
+                // PASIVA
                 elseif (in_array($fixed_key, ['hutang_usaha', 'hutang_lancar_lainnya'])) {
-                    $account->balance = $account->credit_balance - $account->debit_balance;
                     $liabilities['current_liabilities'][] = $account;
                 } elseif ($fixed_key == 'hutang_jangka_panjang') {
-                    $account->balance = $account->credit_balance - $account->debit_balance;
                     $liabilities['long_term_liabilities'][] = $account;
                 } elseif ($fixed_key == 'ekuitas') {
-                    $account->balance = $account->credit_balance - $account->debit_balance;
                     $equity[] = $account;
                 }
             }
@@ -270,6 +275,7 @@ class AccountReportsController extends Controller
         $account_details = $query->select([
             'accounts.id',
             'accounts.name',
+            'accounts.normal_balance',
             'ATY.name as type_name',
             'ATY.fixed_key as fixed_key',
             'PATY.name as parent_type_name',

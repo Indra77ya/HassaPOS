@@ -129,10 +129,8 @@ class AccountController extends Controller
                                 }
                             })
                             ->editColumn('balance', function ($row) {
-                                $is_debit_normal = true;
-                                if (in_array($row->fixed_key, ['hutang_usaha', 'hutang_lancar_lainnya', 'hutang_jangka_panjang', 'ekuitas', 'pendapatan_usaha', 'pendapatan_lainnya'])) {
-                                    $is_debit_normal = false;
-                                }
+                                $account = Account::find($row->id);
+                                $is_debit_normal = $account->getBalanceType() == 'debit';
 
                                 if ($is_debit_normal) {
                                     $balance = $row->total_debit - $row->total_credit;
@@ -224,7 +222,7 @@ class AccountController extends Controller
 
         if (request()->ajax()) {
             try {
-                $input = $request->only(['name', 'account_number', 'note', 'account_type_id', 'account_details']);
+                $input = $request->only(['name', 'account_number', 'note', 'account_type_id', 'account_details', 'normal_balance']);
                 $business_id = $request->session()->get('user.business_id');
                 $user_id = $request->session()->get('user.id');
                 $input['business_id'] = $business_id;
@@ -542,7 +540,7 @@ class AccountController extends Controller
 
         if (request()->ajax()) {
             try {
-                $input = $request->only(['name', 'account_number', 'note', 'account_type_id', 'account_details']);
+                $input = $request->only(['name', 'account_number', 'note', 'account_type_id', 'account_details', 'normal_balance']);
 
                 $business_id = request()->session()->get('user.business_id');
                 $account = Account::where('business_id', $business_id)
@@ -552,6 +550,7 @@ class AccountController extends Controller
                 $account->note = $input['note'];
                 $account->account_type_id = $input['account_type_id'];
                 $account->account_details = $input['account_details'];
+                $account->normal_balance = $input['normal_balance'];
                 $account->save();
 
                 $output = ['success' => true,

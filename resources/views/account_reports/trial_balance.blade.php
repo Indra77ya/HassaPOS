@@ -134,9 +134,9 @@
                     var balance = 0;
 
                     // Normal balance check
-                    var is_debit_normal = true;
-                    if (['hutang_usaha', 'hutang_lancar_lainnya', 'hutang_jangka_panjang', 'ekuitas', 'pendapatan_usaha', 'pendapatan_lainnya'].includes(fixed_key)) {
-                        is_debit_normal = false;
+                    var is_debit_normal = account.normal_balance == 'debit';
+                    if (!account.normal_balance) {
+                        is_debit_normal = !(['hutang_usaha', 'hutang_lancar_lainnya', 'hutang_jangka_panjang', 'ekuitas', 'pendapatan_usaha', 'pendapatan_lainnya'].includes(fixed_key));
                     }
 
                     // Opening Balance columns
