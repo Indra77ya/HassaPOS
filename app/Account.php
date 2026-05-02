@@ -135,13 +135,17 @@ class Account extends Model
      */
     public function getBalanceType()
     {
-        if (!empty($this->normal_balance)) {
-            return $this->normal_balance;
+        return self::getBalanceTypeStatic($this->normal_balance, $this->account_type->fixed_key ?? '', $this->account_type->name ?? '', $this->account_type->parent_account->name ?? '');
+    }
+
+    public static function getBalanceTypeStatic($normal_balance, $fixed_key, $type_name = '', $parent_type_name = '')
+    {
+        if (!empty($normal_balance)) {
+            return $normal_balance;
         }
 
-        $type_name = !empty($this->account_type) ? strtolower($this->account_type->name) : '';
-        $parent_type_name = !empty($this->account_type->parent_account) ? strtolower($this->account_type->parent_account->name) : '';
-        $fixed_key = !empty($this->account_type) ? $this->account_type->fixed_key : '';
+        $type_name = strtolower($type_name);
+        $parent_type_name = strtolower($parent_type_name);
 
         $debit_keys = [
             'kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya',
@@ -175,8 +179,11 @@ class Account extends Model
      */
     public function getCategory()
     {
-        $fixed_key = !empty($this->account_type) ? $this->account_type->fixed_key : '';
+        return self::getCategoryStatic($this->account_type->fixed_key ?? '');
+    }
 
+    public static function getCategoryStatic($fixed_key)
+    {
         if (in_array($fixed_key, ['kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya', 'aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya'])) {
             return __('account.assets');
         } elseif (in_array($fixed_key, ['hutang_usaha', 'hutang_lancar_lainnya', 'hutang_jangka_panjang'])) {
@@ -190,5 +197,21 @@ class Account extends Model
         }
 
         return '';
+    }
+
+    /**
+     * Get transaction type to increase balance
+     */
+    public function getIncreaseType()
+    {
+        return $this->getBalanceType();
+    }
+
+    /**
+     * Get transaction type to decrease balance
+     */
+    public function getDecreaseType()
+    {
+        return $this->getBalanceType() == 'debit' ? 'credit' : 'debit';
     }
 }

@@ -65,6 +65,7 @@ class AccountController extends Controller
             ->leftJoin('users AS u', 'accounts.created_by', '=', 'u.id')
                                 ->where('accounts.business_id', $business_id)
                                 ->select(['accounts.name', 'accounts.account_number', 'accounts.note', 'accounts.id', 'accounts.account_type_id',
+                                    'accounts.normal_balance',
                                     'ats.name as account_type_name',
                                     'ats.fixed_key',
                                     'pat.name as parent_account_type_name',
@@ -129,8 +130,7 @@ class AccountController extends Controller
                                 }
                             })
                             ->editColumn('balance', function ($row) {
-                                $account = Account::find($row->id);
-                                $is_debit_normal = $account->getBalanceType() == 'debit';
+                                $is_debit_normal = Account::getBalanceTypeStatic($row->normal_balance, $row->fixed_key, $row->account_type_name, $row->parent_account_type_name) == 'debit';
 
                                 if ($is_debit_normal) {
                                     $balance = $row->total_debit - $row->total_credit;
@@ -144,8 +144,7 @@ class AccountController extends Controller
                                 return $row->account_type_name;
                             })
                             ->addColumn('category', function ($row) {
-                                $account = Account::with('account_type')->find($row->id);
-                                return $account->getCategory();
+                                return Account::getCategoryStatic($row->fixed_key);
                             })
                             ->editColumn('account_details', function ($row) {
                                 $html = '';
@@ -318,6 +317,7 @@ class AccountController extends Controller
                 '=',
                 'A.id'
             )
+            ->leftjoin('account_types as ATY', 'A.account_type_id', '=', 'ATY.id')
             ->leftJoin('transaction_payments AS tp', 'account_transactions.transaction_payment_id', '=', 'tp.id')
             ->leftJoin('contacts AS c', 'tp.payment_for', '=', 'c.id')
             ->leftJoin('users AS u', 'account_transactions.created_by', '=', 'u.id')
@@ -340,6 +340,8 @@ class AccountController extends Controller
                             ->select(['account_transactions.type', 'account_transactions.amount', 'operation_date',
                                 'account_transactions.sub_type', 'transfer_transaction_id',
                                 'A.id as account_id',
+                                'A.normal_balance',
+                                'ATY.fixed_key',
                                 'account_transactions.transaction_id',
                                 'account_transactions.id',
                                 'account_transactions.note',
@@ -439,8 +441,7 @@ class AccountController extends Controller
                             })
                             ->addColumn('balance', function ($row) use ($bal_before_start_date, $start_date) {
                                 //TODO:: Need to fix same balance showing for transactions having same operation date
-                                $account = Account::with('account_type')->find($row->account_id);
-                                $is_debit_normal = $account->getBalanceType() == 'debit';
+                                $is_debit_normal = Account::getBalanceTypeStatic($row->normal_balance, $row->fixed_key) == 'debit';
 
                                 $current_details = AccountTransaction::where('account_id', $row->account_id)
                                                 ->where('operation_date', '>=', $start_date)
@@ -695,10 +696,13 @@ class AccountController extends Controller
             $to = $request->input('to_account');
             $note = $request->input('note');
             if (! empty($amount)) {
+                $from_account = Account::findOrFail($from);
+                $to_account = Account::findOrFail($to);
+
                 $source_data = [
                     'amount' => $amount,
                     'account_id' => $from,
-                    'type' => 'credit',
+                    'type' => $from_account->getDecreaseType(),
                     'sub_type' => 'fund_transfer',
                     'created_by' => session()->get('user.id'),
                     'note' => $note,
@@ -712,7 +716,7 @@ class AccountController extends Controller
                 $destination_data = [
                     'amount' => $amount,
                     'account_id' => $to,
-                    'type' => 'debit',
+                    'type' => $to_account->getIncreaseType(),
                     'sub_type' => 'fund_transfer',
                     'created_by' => session()->get('user.id'),
                     'note' => $note,
@@ -800,7 +804,7 @@ class AccountController extends Controller
                 $deposit_data = [
                     'amount' => $amount,
                     'account_id' => $account_id,
-                    'type' => 'debit',
+                    'type' => $account->getIncreaseType(),
                     'sub_type' => 'deposit',
                     'operation_date' => $this->commonUtil->uf_date($request->input('operation_date'), true),
                     'created_by' => session()->get('user.id'),
@@ -808,11 +812,12 @@ class AccountController extends Controller
                 ];
                 $deposit = AccountTransaction::createAccountTransaction($deposit_data);
 
-                $from_account = $request->input('from_account');
-                if (! empty($from_account)) {
+                $from_account_id = $request->input('from_account');
+                if (! empty($from_account_id)) {
+                    $from_account = Account::findOrFail($from_account_id);
                     $source_data = $deposit_data;
-                    $source_data['type'] = 'credit';
-                    $source_data['account_id'] = $from_account;
+                    $source_data['type'] = $from_account->getDecreaseType();
+                    $source_data['account_id'] = $from_account_id;
                     $source_data['transfer_transaction_id'] = $deposit->id;
 
                     $source = AccountTransaction::createAccountTransaction($source_data);
@@ -1023,8 +1028,7 @@ class AccountController extends Controller
                 ->addColumn('debit', '@if($type == "debit")<span class="debit" data-orig-value="{{$amount}}">@format_currency($amount)</span>@endif')
                 ->addColumn('credit', '@if($type == "credit")<span class="credit" data-orig-value="{{$amount}}">@format_currency($amount)</span>@endif')
                 ->addColumn('balance', function ($row) {
-                    $account = Account::with('account_type')->find($row->account_id);
-                    $is_debit_normal = $account->getBalanceType() == 'debit';
+                    $is_debit_normal = Account::getBalanceTypeStatic($row->normal_balance, $row->fixed_key) == 'debit';
 
                     $details = AccountTransaction::where('account_id', $row->account_id)
                                     ->where('operation_date', '<=', $row->operation_date)
@@ -1067,7 +1071,18 @@ class AccountController extends Controller
         if (! empty($row->sub_type)) {
             $details = __('account.'.$row->sub_type);
             if (in_array($row->sub_type, ['fund_transfer', 'deposit']) && ! empty($row->transfer_transaction)) {
-                if ($row->type == 'debit') {
+
+                $normal_balance = $row->normal_balance;
+                if (empty($normal_balance)) {
+                    $debit_keys = [
+                        'kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya',
+                        'aktiva_tetap', 'aktiva_lainnya', 'harga_pokok_penjualan',
+                        'beban_operasional', 'beban_lain_lain', 'beban_pajak'
+                    ];
+                    $normal_balance = in_array($row->fixed_key, $debit_keys) ? 'debit' : 'credit';
+                }
+
+                if ($row->type == $normal_balance) {
                     $details .= ' ( '.__('account.from').': '.$row->transfer_transaction->account->name.')';
                 } else {
                     $details .= ' ( '.__('account.to').': '.$row->transfer_transaction->account->name.')';
