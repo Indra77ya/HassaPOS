@@ -72,7 +72,7 @@
                                                         </svg> @lang('messages.add')
                                                     </button>
 
-                                                    {!! Form::open(['url' => action([\App\Http\Controllers\AccountTypeController::class, 'seedDefault']), 'method' => 'post', 'class' => 'pull-right', 'style' => 'margin-right: 10px;']) !!}
+                                                    {!! Form::open(['url' => action([\App\Http\Controllers\AccountTypeController::class, 'seedDefault']), 'method' => 'post', 'class' => 'pull-right', 'id' => 'add_default_accounts_form', 'style' => 'margin-right: 10px;']) !!}
                                                         <button type="submit" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-font-bold tw-rounded-full">
                                                             <i class="fas fa-magic"></i> @lang('account.add_default_account_types')
                                                         </button>
@@ -321,6 +321,29 @@
 
         $('#account_status').change(function() {
             other_account_table.ajax.reload();
+        });
+
+        $(document).on('submit', 'form#add_default_accounts_form', function(e) {
+            e.preventDefault();
+            var data = $(this).serialize();
+            var ladda = Ladda.create(document.querySelector('#add_default_accounts_form button[type="submit"]'));
+            ladda.start();
+
+            $.ajax({
+                method: "post",
+                url: $(this).attr("action"),
+                dataType: "json",
+                data: data,
+                success: function(result) {
+                    ladda.stop();
+                    if (result.success == true) {
+                        toastr.success(result.msg);
+                        other_account_table.ajax.reload();
+                    } else {
+                        toastr.error(result.msg);
+                    }
+                }
+            });
         });
 
         $(document).on('submit', 'form#deposit_form', function(e) {

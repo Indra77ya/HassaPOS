@@ -89,7 +89,7 @@ class AccountTypeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function seedDefault()
+    public function seedDefault(Request $request)
     {
         if (! auth()->user()->can('account.access')) {
             abort(403, 'Unauthorized action.');
@@ -180,6 +180,10 @@ class AccountTypeController extends Controller
             $output = ['success' => false,
                 'msg' => __('messages.something_went_wrong'),
             ];
+        }
+
+        if ($request->ajax()) {
+            return $output;
         }
 
         return redirect()->back()->with('status', $output);
