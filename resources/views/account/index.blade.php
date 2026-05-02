@@ -88,6 +88,7 @@
                                                         <tr>
                                                             <th>@lang('lang_v1.name')</th>
                                                             <th>@lang('lang_v1.account_type')</th>
+                                                            <th>@lang('account.account_category')</th>
                                                             <th>@lang('account.account_number')</th>
                                                             <th>@lang('brand.note')</th>
                                                             <th>@lang('lang_v1.balance')</th>
@@ -98,7 +99,7 @@
                                                     </thead>
                                                     <tfoot>
                                                         <tr class="bg-gray font-17 footer-total text-center">
-                                                            <td colspan="4"><strong>@lang('sale.total'):</strong></td>
+                                                            <td colspan="5"><strong>@lang('sale.total'):</strong></td>
                                                             <td class="footer_total_balance"></td>
                                                             <td colspan="3"></td>
                                                         </tr>
@@ -265,7 +266,7 @@
                     }
                 },
                 columnDefs: [{
-                    "targets": [5, 7],
+                    "targets": [6, 8],
                     "orderable": false,
                     "searchable": false
                 }],
@@ -276,6 +277,11 @@
                     {
                         data: 'account_type_name',
                         name: 'ats.name'
+                    },
+                    {
+                        data: 'category',
+                        name: 'category',
+                        searchable: false
                     },
                     {
                         data: 'account_number',

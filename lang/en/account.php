@@ -79,6 +79,9 @@ return [
     'investing' => 'Investing',
     'financing' => 'Financing',
     'activity' => 'Activity',
+    'account_category' => 'Account Category',
+    'income' => 'Income',
+    'expenses' => 'Expenses',
 
     // Default account types
     'kas_dan_bank' => 'Cash & Bank',

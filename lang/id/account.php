@@ -79,6 +79,9 @@ return [
     'investing' => 'Investasi',
     'financing' => 'Pendanaan',
     'activity' => 'Aktivitas',
+    'account_category' => 'Kategori Akun',
+    'income' => 'Pendapatan',
+    'expenses' => 'Beban',
 
     // Default account types
     'kas_dan_bank' => 'Kas & Bank',

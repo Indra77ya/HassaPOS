@@ -143,6 +143,10 @@ class AccountController extends Controller
                             ->editColumn('account_type_name', function ($row) {
                                 return $row->account_type_name;
                             })
+                            ->addColumn('category', function ($row) {
+                                $account = Account::with('account_type')->find($row->id);
+                                return $account->getCategory();
+                            })
                             ->editColumn('account_details', function ($row) {
                                 $html = '';
                                 if (! empty($row->account_details)) {

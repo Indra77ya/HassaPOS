@@ -167,4 +167,28 @@ class Account extends Model
 
         return 'credit';
     }
+
+    /**
+     * Get account group category (Asset, Liability, Equity, etc.)
+     *
+     * @return string
+     */
+    public function getCategory()
+    {
+        $fixed_key = !empty($this->account_type) ? $this->account_type->fixed_key : '';
+
+        if (in_array($fixed_key, ['kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya', 'aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya'])) {
+            return __('account.assets');
+        } elseif (in_array($fixed_key, ['hutang_usaha', 'hutang_lancar_lainnya', 'hutang_jangka_panjang'])) {
+            return __('account.liability');
+        } elseif ($fixed_key == 'ekuitas') {
+            return __('account.equity');
+        } elseif (in_array($fixed_key, ['pendapatan_usaha', 'pendapatan_lainnya'])) {
+            return __('account.income');
+        } elseif (in_array($fixed_key, ['harga_pokok_penjualan', 'beban_operasional', 'beban_lain_lain', 'beban_pajak'])) {
+            return __('account.expenses');
+        }
+
+        return '';
+    }
 }
