@@ -367,8 +367,9 @@ class AccountController extends Controller
                                 DB::raw('GROUP_CONCAT(child_sells.invoice_no) as child_sells'),
                             ])
                              ->groupBy('account_transactions.id')
-                             //->orderBy('account_transactions.id', 'asc')
-                             ->orderBy('account_transactions.operation_date', 'asc');
+                             ->orderBy('account_transactions.operation_date', 'asc')
+                             ->orderByRaw("CASE WHEN account_transactions.sub_type = 'opening_balance' THEN 0 ELSE 1 END")
+                             ->orderBy('account_transactions.id', 'asc');
             if (! empty(request()->input('type'))) {
                 $accounts->where('account_transactions.type', request()->input('type'));
             }
@@ -942,7 +943,9 @@ class AccountController extends Controller
                     DB::raw("GROUP_CONCAT(child_sells.invoice_no SEPARATOR ', ') as child_sells"),
                 ])
                  ->groupBy('account_transactions.id')
-                 ->orderBy('account_transactions.operation_date', 'asc');
+                 ->orderBy('account_transactions.operation_date', 'asc')
+                 ->orderByRaw("CASE WHEN account_transactions.sub_type = 'opening_balance' THEN 0 ELSE 1 END")
+                 ->orderBy('account_transactions.id', 'asc');
             if (! empty(request()->input('type'))) {
                 $accounts->where('account_transactions.type', request()->input('type'));
             }
@@ -1087,18 +1090,7 @@ class AccountController extends Controller
         if (! empty($row->sub_type)) {
             $details = __('account.'.$row->sub_type);
             if (in_array($row->sub_type, ['fund_transfer', 'deposit']) && ! empty($row->transfer_transaction)) {
-
-                $normal_balance = $row->normal_balance;
-                if (empty($normal_balance)) {
-                    $debit_keys = [
-                        'kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya',
-                        'aktiva_tetap', 'aktiva_lainnya', 'harga_pokok_penjualan',
-                        'beban_operasional', 'beban_lain_lain', 'beban_pajak'
-                    ];
-                    $normal_balance = in_array($row->fixed_key, $debit_keys) ? 'debit' : 'credit';
-                }
-
-                if ($row->type == $normal_balance) {
+                if ($row->type == 'debit') {
                     $details .= ' ( '.__('account.from').': '.$row->transfer_transaction->account->name.')';
                 } else {
                     $details .= ' ( '.__('account.to').': '.$row->transfer_transaction->account->name.')';
