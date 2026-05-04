@@ -68,7 +68,6 @@ class AccountController extends Controller
                                     'accounts.normal_balance',
                                     'ats.fixed_key as fixed_key',
                                     'ats.name as account_type_name',
-                                    'ats.fixed_key',
                                     'pat.name as parent_account_type_name',
                                     'accounts.account_details',
                                     'is_closed',
