@@ -66,6 +66,7 @@ class AccountController extends Controller
                                 ->where('accounts.business_id', $business_id)
                                 ->select(['accounts.name', 'accounts.account_number', 'accounts.note', 'accounts.id', 'accounts.account_type_id',
                                     'accounts.normal_balance',
+                                    'ats.fixed_key as fixed_key',
                                     'ats.name as account_type_name',
                                     'ats.fixed_key',
                                     'pat.name as parent_account_type_name',
@@ -446,6 +447,7 @@ class AccountController extends Controller
                                 $current_details = AccountTransaction::where('account_id', $row->account_id)
                                                 ->where('operation_date', '>=', $start_date)
                                                 ->where('operation_date', '<=', $row->operation_date)
+                                                ->whereNull('deleted_at')
                                                 ->select(
                                                     DB::raw("SUM(IF(type='debit', amount, 0)) as total_debit"),
                                                     DB::raw("SUM(IF(type='credit', amount, 0)) as total_credit")
@@ -696,13 +698,10 @@ class AccountController extends Controller
             $to = $request->input('to_account');
             $note = $request->input('note');
             if (! empty($amount)) {
-                $from_account = Account::findOrFail($from);
-                $to_account = Account::findOrFail($to);
-
                 $source_data = [
                     'amount' => $amount,
                     'account_id' => $from,
-                    'type' => $from_account->getDecreaseType(),
+                    'type' => 'credit',
                     'sub_type' => 'fund_transfer',
                     'created_by' => session()->get('user.id'),
                     'note' => $note,
@@ -716,7 +715,7 @@ class AccountController extends Controller
                 $destination_data = [
                     'amount' => $amount,
                     'account_id' => $to,
-                    'type' => $to_account->getIncreaseType(),
+                    'type' => 'debit',
                     'sub_type' => 'fund_transfer',
                     'created_by' => session()->get('user.id'),
                     'note' => $note,
@@ -804,7 +803,7 @@ class AccountController extends Controller
                 $deposit_data = [
                     'amount' => $amount,
                     'account_id' => $account_id,
-                    'type' => $account->getIncreaseType(),
+                    'type' => 'debit',
                     'sub_type' => 'deposit',
                     'operation_date' => $this->commonUtil->uf_date($request->input('operation_date'), true),
                     'created_by' => session()->get('user.id'),
@@ -812,12 +811,11 @@ class AccountController extends Controller
                 ];
                 $deposit = AccountTransaction::createAccountTransaction($deposit_data);
 
-                $from_account_id = $request->input('from_account');
-                if (! empty($from_account_id)) {
-                    $from_account = Account::findOrFail($from_account_id);
+                $from_account = $request->input('from_account');
+                if (! empty($from_account)) {
                     $source_data = $deposit_data;
-                    $source_data['type'] = $from_account->getDecreaseType();
-                    $source_data['account_id'] = $from_account_id;
+                    $source_data['type'] = 'credit';
+                    $source_data['account_id'] = $from_account;
                     $source_data['transfer_transaction_id'] = $deposit->id;
 
                     $source = AccountTransaction::createAccountTransaction($source_data);
@@ -921,6 +919,7 @@ class AccountController extends Controller
                     'A.name as account_name',
                     'ATY.name as account_type_name',
                     'ATY.fixed_key as fixed_key',
+                    'account_transactions.transfer_account_id',
                     'TP.payment_ref_no as payment_ref_no',
                     'TP.is_return',
                     'TP.is_advance',
@@ -1017,6 +1016,24 @@ class AccountController extends Controller
             return DataTables::of($accounts)
                 ->addColumn('activity', function ($row) {
                     $fixed_key = $row->fixed_key;
+
+                    // For fund transfers/deposits, check the "other" account
+                    if (in_array($row->sub_type, ['fund_transfer', 'deposit']) && !empty($row->transfer_account_id)) {
+                        $other_account = Account::join('account_types as ATY', 'accounts.account_type_id', '=', 'ATY.id')
+                            ->where('accounts.id', $row->transfer_account_id)
+                            ->select('ATY.fixed_key')
+                            ->first();
+
+                        if ($other_account) {
+                            $other_fixed_key = $other_account->fixed_key;
+                            if (in_array($other_fixed_key, ['aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya'])) {
+                                return __('account.investing');
+                            } elseif (in_array($other_fixed_key, ['hutang_jangka_panjang', 'ekuitas'])) {
+                                return __('account.financing');
+                            }
+                        }
+                    }
+
                     if (in_array($fixed_key, ['aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya'])) {
                         return __('account.investing');
                     } elseif (in_array($fixed_key, ['hutang_jangka_panjang', 'ekuitas'])) {
