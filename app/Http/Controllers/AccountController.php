@@ -708,7 +708,6 @@ class AccountController extends Controller
                     'sub_type' => 'fund_transfer',
                     'created_by' => session()->get('user.id'),
                     'note' => $note,
-                    'transfer_account_id' => $to,
                     'operation_date' => $this->commonUtil->uf_date($request->input('operation_date'), true),
                 ];
 
@@ -722,7 +721,6 @@ class AccountController extends Controller
                     'sub_type' => 'fund_transfer',
                     'created_by' => session()->get('user.id'),
                     'note' => $note,
-                    'transfer_account_id' => $from,
                     'transfer_transaction_id' => $source_trans->id,
                     'operation_date' => $this->commonUtil->uf_date($request->input('operation_date'), true),
                 ];
@@ -814,13 +812,13 @@ class AccountController extends Controller
                 ];
                 $deposit = AccountTransaction::createAccountTransaction($deposit_data);
 
-                $from_account_id = $request->input('from_account');
-                if (! empty($from_account_id)) {
-                    $from_account = Account::findOrFail($from_account_id);
+                $from_account = $request->input('from_account');
+                if (! empty($from_account)) {
+                    $from_account_obj = Account::findOrFail($from_account);
 
                     $source_data = $deposit_data;
-                    $source_data['type'] = $from_account->getDecreaseType();
-                    $source_data['account_id'] = $from_account_id;
+                    $source_data['type'] = $from_account_obj->getDecreaseType();
+                    $source_data['account_id'] = $from_account;
                     $source_data['transfer_transaction_id'] = $deposit->id;
 
                     $source = AccountTransaction::createAccountTransaction($source_data);
@@ -915,6 +913,9 @@ class AccountController extends Controller
                 )
                 ->leftJoin('users AS u', 'account_transactions.created_by', '=', 'u.id')
                 ->leftJoin('contacts AS c', 'TP.payment_for', '=', 'c.id')
+                ->leftJoin('account_transactions as transfer_trans', 'account_transactions.transfer_transaction_id', '=', 'transfer_trans.id')
+                ->leftJoin('accounts as transfer_acc', 'transfer_trans.account_id', '=', 'transfer_acc.id')
+                ->leftJoin('account_types as transfer_aty', 'transfer_acc.account_type_id', '=', 'transfer_aty.id')
                 ->where('A.business_id', $business_id)
                 ->with(['transaction', 'transaction.contact', 'transfer_transaction', 'transaction.transaction_for'])
                 ->select(['account_transactions.type', 'account_transactions.amount', 'operation_date',
@@ -925,7 +926,6 @@ class AccountController extends Controller
                     'A.normal_balance',
                     'ATY.name as account_type_name',
                     'ATY.fixed_key as fixed_key',
-                    'account_transactions.transfer_account_id',
                     'TP.payment_ref_no as payment_ref_no',
                     'TP.is_return',
                     'TP.is_advance',
@@ -1026,19 +1026,12 @@ class AccountController extends Controller
                     $fixed_key = $row->fixed_key;
 
                     // For fund transfers/deposits, check the "other" account
-                    if (in_array($row->sub_type, ['fund_transfer', 'deposit']) && !empty($row->transfer_account_id)) {
-                        $other_account = Account::join('account_types as ATY', 'accounts.account_type_id', '=', 'ATY.id')
-                            ->where('accounts.id', $row->transfer_account_id)
-                            ->select('ATY.fixed_key')
-                            ->first();
-
-                        if ($other_account) {
-                            $other_fixed_key = $other_account->fixed_key;
-                            if (in_array($other_fixed_key, ['aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya'])) {
-                                return __('account.investing');
-                            } elseif (in_array($other_fixed_key, ['hutang_jangka_panjang', 'ekuitas'])) {
-                                return __('account.financing');
-                            }
+                    if (in_array($row->sub_type, ['fund_transfer', 'deposit']) && !empty($row->transfer_fixed_key)) {
+                        $other_fixed_key = $row->transfer_fixed_key;
+                        if (in_array($other_fixed_key, ['aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya'])) {
+                            return __('account.investing');
+                        } elseif (in_array($other_fixed_key, ['hutang_jangka_panjang', 'ekuitas'])) {
+                            return __('account.financing');
                         }
                     }
 
