@@ -227,6 +227,10 @@ class AccountReportsController extends Controller
                 'total_purchase_discount' => $pl_details['total_purchase_discount'],
                 'total_reward_amount' => $pl_details['total_reward_amount'],
                 'total_sell_round_off' => $pl_details['total_sell_round_off'],
+                'total_sell_tax' => $pl_details['total_sell_tax'] ?? 0,
+                'total_purchase_tax' => $pl_details['total_purchase_tax'] ?? 0,
+                'total_sell_shipping_charge' => $pl_details['total_sell_shipping_charge'] ?? 0,
+                'total_sell_additional_expense' => $pl_details['total_sell_additional_expense'] ?? 0,
             ];
 
             return $output;
@@ -279,10 +283,15 @@ class AccountReportsController extends Controller
             'ATY.name as type_name',
             'ATY.fixed_key as fixed_key',
             'PATY.name as parent_type_name',
-            DB::raw("(SELECT SUM(IF(type='credit', amount, -1*amount)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL AND DATE(operation_date) < '{$start_date}') as opening_balance"),
-            DB::raw("(SELECT SUM(amount) FROM account_transactions WHERE account_id = accounts.id AND type='debit' AND deleted_at IS NULL AND DATE(operation_date) >= '{$start_date}' AND DATE(operation_date) <= '{$end_date}') as total_debit"),
-            DB::raw("(SELECT SUM(amount) FROM account_transactions WHERE account_id = accounts.id AND type='credit' AND deleted_at IS NULL AND DATE(operation_date) >= '{$start_date}' AND DATE(operation_date) <= '{$end_date}') as total_credit"),
+            DB::raw("(SELECT SUM(IF(type='credit', amount, -1*amount)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL AND DATE(operation_date) < ?) as opening_balance"),
+            DB::raw("(SELECT SUM(amount) FROM account_transactions WHERE account_id = accounts.id AND type='debit' AND deleted_at IS NULL AND DATE(operation_date) >= ? AND DATE(operation_date) <= ?) as total_debit"),
+            DB::raw("(SELECT SUM(amount) FROM account_transactions WHERE account_id = accounts.id AND type='credit' AND deleted_at IS NULL AND DATE(operation_date) >= ? AND DATE(operation_date) <= ?) as total_credit"),
         ])
+        ->addBinding($start_date, 'select')
+        ->addBinding($start_date, 'select')
+        ->addBinding($end_date, 'select')
+        ->addBinding($start_date, 'select')
+        ->addBinding($end_date, 'select')
         ->get();
 
         return $account_details;

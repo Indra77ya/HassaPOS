@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'account' => 'Akun',
+    'account' => 'Daftar Akun',
     'manage_your_account' => 'Kelola akun Anda',
     'all_accounts' => 'Semua akun',
     'account_number' => 'Nomor Akun',
@@ -14,7 +14,7 @@ return [
     'list_accounts' => 'Daftar Akun',
     'opening_balance' => 'Saldo Awal',
     'account_book' => 'Buku Akun',
-    'credit' => 'Kredit',
+    'credit' => 'Credit',
     'debit' => 'Debit',
     'account_name' => 'Nama Akun',
     'transaction_type' => 'Tipe Transaksi',
@@ -67,6 +67,7 @@ return [
     'total_equity' => 'Total Ekuitas',
     'total_liability_equity' => 'Total Pasiva',
     'balance' => 'Saldo',
+    'balance_akhir' => 'Saldo Akhir',
     'add_default_account_types' => 'Tambahkan Akun Default',
     'total_current_assets' => 'Total Aktiva Lancar',
     'total_fixed_assets' => 'Total Aktiva Tetap',
@@ -74,7 +75,7 @@ return [
     'total_current_liabilities' => 'Total Kewajiban Lancar',
     'total_long_term_liabilities' => 'Total Kewajiban Jangka Panjang',
     'total_equity' => 'Total Ekuitas',
-    'current_period' => 'Periode Berjalan',
+    'current_period' => 'Pergerakan',
     'operating' => 'Operasional',
     'investing' => 'Investasi',
     'financing' => 'Pendanaan',
@@ -101,4 +102,11 @@ return [
     'beban_operasional' => 'Beban Operasional',
     'beban_lain_lain' => 'Beban Lain-lain',
     'beban_pajak' => 'Beban Pajak',
+    'inventory_account' => 'Persediaan Barang',
+    'sales_account' => 'Penjualan',
+    'purchase_account' => 'Pembelian',
+    'tax_payable_account' => 'Utang Pajak (PPN)',
+    'shipping_income_account' => 'Pendapatan Pengiriman',
+    'rounding_account' => 'Beban Pembulatan',
+    'packing_charge_account' => 'Pendapatan Packing',
 ];
