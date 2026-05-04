@@ -67,6 +67,7 @@ return [
     'total_equity' => 'Total Equity',
     'total_liability_equity' => 'Total Liabilities & Equity',
     'balance' => 'Balance',
+    'ending_balance' => 'Ending Balance',
     'add_default_account_types' => 'Add Default Accounts',
     'total_current_assets' => 'Total Current Assets',
     'total_fixed_assets' => 'Total Fixed Assets',

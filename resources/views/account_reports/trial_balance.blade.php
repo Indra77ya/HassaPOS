@@ -53,7 +53,7 @@
                         <th rowspan="2" class="text-center" style="vertical-align: middle;">@lang('account.account')</th>
                         <th colspan="2" class="text-center">@lang('account.opening_balance')</th>
                         <th colspan="2" class="text-center">@lang('account.current_period')</th>
-                        <th colspan="2" class="text-center">@lang('account.balance_akhir')</th>
+                        <th colspan="2" class="text-center">@lang('account.ending_balance')</th>
                     </tr>
                     <tr class="bg-gray">
                         <th class="text-center">@lang('account.debit')</th>
