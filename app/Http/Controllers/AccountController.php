@@ -337,8 +337,8 @@ class AccountController extends Controller
                             ->where('A.business_id', $business_id)
                             ->where('A.id', $id)
                             ->with(['transaction', 'transaction.contact', 'transfer_transaction', 'media', 'transfer_transaction.media'])
-                            ->select(['account_transactions.type', 'account_transactions.amount', 'operation_date',
-                                'account_transactions.sub_type', 'transfer_transaction_id',
+                            ->select(['account_transactions.type', 'account_transactions.amount', 'account_transactions.operation_date',
+                                'account_transactions.sub_type', 'account_transactions.transfer_transaction_id',
                                 'A.id as account_id',
                                 'A.normal_balance',
                                 'ATY.fixed_key',
@@ -918,14 +918,15 @@ class AccountController extends Controller
                 ->leftJoin('account_types as transfer_aty', 'transfer_acc.account_type_id', '=', 'transfer_aty.id')
                 ->where('A.business_id', $business_id)
                 ->with(['transaction', 'transaction.contact', 'transfer_transaction', 'transaction.transaction_for'])
-                ->select(['account_transactions.type', 'account_transactions.amount', 'operation_date',
-                    'account_transactions.sub_type', 'transfer_transaction_id',
+                ->select(['account_transactions.type', 'account_transactions.amount', 'account_transactions.operation_date',
+                    'account_transactions.sub_type', 'account_transactions.transfer_transaction_id',
                     'account_transactions.transaction_id',
                     'account_transactions.id',
                     'A.name as account_name',
                     'A.normal_balance',
                     'ATY.name as account_type_name',
                     'ATY.fixed_key as fixed_key',
+                    'transfer_aty.fixed_key as transfer_fixed_key',
                     'TP.payment_ref_no as payment_ref_no',
                     'TP.is_return',
                     'TP.is_advance',
@@ -1005,13 +1006,13 @@ class AccountController extends Controller
             $end_date = request()->input('end_date');
 
             if (! empty($start_date) && ! empty($end_date)) {
-                $accounts->whereBetween(DB::raw('date(operation_date)'), [$start_date, $end_date]);
+                $accounts->whereBetween(DB::raw('date(account_transactions.operation_date)'), [$start_date, $end_date]);
             }
 
             if (request()->has('only_payment_recovered')) {
                 //payment date is today and transaction date is less than today
                 $accounts->leftJoin('transactions AS t', 'TP.transaction_id', '=', 't.id')
-                    ->whereDate('operation_date', '=', \Carbon::now()->format('Y-m-d'))
+                    ->whereDate('account_transactions.operation_date', '=', \Carbon::now()->format('Y-m-d'))
                     ->where(function ($q) {
                         $q->whereDate('t.transaction_date', '<',
                         \Carbon::now()->format('Y-m-d'))
