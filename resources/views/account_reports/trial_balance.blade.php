@@ -142,20 +142,21 @@
                 var total_round_off = parseFloat(result.total_sell_round_off) || 0;
 
                 // Add virtual rows
-                accounts.push({name: "{{__('account.customer_due')}}", opening_balance: 0, total_debit: customer_due, total_credit: 0, normal_balance: 'debit'});
-                accounts.push({name: "{{__('account.supplier_due')}}", opening_balance: 0, total_debit: 0, total_credit: supplier_due, normal_balance: 'credit'});
-                accounts.push({name: "{{__('account.inventory_account')}}", opening_balance: -1 * opening_stock, total_debit: closing_stock, total_credit: opening_stock, normal_balance: 'debit'});
-                accounts.push({name: "{{__('account.sales_account')}}", opening_balance: 0, total_debit: 0, total_credit: total_sell, normal_balance: 'credit'});
-                accounts.push({name: "{{__('account.purchase_account')}}", opening_balance: 0, total_debit: total_purchase, total_credit: 0, normal_balance: 'debit'});
-                accounts.push({name: "{{__('account.tax_payable_account')}}", opening_balance: 0, total_debit: total_purchase_tax, total_credit: total_sell_tax, normal_balance: 'credit'});
-                accounts.push({name: "{{__('account.shipping_income_account')}}", opening_balance: 0, total_debit: 0, total_credit: total_shipping, normal_balance: 'credit'});
-                accounts.push({name: "{{__('account.packing_charge_account')}}", opening_balance: 0, total_debit: 0, total_credit: total_additional_expense, normal_balance: 'credit'});
+                accounts.push({name: "{{__('account.customer_due')}}", opening_debit: 0, opening_credit: 0, total_debit: customer_due, total_credit: 0, normal_balance: 'debit'});
+                accounts.push({name: "{{__('account.supplier_due')}}", opening_debit: 0, opening_credit: 0, total_debit: 0, total_credit: supplier_due, normal_balance: 'credit'});
+                accounts.push({name: "{{__('account.inventory_account')}}", opening_debit: opening_stock, opening_credit: 0, total_debit: closing_stock, total_credit: opening_stock, normal_balance: 'debit'});
+                accounts.push({name: "{{__('account.sales_account')}}", opening_debit: 0, opening_credit: 0, total_debit: 0, total_credit: total_sell, normal_balance: 'credit'});
+                accounts.push({name: "{{__('account.purchase_account')}}", opening_debit: 0, opening_credit: 0, total_debit: total_purchase, total_credit: 0, normal_balance: 'debit'});
+                accounts.push({name: "{{__('account.tax_payable_account')}}", opening_debit: 0, opening_credit: 0, total_debit: total_purchase_tax, total_credit: total_sell_tax, normal_balance: 'credit'});
+                accounts.push({name: "{{__('account.shipping_income_account')}}", opening_debit: 0, opening_credit: 0, total_debit: 0, total_credit: total_shipping, normal_balance: 'credit'});
+                accounts.push({name: "{{__('account.packing_charge_account')}}", opening_debit: 0, opening_credit: 0, total_debit: 0, total_credit: total_additional_expense, normal_balance: 'credit'});
 
                 if (total_round_off != 0) {
                     var is_rounding_debit = total_round_off < 0;
                     accounts.push({
                         name: "{{__('account.rounding_account')}}",
-                        opening_balance: 0,
+                        opening_debit: 0,
+                        opening_credit: 0,
                         total_debit: is_rounding_debit ? Math.abs(total_round_off) : 0,
                         total_credit: is_rounding_debit ? 0 : total_round_off,
                         normal_balance: 'debit'
@@ -163,7 +164,8 @@
                 }
 
                 accounts.forEach(function(account) {
-                    var opening = parseFloat(account.opening_balance) || 0;
+                    var opening_debit = parseFloat(account.opening_debit) || 0;
+                    var opening_credit = parseFloat(account.opening_credit) || 0;
                     var debit = parseFloat(account.total_debit) || 0;
                     var credit = parseFloat(account.total_credit) || 0;
 
@@ -175,10 +177,6 @@
                         var debit_keys = ['kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya', 'aktiva_tetap', 'aktiva_lainnya', 'harga_pokok_penjualan', 'beban_operasional', 'beban_lain_lain', 'beban_pajak'];
                         is_debit_normal = debit_keys.includes(fixed_key);
                     }
-
-                    // Opening Balance columns
-                    var opening_debit = opening < 0 ? Math.abs(opening) : 0;
-                    var opening_credit = opening > 0 ? opening : 0;
 
                     // Final Balance calculation
                     var final_bal = 0;

@@ -283,10 +283,12 @@ class AccountReportsController extends Controller
             'ATY.name as type_name',
             'ATY.fixed_key as fixed_key',
             'PATY.name as parent_type_name',
-            DB::raw("(SELECT SUM(IF(type='credit', amount, -1*amount)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL AND DATE(operation_date) < ?) as opening_balance"),
+            DB::raw("(SELECT SUM(IF(type='debit', amount, 0)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL AND DATE(operation_date) < ?) as opening_debit"),
+            DB::raw("(SELECT SUM(IF(type='credit', amount, 0)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL AND DATE(operation_date) < ?) as opening_credit"),
             DB::raw("(SELECT SUM(amount) FROM account_transactions WHERE account_id = accounts.id AND type='debit' AND deleted_at IS NULL AND DATE(operation_date) >= ? AND DATE(operation_date) <= ?) as total_debit"),
             DB::raw("(SELECT SUM(amount) FROM account_transactions WHERE account_id = accounts.id AND type='credit' AND deleted_at IS NULL AND DATE(operation_date) >= ? AND DATE(operation_date) <= ?) as total_credit"),
         ])
+        ->addBinding($start_date, 'select')
         ->addBinding($start_date, 'select')
         ->addBinding($start_date, 'select')
         ->addBinding($end_date, 'select')

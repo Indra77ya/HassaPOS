@@ -863,11 +863,25 @@ class AccountController extends Controller
             '=',
             'accounts.id'
         )
+            ->leftjoin('account_types as ats', 'accounts.account_type_id', '=', 'ats.id')
+            ->leftjoin('account_types as pat', 'ats.parent_account_type_id', '=', 'pat.id')
             ->whereNull('AT.deleted_at')
             ->where('accounts.business_id', $business_id)
             ->where('accounts.id', $id)
-            ->select('accounts.*', DB::raw("SUM( IF(AT.type='credit', amount, -1 * amount) ) as balance"))
+            ->select(['accounts.*', 'ats.fixed_key', 'ats.name as account_type_name', 'pat.name as parent_account_type_name',
+                DB::raw("SUM(IF(AT.type='debit', amount, 0)) as total_debit"),
+                DB::raw("SUM(IF(AT.type='credit', amount, 0)) as total_credit"),
+            ])
+            ->groupBy('accounts.id')
             ->first();
+
+        $is_debit_normal = Account::getBalanceTypeStatic($account->normal_balance, $account->fixed_key, $account->account_type_name, $account->parent_account_type_name) == 'debit';
+
+        if ($is_debit_normal) {
+            $account->balance = $account->total_debit - $account->total_credit;
+        } else {
+            $account->balance = $account->total_credit - $account->total_debit;
+        }
 
         return $account;
     }

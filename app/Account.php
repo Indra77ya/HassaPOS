@@ -53,14 +53,17 @@ class Account extends Model
 
         $can_access_account = auth()->user()->can('account.access');
         if ($can_access_account && $show_balance) {
-            // $query->leftjoin('account_transactions as AT', function ($join) {
-            //     $join->on('AT.account_id', '=', 'accounts.id');
-            //     $join->whereNull('AT.deleted_at');
-            // })
-            $query->select('accounts.name',
+            $query->leftjoin('account_types as ats', 'accounts.account_type_id', '=', 'ats.id')
+                ->leftjoin('account_types as pat', 'ats.parent_account_type_id', '=', 'pat.id')
+                ->select(['accounts.name',
                     'accounts.id',
-                    DB::raw("(SELECT SUM( IF(account_transactions.type='credit', amount, -1*amount) ) as balance from account_transactions where account_transactions.account_id = accounts.id AND deleted_at is NULL) as balance")
-                );
+                    'accounts.normal_balance',
+                    'ats.fixed_key',
+                    'ats.name as account_type_name',
+                    'pat.name as parent_account_type_name',
+                    DB::raw("(SELECT SUM(IF(type='debit', amount, 0)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL) as total_debit"),
+                    DB::raw("(SELECT SUM(IF(type='credit', amount, 0)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL) as total_credit"),
+                ]);
         }
 
         if (! $closed) {
@@ -79,7 +82,15 @@ class Account extends Model
             $name = $account->name;
 
             if ($can_access_account && $show_balance) {
-                $name .= ' ('.__('lang_v1.balance').': '.$commonUtil->num_f($account->balance).')';
+                $is_debit_normal = self::getBalanceTypeStatic($account->normal_balance, $account->fixed_key, $account->account_type_name, $account->parent_account_type_name) == 'debit';
+
+                if ($is_debit_normal) {
+                    $balance = $account->total_debit - $account->total_credit;
+                } else {
+                    $balance = $account->total_credit - $account->total_debit;
+                }
+
+                $name .= ' ('.__('lang_v1.balance').': '.$commonUtil->num_f($balance).')';
             }
 
             $dropdown[$account->id] = $name;
@@ -160,7 +171,8 @@ class Account extends Model
         // Fallback for legacy data or if fixed_key is missing
         $debit_names = [
             'aktiva lancar', 'aktiva tetap', 'current assets', 'fixed assets',
-            'cogs', 'expenses', 'biaya operasional', 'harga pokok penjualan', 'beban'
+            'cogs', 'expenses', 'biaya operasional', 'harga pokok penjualan', 'beban',
+            'kas', 'bank', 'cash', 'piutang', 'receivable', 'persediaan', 'inventory', 'asset'
         ];
 
         foreach ($debit_names as $name) {
