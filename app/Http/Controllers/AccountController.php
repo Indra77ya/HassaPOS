@@ -698,10 +698,13 @@ class AccountController extends Controller
             $to = $request->input('to_account');
             $note = $request->input('note');
             if (! empty($amount)) {
+                $from_account = Account::findOrFail($from);
+                $to_account = Account::findOrFail($to);
+
                 $source_data = [
                     'amount' => $amount,
                     'account_id' => $from,
-                    'type' => 'credit',
+                    'type' => $from_account->getDecreaseType(),
                     'sub_type' => 'fund_transfer',
                     'created_by' => session()->get('user.id'),
                     'note' => $note,
@@ -715,7 +718,7 @@ class AccountController extends Controller
                 $destination_data = [
                     'amount' => $amount,
                     'account_id' => $to,
-                    'type' => 'debit',
+                    'type' => $to_account->getIncreaseType(),
                     'sub_type' => 'fund_transfer',
                     'created_by' => session()->get('user.id'),
                     'note' => $note,
@@ -803,7 +806,7 @@ class AccountController extends Controller
                 $deposit_data = [
                     'amount' => $amount,
                     'account_id' => $account_id,
-                    'type' => 'debit',
+                    'type' => $account->getIncreaseType(),
                     'sub_type' => 'deposit',
                     'operation_date' => $this->commonUtil->uf_date($request->input('operation_date'), true),
                     'created_by' => session()->get('user.id'),
@@ -811,11 +814,13 @@ class AccountController extends Controller
                 ];
                 $deposit = AccountTransaction::createAccountTransaction($deposit_data);
 
-                $from_account = $request->input('from_account');
-                if (! empty($from_account)) {
+                $from_account_id = $request->input('from_account');
+                if (! empty($from_account_id)) {
+                    $from_account = Account::findOrFail($from_account_id);
+
                     $source_data = $deposit_data;
-                    $source_data['type'] = 'credit';
-                    $source_data['account_id'] = $from_account;
+                    $source_data['type'] = $from_account->getDecreaseType();
+                    $source_data['account_id'] = $from_account_id;
                     $source_data['transfer_transaction_id'] = $deposit->id;
 
                     $source = AccountTransaction::createAccountTransaction($source_data);
@@ -917,6 +922,7 @@ class AccountController extends Controller
                     'account_transactions.transaction_id',
                     'account_transactions.id',
                     'A.name as account_name',
+                    'A.normal_balance',
                     'ATY.name as account_type_name',
                     'ATY.fixed_key as fixed_key',
                     'account_transactions.transfer_account_id',
@@ -1090,7 +1096,8 @@ class AccountController extends Controller
         if (! empty($row->sub_type)) {
             $details = __('account.'.$row->sub_type);
             if (in_array($row->sub_type, ['fund_transfer', 'deposit']) && ! empty($row->transfer_transaction)) {
-                if ($row->type == 'debit') {
+                $normal_balance = Account::getBalanceTypeStatic($row->normal_balance, $row->fixed_key);
+                if ($row->type == $normal_balance) {
                     $details .= ' ( '.__('account.from').': '.$row->transfer_transaction->account->name.')';
                 } else {
                     $details .= ' ( '.__('account.to').': '.$row->transfer_transaction->account->name.')';
@@ -1265,10 +1272,18 @@ class AccountController extends Controller
             $account_transaction->operation_date = $this->commonUtil->uf_date($request->input('operation_date'), true);
             $account_transaction->note = $request->input('note');
 
-            if($request->input('account_id'))
-            {
+            if ($request->input('account_id')) {
                 $account_transaction->account_id = $request->input('account_id');
-            }            
+            }
+
+            $primary_account = Account::findOrFail($account_transaction->account_id);
+            if ($account_transaction->sub_type == 'fund_transfer') {
+                $account_transaction->type = $primary_account->getDecreaseType();
+            } elseif ($account_transaction->sub_type == 'deposit') {
+                $account_transaction->type = $primary_account->getIncreaseType();
+            } elseif ($account_transaction->sub_type == 'opening_balance') {
+                $account_transaction->type = $primary_account->getIncreaseType();
+            }
 
             $account_transaction->save();
 
@@ -1281,9 +1296,17 @@ class AccountController extends Controller
 
                 if ($account_transaction->sub_type == 'deposit') {
                     $transfer_transaction->account_id = $request->input('from_account');
+                    if ($transfer_transaction->account_id) {
+                        $other_account = Account::findOrFail($transfer_transaction->account_id);
+                        $transfer_transaction->type = $other_account->getDecreaseType();
+                    }
                 }
                 if ($account_transaction->sub_type == 'fund_transfer') {
                     $transfer_transaction->account_id = $request->input('to_account');
+                    if ($transfer_transaction->account_id) {
+                        $other_account = Account::findOrFail($transfer_transaction->account_id);
+                        $transfer_transaction->type = $other_account->getIncreaseType();
+                    }
                 }
 
                 $transfer_transaction->save();
